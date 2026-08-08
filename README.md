@@ -147,6 +147,38 @@ stored, reviewed, or replayed by another machine.
 On GitHub, each diagram can be opened, panned, zoomed, or copied as Mermaid
 source for a design review or architecture decision record.
 
+## AWE vision: evidence before reuse
+
+TraceGate is the verification and governance layer of a broader AWE direction,
+not an autonomous agent runtime. The intended discovery loop is deliberately
+split across trust boundaries: a runtime or evaluation harness may explore and
+measure alternatives; TraceGate decides only whether the exported evidence is
+sufficient to compile, evaluate, and record a human decision.
+
+```mermaid
+flowchart LR
+    G["User goal"] --> H["Runtime or harness<br/>(future: separate system)"]
+    H --> T["Execution traces<br/>awe.trace.v1"]
+    T --> C["TraceGate<br/>(implemented now)<br/>compile · replay · evaluate · promote"]
+    C -->|"verified + PASS + human approval"| S["Reviewed workflow candidate"]
+    S --> R["Skill registry or runtime<br/>(future: operator-controlled)"]
+    R --> O["Measured outcomes"]
+    O --> D["Discovery loop<br/>(future: external evaluator)"]
+    D --> H
+```
+
+**Current scope:** repeated trace analysis, deterministic evidence checks,
+frozen evaluation policy, redaction, and replay-gated human promotion.
+
+**Future direction:** a separately reviewed runtime may emit traces and consume
+only reviewed candidates; an external evaluator may compare alternatives and
+feed measured outcomes into the next experiment. TraceGate will not add browser
+control, tool execution, model routing, or automatic promotion to reach that
+vision.
+
+> Repeated success is evidence, not permission. Agents may explore; evidence
+> verifies; humans govern; proven behavior can become reusable software.
+
 ## Try it in five minutes
 
 Requires Python 3.11 or newer.
