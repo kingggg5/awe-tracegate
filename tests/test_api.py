@@ -91,3 +91,43 @@ def test_evaluate_endpoint_returns_policy_decision() -> None:
 
     assert response.status_code == 200
     assert response.json()["status"] == "pass"
+
+
+def test_promote_endpoint_requires_a_replayable_evidence_chain() -> None:
+    compile_response = CLIENT.post("/v1/compile", json=request_payload())
+    verification_response = CLIENT.post(
+        "/v1/verify",
+        json={
+            "receipt": compile_response.json(),
+            "traces": request_payload()["traces"],
+        },
+    )
+    baseline = (EVALUATION_DIRECTORY / "baseline.json").read_text(encoding="utf-8")
+    candidate = (EVALUATION_DIRECTORY / "candidate.json").read_text(encoding="utf-8")
+    policy = (EVALUATION_DIRECTORY / "policy.json").read_text(encoding="utf-8")
+    evaluation_response = CLIENT.post(
+        "/v1/evaluate",
+        content=(
+            f'{{"baseline":{baseline},"candidate":{candidate},"policy":{policy}}}'
+        ),
+        headers={"content-type": "application/json"},
+    )
+
+    response = CLIENT.post(
+        "/v1/promote",
+        json={
+            "compilation": compile_response.json(),
+            "verification": verification_response.json(),
+            "traces": request_payload()["traces"],
+            "evaluation": evaluation_response.json(),
+            "decision": "approved",
+            "actor_id": "maintainer@example.com",
+            "commit_sha": "a" * 40,
+            "issued_at": "2026-08-08T00:00:00Z",
+            "rationale": "Reviewed a locally replayed evidence chain.",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["decision"] == "approved"
+    assert response.json()["traces_verified"] is True

@@ -63,6 +63,12 @@ def test_cli_release_flow(tmp_path: Path) -> None:
         main(
             [
                 "promote",
+                "--compilation",
+                str(compilation),
+                "--verification",
+                str(verification),
+                "--traces",
+                str(ROOT / "examples/repo_analysis/traces.jsonl"),
                 "--evaluation",
                 str(evaluation),
                 "--decision",
@@ -81,7 +87,10 @@ def test_cli_release_flow(tmp_path: Path) -> None:
         )
         == 0
     )
-    assert json.loads(promotion.read_text(encoding="utf-8"))["decision"] == "approved"
+    promotion_payload = json.loads(promotion.read_text(encoding="utf-8"))
+    assert promotion_payload["decision"] == "approved"
+    assert promotion_payload["verification_status"] == "valid"
+    assert promotion_payload["traces_verified"] is True
 
     assert main(["schema", "--out-dir", str(schemas)]) == 0
     assert len(list(schemas.glob("*.schema.json"))) == 9

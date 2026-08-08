@@ -23,8 +23,10 @@
 - Only explicit, consistent bindings may prove hard dependency edges.
 - The canonical SHA-256 receipt is the review artifact.
 - CLI and API must use the same compiler path and return the same contract.
-- Promotion approval requires a valid passing evaluation receipt and must bind
-  actor, commit SHA, timestamp, and rationale.
+- Promotion approval requires a compiled receipt, a valid locally replayed
+  verification receipt, and a passing evaluation for the same candidate. It
+  must bind compilation/input, verification, dataset/policy, actor, commit SHA,
+  timestamp, and rationale.
 
 ## Boundaries
 

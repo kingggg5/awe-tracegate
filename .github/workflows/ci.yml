@@ -87,5 +87,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: awe-compilation-receipt
-          path: awe-compilation-receipt.json
+          path: |
+            awe-compilation-receipt.json
+            awe-verification-receipt.json
           if-no-files-found: error

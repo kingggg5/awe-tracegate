@@ -9,17 +9,20 @@ from .contracts import (
     EvaluateRequest,
     EvaluationReceipt,
     HealthResponse,
+    PromotionReceipt,
+    PromotionRequest,
     ReceiptVerification,
     VerifyRequest,
 )
 from .evaluation import evaluate_candidate
+from .promotion import create_promotion_receipt
 from .verifier import verify_compilation_receipt
 
 
 def create_app() -> FastAPI:
     application = FastAPI(
         title="AWE TraceGate",
-        version="0.1.0",
+        version="0.2.0",
         description="Evidence-gated, read-only trace compiler and verifier",
     )
 
@@ -38,6 +41,20 @@ def create_app() -> FastAPI:
     @application.post("/v1/evaluate", response_model=EvaluationReceipt)
     def evaluate(request: EvaluateRequest) -> EvaluationReceipt:
         return evaluate_candidate(request.baseline, request.candidate, request.policy)
+
+    @application.post("/v1/promote", response_model=PromotionReceipt)
+    def promote(request: PromotionRequest) -> PromotionReceipt:
+        return create_promotion_receipt(
+            request.compilation,
+            request.verification,
+            request.traces,
+            request.evaluation,
+            decision=request.decision,
+            actor_id=request.actor_id,
+            commit_sha=request.commit_sha,
+            issued_at=request.issued_at,
+            rationale=request.rationale,
+        )
 
     return application
 

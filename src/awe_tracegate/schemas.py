@@ -26,8 +26,8 @@ SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "evaluation-policy-v1.schema.json": EvaluationPolicy,
     "evaluation-receipt-v1.schema.json": EvaluationReceipt,
     "execution-trace-v1.schema.json": ExecutionTrace,
-    "promotion-receipt-v1.schema.json": PromotionReceipt,
-    "receipt-verification-v1.schema.json": ReceiptVerification,
+    "promotion-receipt-v2.schema.json": PromotionReceipt,
+    "receipt-verification-v2.schema.json": ReceiptVerification,
     "redaction-summary-v1.schema.json": RedactionSummary,
 }
 

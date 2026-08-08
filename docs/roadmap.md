@@ -24,7 +24,19 @@ Release criteria:
 - clean install, package build, container health, and Action smoke test;
 - public security boundaries and synthetic-data labels remain accurate.
 
-## v0.2 — External evidence interoperability
+## v0.2 — Stronger evidence chain
+
+Implemented for the next release:
+
+- Content-addressed verification receipts, including exact-trace replay state.
+- Replay-gated promotion that recomputes verification and rejects mismatched
+  compilation, evidence, candidate, or evaluation artifacts.
+- Promotion receipts binding the compilation/input bundle, verification,
+  evaluation, dataset, policy, actor, and commit.
+- Typed promotion API and a GitHub Action that replays the compilation receipt
+  before it can report `PASS`.
+
+## v0.3 — External evidence interoperability
 
 - Two independent import adapters, beginning with generic evaluation JSON and a
   version-pinned OpenTelemetry GenAI mapping.
@@ -37,7 +49,7 @@ Exit criteria: two exporters produce the same canonical contract; tampered or
 commit-mismatched evidence never passes; a new adopter reaches a verified
 receipt in ten minutes or less.
 
-## v0.3 — Durable review history
+## v0.4 — Durable review history
 
 - Append-only PostgreSQL receipt and decision ledger.
 - Transactional outbox with idempotent delivery for review notifications.

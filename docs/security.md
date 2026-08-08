@@ -33,8 +33,10 @@ policy, grant a capability, approve a step, or change an effect class.
 - A receipt hash can be recomputed offline.
 - Evaluation receipts fail closed on dataset/case mismatch, seeded safety
   violations, and excessive success regression.
-- Human approval requires a valid passing evaluation receipt and records the
-  actor plus exact commit SHA.
+- Approval requires a compiled receipt, locally replayed exact traces, a valid
+  verification receipt, and a passing evaluation for the identical candidate.
+  The promotion receipt records every linked digest plus the actor and exact
+  commit SHA.
 
 ## Important limitations
 
@@ -46,6 +48,9 @@ policy, grant a capability, approve a step, or change an effect class.
   usefulness, or production safety.
 - Repeated successful traces may contain correlated mistakes or incomplete
   coverage. Compilation does not create missing branches or counterexamples.
+- Trace capture time and evidence freshness are not enforced in v0.2. Do not
+  label evidence as current merely because its receipt replays; freshness needs
+  immutable capture provenance and a pinned review time in a later contract.
 - The local API is not an internet-facing deployment profile. It does not imply
   authentication, tenant isolation, rate limiting, or denial-of-service
   protection.

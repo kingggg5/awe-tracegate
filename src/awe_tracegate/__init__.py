@@ -7,6 +7,7 @@ from .contracts import (
     CompileRequest,
     EvaluationReceipt,
     ExecutionTrace,
+    PromotionReceipt,
     ReceiptVerification,
 )
 from .evaluation import evaluate_candidate
@@ -18,10 +19,11 @@ __all__ = [
     "CompileRequest",
     "EvaluationReceipt",
     "ExecutionTrace",
+    "PromotionReceipt",
     "ReceiptVerification",
     "compile_traces",
     "evaluate_candidate",
     "verify_compilation_receipt",
 ]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
