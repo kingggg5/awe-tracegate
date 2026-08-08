@@ -40,6 +40,109 @@ emit content-addressed receipts that another machine can replay.
 - **Portable contracts.** Export versioned JSON Schema and use the same typed
   core through the CLI, FastAPI, or GitHub Action.
 
+## Workflow
+
+TraceGate sits between an agent harness and promotion. The harness may use any
+model or runtime; TraceGate only consumes exported evidence and makes a
+deterministic decision.
+
+```mermaid
+flowchart LR
+    H["Agent or evaluation harness"] --> T["Typed traces<br/>JSONL"]
+    T --> C["Compile evidence"]
+    C -->|"Supported read-only pattern"| R["Candidate + compilation receipt"]
+    C -->|"Ambiguous, stale, or write-like"| F["REFUSED"]
+
+    R --> V["Replay and verify<br/>exact evidence digests"]
+    V -->|"Invalid or mismatched"| F
+
+    B["Frozen baseline trials"] --> E["Evaluation policy"]
+    N["Candidate trials"] --> E
+    E -->|"Safety or quality regression"| X["BLOCK"]
+    E -->|"Cost or latency regression"| Q["REVIEW"]
+    E -->|"All policy gates pass"| P["Evaluation PASS"]
+
+    V -->|"Valid"| K["Promotion eligibility"]
+    P --> K
+    K --> M["Human promotion decision"]
+    M --> A["Actor-bound promotion receipt"]
+
+    R --> D["Redact secrets, PII,<br/>and customer data"]
+    D --> G["Governed evidence export"]
+```
+
+`PASS` means the supplied evidence satisfies the configured policy. It never
+authorizes execution or proves that a workflow is safe in every environment.
+
+## Architecture
+
+The CLI, API, and GitHub Action are thin adapters over one typed deterministic
+core. Every interface produces the same versioned contracts and decision
+semantics.
+
+```mermaid
+flowchart TB
+    subgraph Producers["Evidence producers — outside TraceGate"]
+        Agent["Agent / workflow runtime"]
+        CI["CI and evaluation harness"]
+    end
+
+    subgraph Interfaces["Interfaces"]
+        Action["GitHub Action"]
+        CLI["awe CLI"]
+        API["FastAPI / OpenAPI"]
+    end
+
+    subgraph Core["Deterministic typed core — no model call"]
+        Contracts["Pydantic contracts<br/>and canonical JSON"]
+        Compiler["Evidence compiler"]
+        Verifier["Receipt verifier"]
+        Evaluator["Evaluation policy engine"]
+        Redactor["Evidence redactor"]
+        Promotion["Human promotion recorder"]
+        Schemas["JSON Schema exporter"]
+
+        Contracts --> Compiler
+        Contracts --> Verifier
+        Contracts --> Evaluator
+        Contracts --> Redactor
+        Contracts --> Promotion
+        Contracts --> Schemas
+    end
+
+    subgraph Artifacts["Portable artifacts"]
+        Candidate["Workflow candidate"]
+        CompilationReceipt["Compilation receipt"]
+        VerificationResult["Verification result"]
+        EvaluationReceipt["Evaluation receipt"]
+        PromotionReceipt["Promotion receipt"]
+        SanitizedEvidence["Sanitized evidence"]
+        SchemaFiles["Versioned schemas"]
+    end
+
+    Agent --> Action
+    CI --> Action
+    Agent --> CLI
+    CI --> API
+
+    Action --> Contracts
+    CLI --> Contracts
+    API --> Contracts
+
+    Compiler --> Candidate
+    Compiler --> CompilationReceipt
+    Verifier --> VerificationResult
+    Evaluator --> EvaluationReceipt
+    Redactor --> SanitizedEvidence
+    Promotion --> PromotionReceipt
+    Schemas --> SchemaFiles
+```
+
+The trust boundary is deliberate: agent execution, provider credentials, and
+production side effects stay outside TraceGate. Inputs are validated before
+entering the core; outputs are immutable, versioned JSON artifacts that can be
+stored, reviewed, or replayed by another machine.
+
 ## Try it in five minutes
 
 Requires Python 3.11 or newer.
