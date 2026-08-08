@@ -143,6 +143,9 @@ production side effects stay outside TraceGate. Inputs are validated before
 entering the core; outputs are immutable, versioned JSON artifacts that can be
 stored, reviewed, or replayed by another machine.
 
+On GitHub, each diagram can be opened, panned, zoomed, or copied as Mermaid
+source for a design review or architecture decision record.
+
 ## Try it in five minutes
 
 Requires Python 3.11 or newer.
