@@ -1,0 +1,59 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from fastapi.testclient import TestClient
+
+from awe_harness.api import app
+from awe_harness.contracts import ExecutionTrace
+
+EXAMPLE_TRACES = (
+    Path(__file__).parents[1] / "examples" / "repo_analysis" / "traces.jsonl"
+)
+CLIENT = TestClient(app)
+
+
+def request_payload() -> dict[str, object]:
+    traces = [
+        ExecutionTrace.model_validate_json(line).model_dump(mode="json")
+        for line in EXAMPLE_TRACES.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    return {"traces": traces}
+
+
+def test_compile_endpoint_returns_typed_receipt() -> None:
+    response = CLIENT.post("/v1/compile", json=request_payload())
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "compiled"
+    assert body["candidate"]["effect_scope"] == "pure_or_read"
+    assert body["receipt_hash"].startswith("sha256:")
+
+
+def test_compile_endpoint_rejects_unknown_contract_fields() -> None:
+    payload = request_payload()
+    payload["unexpected"] = True
+
+    response = CLIENT.post("/v1/compile", json=payload)
+
+    assert response.status_code == 422
+
+
+def test_compile_endpoint_returns_refusal_for_one_valid_trace() -> None:
+    payload = request_payload()
+    payload["traces"] = payload["traces"][:1]
+
+    response = CLIENT.post("/v1/compile", json=payload)
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "refused"
+    assert response.json()["reasons"] == ["insufficient_trace_evidence"]
+
+
+def test_health_is_explicitly_keyless() -> None:
+    response = CLIENT.get("/healthz")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "mode": "offline_keyless"}

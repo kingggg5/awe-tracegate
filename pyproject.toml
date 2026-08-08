@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "awe-harness"
+version = "0.1.0"
+description = "Evidence-gated trace-to-workflow compiler and reviewer"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+keywords = [
+  "ai-agents",
+  "evaluation",
+  "provenance",
+  "workflow",
+]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Typing :: Typed",
+]
+dependencies = [
+  "pydantic>=2.10,<3",
+]
+
+[project.optional-dependencies]
+api = [
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.34,<1",
+]
+dev = [
+  "build>=1.2,<2",
+  "httpx2>=2,<3",
+  "mypy>=1.15,<2",
+  "pytest>=8,<9",
+  "ruff>=0.11,<1",
+]
+test = [
+  "httpx2>=2,<3",
+  "pytest>=8,<9",
+]
+
+[project.scripts]
+awe = "awe_harness.cli:main"
+
+[project.urls]
+Documentation = "https://github.com/kingggg5/awe-agent-harness#readme"
+Issues = "https://github.com/kingggg5/awe-agent-harness/issues"
+Repository = "https://github.com/kingggg5/awe-agent-harness"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/awe_harness"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+
+[tool.pytest.ini_options]
+addopts = "-q"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
