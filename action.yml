@@ -14,6 +14,10 @@ inputs:
     description: Path where the compilation receipt will be written.
     required: false
     default: awe-compilation-receipt.json
+  verification-path:
+    description: Path where the replayed verification receipt will be written.
+    required: false
+    default: awe-verification-receipt.json
   baseline-evaluation:
     description: Optional frozen baseline evaluation bundle.
     required: false
@@ -34,6 +38,12 @@ outputs:
   receipt-hash:
     description: Canonical compilation receipt digest.
     value: ${{ steps.gate.outputs.receipt-hash }}
+  verification-hash:
+    description: Canonical replay verification receipt digest.
+    value: ${{ steps.gate.outputs.verification-hash }}
+  verification-path:
+    description: Path to the generated replay verification receipt.
+    value: ${{ steps.gate.outputs.verification-path }}
   receipt-path:
     description: Path to the generated compilation receipt.
     value: ${{ steps.gate.outputs.receipt-path }}
@@ -58,12 +68,25 @@ runs:
         AWE_POLICY: ${{ inputs.evaluation-policy }}
         AWE_RECEIPT_PATH: ${{ inputs.receipt-path }}
         AWE_TRACES: ${{ inputs.traces }}
+        AWE_VERIFICATION_PATH: ${{ inputs.verification-path }}
       run: |
         set +e
         awe compile --traces "$AWE_TRACES" --out "$AWE_RECEIPT_PATH"
         compile_exit=$?
         set -e
         if [ "$compile_exit" -eq 1 ]; then
+          echo "decision=ERROR" >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+
+        set +e
+        awe verify \
+          --receipt "$AWE_RECEIPT_PATH" \
+          --traces "$AWE_TRACES" \
+          --out "$AWE_VERIFICATION_PATH"
+        verification_exit=$?
+        set -e
+        if [ "$verification_exit" -eq 1 ]; then
           echo "decision=ERROR" >> "$GITHUB_OUTPUT"
           exit 1
         fi
@@ -95,13 +118,16 @@ runs:
           fi
         fi
 
-        summary_args=(--receipt "$AWE_RECEIPT_PATH")
+        summary_args=(
+          --receipt "$AWE_RECEIPT_PATH"
+          --verification "$AWE_VERIFICATION_PATH"
+        )
         if [ -n "$evaluation_path" ]; then
           summary_args+=(--evaluation "$evaluation_path")
         fi
         python "$GITHUB_ACTION_PATH/scripts/github_action_summary.py" \
           "${summary_args[@]}"
 
-        if [ "$compile_exit" -ne 0 ] || [ "$evaluation_exit" -ne 0 ]; then
+        if [ "$compile_exit" -ne 0 ] || [ "$verification_exit" -ne 0 ] || [ "$evaluation_exit" -ne 0 ]; then
           exit 2
         fi

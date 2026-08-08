@@ -20,6 +20,7 @@ from .contracts import (
     EvaluationPolicy,
     EvaluationReceipt,
     ExecutionTrace,
+    ReceiptVerification,
 )
 from .evaluation import evaluate_candidate
 from .promotion import create_promotion_receipt
@@ -113,8 +114,11 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_output(evaluate_parser)
 
     promote_parser = subcommands.add_parser(
-        "promote", help="record an actor-bound human decision"
+        "promote", help="record a human decision from a replayed evidence chain"
     )
+    promote_parser.add_argument("--compilation", type=Path, required=True)
+    promote_parser.add_argument("--verification", type=Path, required=True)
+    promote_parser.add_argument("--traces", type=Path, required=True)
     promote_parser.add_argument("--evaluation", type=Path, required=True)
     promote_parser.add_argument(
         "--decision", choices=("approved", "rejected"), required=True
@@ -168,9 +172,15 @@ def _evaluate(args: argparse.Namespace) -> int:
 
 
 def _promote(args: argparse.Namespace) -> int:
+    compilation = _load_model(args.compilation, CompilationReceipt)
+    verification = _load_model(args.verification, ReceiptVerification)
+    traces = _load_jsonl(args.traces)
     evaluation = _load_model(args.evaluation, EvaluationReceipt)
     issued_at = datetime.fromisoformat(args.issued_at.replace("Z", "+00:00"))
     receipt = create_promotion_receipt(
+        compilation,
+        verification,
+        traces,
         evaluation,
         decision=args.decision,
         actor_id=args.actor,

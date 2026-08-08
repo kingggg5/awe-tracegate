@@ -7,7 +7,14 @@ import json
 from datetime import datetime, timedelta
 from typing import Annotated, Any, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    StringConstraints,
+    model_validator,
+)
 
 Identifier = Annotated[
     str,
@@ -54,6 +61,20 @@ GitCommitSha = Annotated[
     StringConstraints(pattern=r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$"),
 ]
 Reason = Annotated[str, StringConstraints(min_length=1, max_length=512)]
+
+
+def _parse_rfc3339_utc(value: object) -> object:
+    """Accept JSON's RFC 3339 timestamp while keeping Python inputs strict."""
+
+    if not isinstance(value, str):
+        return value
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return value
+
+
+UtcDateTime = Annotated[datetime, BeforeValidator(_parse_rfc3339_utc)]
 
 EffectClass = Literal["pure", "read", "write", "high_impact"]
 BindingSource = Literal["workflow_input", "step_output", "model_decision"]
@@ -259,13 +280,14 @@ class CompilationReceipt(ContractModel):
 class ReceiptVerification(ContractModel):
     """Result of recomputing a compilation receipt and optional source traces."""
 
-    schema_version: Literal["awe.receipt-verification.v1"] = (
-        "awe.receipt-verification.v1"
+    schema_version: Literal["awe.receipt-verification.v2"] = (
+        "awe.receipt-verification.v2"
     )
     status: Literal["valid", "invalid"]
     receipt_hash: Sha256Digest
     traces_verified: bool
     reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()
+    verification_hash: Sha256Digest
 
     @model_validator(mode="after")
     def validate_status(self) -> Self:
@@ -273,6 +295,11 @@ class ReceiptVerification(ContractModel):
             raise ValueError("valid verification cannot contain reasons")
         if self.status == "invalid" and not self.reasons:
             raise ValueError("invalid verification requires reasons")
+        expected_verification_hash = canonical_digest(
+            self.model_dump(mode="json", exclude={"verification_hash"})
+        )
+        if self.verification_hash != expected_verification_hash:
+            raise ValueError("verification hash is invalid")
         return self
 
 
@@ -357,16 +384,23 @@ class EvaluateRequest(ContractModel):
 
 
 class PromotionReceipt(ContractModel):
-    """Human decision bound to exact candidate, evaluation, actor, and commit."""
+    """Human decision bound to a verified compilation and evaluation chain."""
 
-    schema_version: Literal["awe.promotion-receipt.v1"] = "awe.promotion-receipt.v1"
+    schema_version: Literal["awe.promotion-receipt.v2"] = "awe.promotion-receipt.v2"
     candidate_digest: Sha256Digest
+    compilation_receipt_hash: Sha256Digest
+    input_bundle_digest: Sha256Digest
+    verification_receipt_hash: Sha256Digest
+    verification_status: Literal["valid", "invalid"]
+    traces_verified: bool
     evaluation_receipt_hash: Sha256Digest
     evaluation_status: Literal["pass", "review", "block"]
+    dataset_digest: Sha256Digest
+    policy_digest: Sha256Digest
     decision: Literal["approved", "rejected"]
     actor_id: ActorIdentifier
     commit_sha: GitCommitSha
-    issued_at: datetime
+    issued_at: UtcDateTime
     rationale: Annotated[str, StringConstraints(min_length=1, max_length=1_024)]
     receipt_hash: Sha256Digest
 
@@ -376,6 +410,15 @@ class PromotionReceipt(ContractModel):
             raise ValueError("issued_at must include the UTC timezone")
         if self.decision == "approved" and self.evaluation_status != "pass":
             raise ValueError("approval requires a passing evaluation receipt")
+        if self.decision == "approved" and self.verification_status != "valid":
+            raise ValueError("approval requires a valid verification receipt")
+        if self.decision == "approved" and not self.traces_verified:
+            raise ValueError("approval requires exact trace replay")
+        expected_receipt_hash = canonical_digest(
+            self.model_dump(mode="json", exclude={"receipt_hash"})
+        )
+        if self.receipt_hash != expected_receipt_hash:
+            raise ValueError("promotion receipt hash is invalid")
         return self
 
 
@@ -394,6 +437,20 @@ class RedactionSummary(ContractModel):
 class VerifyRequest(ContractModel):
     receipt: CompilationReceipt
     traces: Annotated[tuple[ExecutionTrace, ...], Field(strict=False)] | None = None
+
+
+class PromotionRequest(ContractModel):
+    """Evidence inputs required to record a human promotion decision."""
+
+    compilation: CompilationReceipt
+    verification: ReceiptVerification
+    traces: Annotated[tuple[ExecutionTrace, ...], Field(strict=False)]
+    evaluation: EvaluationReceipt
+    decision: Literal["approved", "rejected"]
+    actor_id: ActorIdentifier
+    commit_sha: GitCommitSha
+    issued_at: UtcDateTime
+    rationale: Annotated[str, StringConstraints(min_length=1, max_length=1_024)]
 
 
 class HealthResponse(ContractModel):

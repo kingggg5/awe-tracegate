@@ -25,13 +25,21 @@ def _append(path: str | None, text: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--receipt", type=Path, required=True)
+    parser.add_argument("--verification", type=Path, required=True)
     parser.add_argument("--evaluation", type=Path)
     args = parser.parse_args()
 
     receipt = _load(args.receipt)
+    verification = _load(args.verification)
     compile_status = receipt.get("status")
-    decision = "PASS" if compile_status == "compiled" else "BLOCK"
+    verification_status = verification.get("status")
+    decision = (
+        "PASS"
+        if compile_status == "compiled" and verification_status == "valid"
+        else "BLOCK"
+    )
     reasons = list(receipt.get("reasons") or [])
+    reasons.extend(verification.get("reasons") or [])
     evaluation_status = "not supplied"
 
     if args.evaluation is not None:
@@ -47,7 +55,9 @@ def main() -> int:
     output = os.environ.get("GITHUB_OUTPUT")
     _append(output, f"decision={decision}\n")
     _append(output, f"receipt-hash={receipt.get('receipt_hash', '')}\n")
+    _append(output, f"verification-hash={verification.get('verification_hash', '')}\n")
     _append(output, f"receipt-path={args.receipt}\n")
+    _append(output, f"verification-path={args.verification}\n")
 
     reason_text = "<br>".join(f"`{reason}`" for reason in sorted(set(reasons)))
     if not reason_text:
@@ -58,6 +68,7 @@ def main() -> int:
         "| Evidence | Result |\n"
         "| --- | --- |\n"
         f"| Compilation | `{compile_status}` |\n"
+        f"| Exact trace replay | `{verification_status}` |\n"
         f"| Evaluation | `{evaluation_status}` |\n"
         f"| Receipt | `{receipt.get('receipt_hash', '')}` |\n\n"
         f"{reason_text}\n"

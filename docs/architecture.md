@@ -23,7 +23,7 @@ canonical SHA-256 receipt -> replay verifier
                                |
 frozen evaluation bundles -> policy gate -> pass / review / block
                                |
-human actor + commit SHA ----> promotion receipt
+exact-trace replay + human actor + commit SHA -> promotion receipt
 ```
 
 The compiler, verifier, evaluator, redactor, and promotion recorder have no
@@ -89,10 +89,13 @@ dataset digest. The evaluator first enforces dataset/case parity and hard safety
 and success gates, then marks excessive latency or cost regression for review.
 It does not run the trials or grade model output itself.
 
-A promotion receipt records a human decision only after verifying the
-evaluation receipt hash. Approval requires a `pass` result and binds the actor,
-candidate, evaluation, commit SHA, UTC timestamp, and rationale. It neither
-authenticates the actor nor executes the candidate.
+A promotion receipt recomputes the compilation verification from the supplied
+source traces rather than trusting a caller's assertion. Approval requires a
+valid exact-trace replay, a `pass` evaluation for the same candidate digest, and
+valid hashes for every chained receipt. It binds the compilation/input bundle,
+verification, dataset, policy, actor, candidate, evaluation, commit SHA, UTC
+timestamp, and rationale. It neither authenticates the actor nor executes the
+candidate.
 
 ## Compilation rules
 
@@ -129,6 +132,7 @@ The optional API is a thin adapter over the same compiler:
 - `POST /v1/compile`
 - `POST /v1/verify`
 - `POST /v1/evaluate`
+- `POST /v1/promote`
 
 It introduces no alternate decision path and should return the same typed
 receipt for the same request.
@@ -146,7 +150,16 @@ claim that external agents or model-backed workflows are deterministic.
 ## Possible later integration
 
 A downstream evaluator may run a candidate in its own isolated environment and
-return independent outcome, safety, latency, and cost evidence. A promotion
-system may then require both the compile receipt and evaluation receipt. Neither
-capability belongs to the v0 compiler, and no future evaluator should let a
-model approve its own change.
+return independent outcome, safety, latency, and cost evidence. TraceGate can
+record a promotion only after the compilation, exact-trace verification, and
+evaluation artifacts agree on the same candidate. No future evaluator should
+let a model approve its own change.
+
+## AWE ecosystem boundary
+
+TraceGate is the evidence and promotion gate in a broader future AWE ecosystem;
+it is not the agent runtime. A separate runtime may later emit `awe.trace.v1`
+evidence, but execution permissions, model keys, and tool capabilities must
+remain outside this repository's trusted core. Repeated success is evidence,
+not permission: a candidate still needs verification, evaluation, and a human
+decision before a downstream registry could treat it as reusable software.

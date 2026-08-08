@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from awe_tracegate.compiler import compile_traces
-from awe_tracegate.contracts import CompilationReceipt, ExecutionTrace
-from awe_tracegate.verifier import verify_compilation_receipt
+from awe_tracegate.contracts import CompilationReceipt, ExecutionTrace, canonical_digest
+from awe_tracegate.verifier import verification_payload, verify_compilation_receipt
 
 EXAMPLE_TRACES = (
     Path(__file__).parents[1] / "examples" / "repo_analysis" / "traces.jsonl"
@@ -28,6 +28,10 @@ def test_verifies_receipt_and_exact_source_traces() -> None:
     assert verification.status == "valid"
     assert verification.traces_verified is True
     assert verification.reasons == ()
+    assert verification.verification_hash.startswith("sha256:")
+    assert verification.verification_hash == canonical_digest(
+        verification_payload(verification)
+    )
 
 
 def test_detects_tampered_candidate_digest() -> None:

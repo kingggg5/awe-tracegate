@@ -13,6 +13,12 @@ from .contracts import (
 )
 
 
+def verification_payload(result: ReceiptVerification) -> dict[str, object]:
+    """Return the canonical hash payload for a verification receipt."""
+
+    return result.model_dump(mode="json", exclude={"verification_hash"})
+
+
 def verify_compilation_receipt(
     receipt: CompilationReceipt,
     traces: Sequence[ExecutionTrace] | None = None,
@@ -38,9 +44,14 @@ def verify_compilation_receipt(
         if replayed.receipt_hash != receipt.receipt_hash:
             reasons.append("receipt_replay_mismatch")
 
-    return ReceiptVerification(
+    result = ReceiptVerification.model_construct(
         status="invalid" if reasons else "valid",
         receipt_hash=receipt.receipt_hash,
         traces_verified=traces_verified,
         reasons=tuple(sorted(set(reasons))),
+        verification_hash="sha256:" + "0" * 64,
+    )
+    payload = verification_payload(result)
+    return ReceiptVerification.model_validate(
+        {**payload, "verification_hash": canonical_digest(payload)}
     )

@@ -9,6 +9,20 @@ stable contract release.
 
 ### Added
 
+- Replay-gated promotion receipts that bind compilation, exact trace replay,
+  evaluation, dataset, policy, actor, and commit provenance.
+- Content-addressed verification receipts plus typed `/v1/promote` API support.
+- GitHub Action replay verification before a `PASS` decision.
+
+### Changed
+
+- Versioned verification and promotion schemas to v2; v0.1 schema consumers
+  should remain pinned to the v0.1.0 release.
+
+## [0.1.0] - 2026-08-08
+
+### Added
+
 - AWE TraceGate naming and collision-resistant repository/package identity.
 - Offline compilation receipt verification with exact-trace replay.
 - Frozen baseline/candidate evaluation and fail-closed policy receipts.
