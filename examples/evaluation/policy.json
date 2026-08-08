@@ -1,0 +1,8 @@
+{
+  "maximum_cost_increase_bps": 2500,
+  "maximum_latency_increase_bps": 2500,
+  "maximum_success_regression_bps": 200,
+  "minimum_trials": 3,
+  "require_zero_safety_violations": true,
+  "schema_version": "awe.evaluation-policy.v1"
+}

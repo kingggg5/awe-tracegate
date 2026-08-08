@@ -1,45 +1,59 @@
 # Roadmap
 
-AWE is developed in evidence-sized increments. Dates are intentionally omitted;
-each milestone ships only after its acceptance criteria are demonstrated.
+TraceGate is developed in evidence-sized increments. Features move from this
+roadmap only when their acceptance criteria are covered by reproducible tests.
 
-## v0.1 — Reviewable candidate
+## v0.1 — Release candidate
 
-- Strict, versioned trace and workflow contracts.
-- Evidence-gated compilation of repeated read-only traces.
-- Canonical, reproducible candidate receipts.
-- Explicit refusal for write, high-impact, and ambiguous effects.
-- Offline fixture, CLI, HTTP API, and golden/property-oriented tests.
+Implemented:
 
-Exit criteria: the same supported input produces a byte-identical receipt on
-Windows and Linux, and every seeded unsupported effect is rejected.
+- Strict, versioned trace, candidate, receipt, evaluation, and promotion models.
+- Fail-closed compilation of repeated read-only traces.
+- Offline receipt verification with optional exact-trace replay.
+- Frozen baseline/candidate evaluation with safety and non-regression policy.
+- Actor- and commit-bound human promotion records.
+- Conservative secret, PII, and customer-field redaction.
+- JSON Schema export, CLI, typed API, Docker image, and composite GitHub Action.
+- Cross-platform golden receipt, adversarial tests, CodeQL, dependency review,
+  release artifacts, and GitHub/Sigstore build provenance.
 
-## v0.2 — Evaluation and promotion
+Release criteria:
 
-- Frozen evaluation suites with baseline and candidate trials.
-- Hard safety gates followed by quality non-regression checks.
-- Append-only PostgreSQL run ledger and idempotent worker/outbox processing.
-- Actor-bound human approval and promotion receipts.
+- byte-identical golden receipt on Windows and Linux;
+- no seeded tamper, dataset mismatch, unsafe effect, or safety violation passes;
+- clean install, package build, container health, and Action smoke test;
+- public security boundaries and synthetic-data labels remain accurate.
 
-Exit criteria: no candidate can be promoted without linked evidence, policy,
-evaluation, and actor identity.
+## v0.2 — External evidence interoperability
 
-## v0.3 — Verifiable integration
+- Two independent import adapters, beginning with generic evaluation JSON and a
+  version-pinned OpenTelemetry GenAI mapping.
+- Signed receipt bundles that verify subject, signer identity, repository, and
+  commit—not only content digests.
+- Pluggable redaction policies with allow/deny reports and corpus consent IDs.
+- One real external pilot and usability measurements for time-to-first receipt.
 
-- Import adapters for two independent trace/evaluation formats.
-- in-toto-compatible attestations and signature verification.
-- GitHub Action that publishes a commit-bound review without an LLM key.
-- OpenTelemetry correlation with sensitive-data redaction.
+Exit criteria: two exporters produce the same canonical contract; tampered or
+commit-mismatched evidence never passes; a new adopter reaches a verified
+receipt in ten minutes or less.
 
-Exit criteria: adapters produce the same canonical contract and tampered or
-commit-mismatched evidence can never pass.
+## v0.3 — Durable review history
 
-## Later, only with adoption evidence
+- Append-only PostgreSQL receipt and decision ledger.
+- Transactional outbox with idempotent delivery for review notifications.
+- Authenticated actor identity and revocable promotion policy.
+- A small read-only review UI after CLI/Action demand is demonstrated.
 
-- Integrations with existing durable runtimes such as LangGraph or Temporal.
-- A small candidate/evaluation review UI.
-- Carefully sandboxed execution for explicitly approved effect classes.
+Exit criteria: every accepted decision has immutable evidence, policy, actor,
+and delivery provenance, tested under a non-owner database role.
 
-AWE will not build a general workflow runtime, autonomous browser agent,
-deployment/rollback controller, adaptive model router, or vector-memory system
-without a demonstrated use case and a separately reviewed threat model.
+## Explicitly deferred
+
+- General agent runtime, planner, or scheduler.
+- Browser, shell, deployment, rollback, or autonomous write execution.
+- Heuristic branching inferred from sparse traces.
+- Adaptive model routing, vector memory, or self-modification.
+
+Existing runtimes already own execution and recovery. TraceGate will integrate
+at evidence boundaries instead of expanding its trusted surface without user
+demand and a separately reviewed threat model.

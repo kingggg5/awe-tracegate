@@ -1,0 +1,107 @@
+name: AWE TraceGate
+description: Compile and gate repeated agent traces without an LLM key.
+author: kingggg5
+
+branding:
+  icon: shield
+  color: blue
+
+inputs:
+  traces:
+    description: Path to an awe.trace.v1 JSONL file.
+    required: true
+  receipt-path:
+    description: Path where the compilation receipt will be written.
+    required: false
+    default: awe-compilation-receipt.json
+  baseline-evaluation:
+    description: Optional frozen baseline evaluation bundle.
+    required: false
+    default: ""
+  candidate-evaluation:
+    description: Optional candidate evaluation bundle.
+    required: false
+    default: ""
+  evaluation-policy:
+    description: Optional evaluation policy JSON.
+    required: false
+    default: ""
+
+outputs:
+  decision:
+    description: PASS, REVIEW, BLOCK, or ERROR.
+    value: ${{ steps.gate.outputs.decision }}
+  receipt-hash:
+    description: Canonical compilation receipt digest.
+    value: ${{ steps.gate.outputs.receipt-hash }}
+  receipt-path:
+    description: Path to the generated compilation receipt.
+    value: ${{ steps.gate.outputs.receipt-path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+      with:
+        python-version: "3.12"
+        cache: pip
+    - name: Install AWE TraceGate
+      shell: bash
+      run: python -m pip install "${GITHUB_ACTION_PATH}"
+    - name: Compile and evaluate evidence
+      id: gate
+      shell: bash
+      env:
+        AWE_BASELINE: ${{ inputs.baseline-evaluation }}
+        AWE_CANDIDATE: ${{ inputs.candidate-evaluation }}
+        AWE_POLICY: ${{ inputs.evaluation-policy }}
+        AWE_RECEIPT_PATH: ${{ inputs.receipt-path }}
+        AWE_TRACES: ${{ inputs.traces }}
+      run: |
+        set +e
+        awe compile --traces "$AWE_TRACES" --out "$AWE_RECEIPT_PATH"
+        compile_exit=$?
+        set -e
+        if [ "$compile_exit" -eq 1 ]; then
+          echo "decision=ERROR" >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+
+        evaluation_path=""
+        evaluation_exit=0
+        if [ -n "$AWE_BASELINE" ] || [ -n "$AWE_CANDIDATE" ]; then
+          if [ -z "$AWE_BASELINE" ] || [ -z "$AWE_CANDIDATE" ]; then
+            echo "Both baseline-evaluation and candidate-evaluation are required." >&2
+            echo "decision=ERROR" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          evaluation_path="${RUNNER_TEMP}/awe-evaluation-receipt.json"
+          policy_args=()
+          if [ -n "$AWE_POLICY" ]; then
+            policy_args=(--policy "$AWE_POLICY")
+          fi
+          set +e
+          awe evaluate \
+            --baseline "$AWE_BASELINE" \
+            --candidate "$AWE_CANDIDATE" \
+            "${policy_args[@]}" \
+            --out "$evaluation_path"
+          evaluation_exit=$?
+          set -e
+          if [ "$evaluation_exit" -eq 1 ]; then
+            echo "decision=ERROR" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+        fi
+
+        summary_args=(--receipt "$AWE_RECEIPT_PATH")
+        if [ -n "$evaluation_path" ]; then
+          summary_args+=(--evaluation "$evaluation_path")
+        fi
+        python "$GITHUB_ACTION_PATH/scripts/github_action_summary.py" \
+          "${summary_args[@]}"
+
+        if [ "$compile_exit" -ne 0 ] || [ "$evaluation_exit" -ne 0 ]; then
+          exit 2
+        fi

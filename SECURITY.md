@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-AWE Agent Harness is pre-alpha. No release is currently guaranteed production
+AWE TraceGate is pre-alpha. No release is currently guaranteed production
 support or long-term security maintenance. Security fixes will target the latest
 development version and the newest published pre-release when practical.
 

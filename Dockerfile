@@ -20,7 +20,7 @@ RUN groupadd --system --gid 10001 awe \
 WORKDIR /app
 COPY --from=builder /wheels /wheels
 RUN python -m pip install --no-cache-dir --no-index --find-links=/wheels \
-      "awe-harness[api]" \
+      "awe-tracegate[api]" \
     && rm -rf /wheels
 
 USER 10001:10001
@@ -28,4 +28,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=2)"]
 
-CMD ["uvicorn", "awe_harness.api:app", "--host", "0.0.0.0", "--port", "8080", "--no-access-log"]
+CMD ["uvicorn", "awe_tracegate.api:app", "--host", "0.0.0.0", "--port", "8080", "--no-access-log"]

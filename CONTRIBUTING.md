@@ -1,4 +1,4 @@
-# Contributing to AWE Agent Harness
+# Contributing to AWE TraceGate
 
 Thank you for helping improve AWE. The project is pre-alpha, so small,
 well-tested changes that tighten the evidence contract are more valuable than
@@ -31,12 +31,14 @@ python -m ruff format --check .
 python -m ruff check .
 python -m mypy src
 python -m pytest
+awe schema --out-dir schemas
 ```
 
 Exercise the public CLI against the repository fixture:
 
 ```bash
 awe compile --traces examples/repo_analysis/traces.jsonl
+awe evaluate --baseline examples/evaluation/baseline.json --candidate examples/evaluation/candidate.json
 ```
 
 ## Pull-request expectations

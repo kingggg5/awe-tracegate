@@ -1,0 +1,6 @@
+{
+  "customer_email": "engineer@example.com",
+  "message": "Synthetic evidence for release 42",
+  "repository": "example/service",
+  "token": "demo-placeholder-not-a-real-secret"
+}

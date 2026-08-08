@@ -3,7 +3,7 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "awe-harness"
+name = "awe-tracegate"
 version = "0.1.0"
 description = "Evidence-gated trace-to-workflow compiler and reviewer"
 readme = "README.md"
@@ -45,15 +45,15 @@ test = [
 ]
 
 [project.scripts]
-awe = "awe_harness.cli:main"
+awe = "awe_tracegate.cli:main"
 
 [project.urls]
-Documentation = "https://github.com/kingggg5/awe-agent-harness#readme"
-Issues = "https://github.com/kingggg5/awe-agent-harness/issues"
-Repository = "https://github.com/kingggg5/awe-agent-harness"
+Documentation = "https://github.com/kingggg5/awe-tracegate#readme"
+Issues = "https://github.com/kingggg5/awe-tracegate/issues"
+Repository = "https://github.com/kingggg5/awe-tracegate"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/awe_harness"]
+packages = ["src/awe_tracegate"]
 
 [tool.mypy]
 python_version = "3.11"

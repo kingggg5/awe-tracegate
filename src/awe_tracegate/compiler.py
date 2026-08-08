@@ -17,6 +17,32 @@ from .contracts import (
 )
 
 
+def candidate_payload(candidate: CompilationCandidate) -> dict[str, Any]:
+    """Return the exact hash payload for a candidate."""
+
+    return {
+        "schema_version": candidate.schema_version,
+        "intent": candidate.intent,
+        "effect_scope": candidate.effect_scope,
+        "source_trace_ids": list(candidate.source_trace_ids),
+        "nodes": [node.model_dump(mode="json") for node in candidate.nodes],
+        "dependencies": [
+            dependency.model_dump(mode="json") for dependency in candidate.dependencies
+        ],
+    }
+
+
+def receipt_payload(receipt: CompilationReceipt) -> dict[str, Any]:
+    """Return the exact hash payload for a compilation receipt."""
+
+    return receipt.model_dump(mode="json", exclude={"receipt_hash"})
+
+
+def input_bundle_digest(traces: Sequence[ExecutionTrace]) -> str:
+    ordered_traces = sorted(traces, key=lambda trace: trace.trace_id)
+    return canonical_digest([trace.model_dump(mode="json") for trace in ordered_traces])
+
+
 def _step_shape(step: TraceStep) -> tuple[Any, ...]:
     bindings = tuple(
         sorted(
@@ -43,58 +69,30 @@ def _trace_shape(trace: ExecutionTrace) -> tuple[tuple[Any, ...], ...]:
     return tuple(_step_shape(step) for step in trace.steps)
 
 
-def _receipt_payload(
-    *,
-    input_bundle_digest: str,
-    status: str,
-    reasons: tuple[str, ...],
-    candidate: CompilationCandidate | None,
-) -> dict[str, Any]:
-    return {
-        "schema_version": "awe.compilation-receipt.v1",
-        "compiler_version": "awe.compiler.v1",
-        "input_bundle_digest": input_bundle_digest,
-        "status": status,
-        "reasons": list(reasons),
-        "candidate": (
-            candidate.model_dump(mode="json", exclude_none=False)
-            if candidate is not None
-            else None
-        ),
-    }
-
-
-def _refused(input_bundle_digest: str, *reasons: str) -> CompilationReceipt:
-    ordered_reasons = tuple(sorted(set(reasons)))
-    payload = _receipt_payload(
-        input_bundle_digest=input_bundle_digest,
+def _refused(input_digest: str, *reasons: str) -> CompilationReceipt:
+    receipt = CompilationReceipt(
+        input_bundle_digest=input_digest,
         status="refused",
-        reasons=ordered_reasons,
-        candidate=None,
+        reasons=tuple(sorted(set(reasons))),
+        receipt_hash="sha256:" + "0" * 64,
     )
-    return CompilationReceipt(
-        input_bundle_digest=input_bundle_digest,
-        status="refused",
-        reasons=ordered_reasons,
-        receipt_hash=canonical_digest(payload),
+    return receipt.model_copy(
+        update={"receipt_hash": canonical_digest(receipt_payload(receipt))}
     )
 
 
 def _compiled(
     candidate: CompilationCandidate,
-    input_bundle_digest: str,
+    input_digest: str,
 ) -> CompilationReceipt:
-    payload = _receipt_payload(
-        input_bundle_digest=input_bundle_digest,
+    receipt = CompilationReceipt(
+        input_bundle_digest=input_digest,
         status="compiled",
-        reasons=(),
         candidate=candidate,
+        receipt_hash="sha256:" + "0" * 64,
     )
-    return CompilationReceipt(
-        input_bundle_digest=input_bundle_digest,
-        status="compiled",
-        candidate=candidate,
-        receipt_hash=canonical_digest(payload),
+    return receipt.model_copy(
+        update={"receipt_hash": canonical_digest(receipt_payload(receipt))}
     )
 
 
@@ -156,7 +154,7 @@ def _collect_trace_reasons(trace: ExecutionTrace) -> list[str]:
                     f"missing_source_node:{step.node_id}:{binding.input_name}"
                 )
                 continue
-            source_position = node_positions.get(source_node or "")
+            source_position = node_positions.get(source_node)
             if source_position is None or source_position >= position:
                 reasons.append(
                     f"unknown_or_forward_dependency:{step.node_id}:{binding.input_name}"
@@ -278,15 +276,13 @@ def compile_traces(traces: Sequence[ExecutionTrace]) -> CompilationReceipt:
     """Compile only when repeated traces prove one safe declarative workflow."""
 
     ordered_traces = tuple(sorted(traces, key=lambda trace: trace.trace_id))
-    input_bundle_digest = canonical_digest(
-        [trace.model_dump(mode="json") for trace in ordered_traces]
-    )
+    input_digest = input_bundle_digest(ordered_traces)
     if len(ordered_traces) < 2:
-        return _refused(input_bundle_digest, "insufficient_trace_evidence")
+        return _refused(input_digest, "insufficient_trace_evidence")
 
     trace_ids = [trace.trace_id for trace in ordered_traces]
     if len(trace_ids) != len(set(trace_ids)):
-        return _refused(input_bundle_digest, "duplicate_trace_ids")
+        return _refused(input_digest, "duplicate_trace_ids")
 
     reasons: list[str] = []
     for trace in ordered_traces:
@@ -306,26 +302,19 @@ def compile_traces(traces: Sequence[ExecutionTrace]) -> CompilationReceipt:
         reasons.extend(_collect_trace_reasons(trace))
 
     if reasons:
-        return _refused(input_bundle_digest, *reasons)
+        return _refused(input_digest, *reasons)
 
     reference = ordered_traces[0]
     nodes = _build_nodes(reference)
     dependencies = _build_dependencies(ordered_traces)
-    candidate_payload = {
-        "schema_version": "awe.candidate.v1",
-        "intent": reference.intent,
-        "effect_scope": "pure_or_read",
-        "source_trace_ids": list(trace_ids),
-        "nodes": [node.model_dump(mode="json") for node in nodes],
-        "dependencies": [
-            dependency.model_dump(mode="json") for dependency in dependencies
-        ],
-    }
     candidate = CompilationCandidate(
-        candidate_digest=canonical_digest(candidate_payload),
+        candidate_digest="sha256:" + "0" * 64,
         intent=reference.intent,
         source_trace_ids=tuple(trace_ids),
         nodes=nodes,
         dependencies=dependencies,
     )
-    return _compiled(candidate, input_bundle_digest)
+    candidate = candidate.model_copy(
+        update={"candidate_digest": canonical_digest(candidate_payload(candidate))}
+    )
+    return _compiled(candidate, input_digest)

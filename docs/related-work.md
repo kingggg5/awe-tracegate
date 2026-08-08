@@ -1,6 +1,6 @@
 # Related work and differentiation
 
-AWE Agent Harness combines established ideas; it does not claim to have invented
+AWE TraceGate combines established ideas; it does not claim to have invented
 trace mining, workflow compilation, agent skills, replay, evaluation, or durable
 execution. This page records the closest primary sources and makes the project
 boundary explicit.

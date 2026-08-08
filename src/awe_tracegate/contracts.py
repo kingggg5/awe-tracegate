@@ -1,9 +1,10 @@
-"""Strict contracts shared by AWE's compiler, CLI, and HTTP API."""
+"""Strict, versioned contracts shared by every AWE TraceGate surface."""
 
 from __future__ import annotations
 
 import hashlib
 import json
+from datetime import datetime, timedelta
 from typing import Annotated, Any, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
@@ -16,6 +17,14 @@ TraceIdentifier = Annotated[
     str,
     StringConstraints(
         min_length=1, max_length=128, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+    ),
+]
+ActorIdentifier = Annotated[
+    str,
+    StringConstraints(
+        min_length=1,
+        max_length=128,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:@+-]*$",
     ),
 ]
 ToolName = Annotated[
@@ -39,6 +48,10 @@ JsonPointer = Annotated[
 Sha256Digest = Annotated[
     str,
     StringConstraints(pattern=r"^sha256:[0-9a-f]{64}$"),
+]
+GitCommitSha = Annotated[
+    str,
+    StringConstraints(pattern=r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$"),
 ]
 Reason = Annotated[str, StringConstraints(min_length=1, max_length=512)]
 
@@ -89,10 +102,13 @@ class TraceStep(ContractModel):
     tool: ToolName
     tool_version: ToolVersion
     effect: EffectClass
-    inputs: Annotated[tuple[TraceBinding, ...], Field(strict=False)] = ()
+    inputs: Annotated[
+        tuple[TraceBinding, ...],
+        Field(max_length=256, strict=False),
+    ] = ()
     outputs: Annotated[
         tuple[FieldEvidence, ...],
-        Field(min_length=1, strict=False),
+        Field(min_length=1, max_length=256, strict=False),
     ]
 
     @model_validator(mode="after")
@@ -115,11 +131,11 @@ class ExecutionTrace(ContractModel):
     succeeded: bool
     workflow_inputs: Annotated[
         tuple[FieldEvidence, ...],
-        Field(min_length=1, strict=False),
+        Field(min_length=1, max_length=256, strict=False),
     ]
     steps: Annotated[
         tuple[TraceStep, ...],
-        Field(min_length=1, strict=False),
+        Field(min_length=1, max_length=256, strict=False),
     ]
 
     @model_validator(mode="after")
@@ -138,7 +154,7 @@ class CompileRequest(ContractModel):
 
     traces: Annotated[
         tuple[ExecutionTrace, ...],
-        Field(min_length=1, strict=False),
+        Field(min_length=1, max_length=128, strict=False),
     ]
 
     @model_validator(mode="after")
@@ -238,6 +254,146 @@ class CompilationReceipt(ContractModel):
         if self.status == "refused" and not self.reasons:
             raise ValueError("refused receipts require at least one reason")
         return self
+
+
+class ReceiptVerification(ContractModel):
+    """Result of recomputing a compilation receipt and optional source traces."""
+
+    schema_version: Literal["awe.receipt-verification.v1"] = (
+        "awe.receipt-verification.v1"
+    )
+    status: Literal["valid", "invalid"]
+    receipt_hash: Sha256Digest
+    traces_verified: bool
+    reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()
+
+    @model_validator(mode="after")
+    def validate_status(self) -> Self:
+        if self.status == "valid" and self.reasons:
+            raise ValueError("valid verification cannot contain reasons")
+        if self.status == "invalid" and not self.reasons:
+            raise ValueError("invalid verification requires reasons")
+        return self
+
+
+class EvaluationTrial(ContractModel):
+    """One deterministic outcome record from an external evaluation harness."""
+
+    trial_id: TraceIdentifier
+    case_id: TraceIdentifier
+    succeeded: bool
+    safety_violations: Annotated[int, Field(ge=0)] = 0
+    latency_ms: Annotated[int, Field(ge=0)]
+    cost_microusd: Annotated[int, Field(ge=0)] = 0
+
+
+class EvaluationBundle(ContractModel):
+    """Frozen evaluation results for one exact subject and dataset."""
+
+    schema_version: Literal["awe.evaluation-bundle.v1"] = "awe.evaluation-bundle.v1"
+    subject_digest: Sha256Digest
+    dataset_digest: Sha256Digest
+    trials: Annotated[
+        tuple[EvaluationTrial, ...],
+        Field(min_length=1, max_length=100_000, strict=False),
+    ]
+
+    @model_validator(mode="after")
+    def validate_unique_trials(self) -> Self:
+        trial_ids = [trial.trial_id for trial in self.trials]
+        if len(trial_ids) != len(set(trial_ids)):
+            raise ValueError("evaluation trial ids must be unique")
+        return self
+
+
+class EvaluationPolicy(ContractModel):
+    """Deterministic non-regression and safety policy."""
+
+    schema_version: Literal["awe.evaluation-policy.v1"] = "awe.evaluation-policy.v1"
+    minimum_trials: Annotated[int, Field(ge=1, le=100_000)] = 3
+    maximum_success_regression_bps: Annotated[int, Field(ge=0, le=10_000)] = 200
+    maximum_latency_increase_bps: Annotated[int, Field(ge=0, le=100_000)] = 2_500
+    maximum_cost_increase_bps: Annotated[int, Field(ge=0, le=100_000)] = 2_500
+    require_zero_safety_violations: bool = True
+
+
+class EvaluationMetrics(ContractModel):
+    trial_count: Annotated[int, Field(ge=1)]
+    success_count: Annotated[int, Field(ge=0)]
+    success_rate_bps: Annotated[int, Field(ge=0, le=10_000)]
+    safety_violations: Annotated[int, Field(ge=0)]
+    p95_latency_ms: Annotated[int, Field(ge=0)]
+    total_cost_microusd: Annotated[int, Field(ge=0)]
+
+
+class EvaluationReceipt(ContractModel):
+    """Fail-closed comparison of a baseline and candidate on one frozen dataset."""
+
+    schema_version: Literal["awe.evaluation-receipt.v1"] = "awe.evaluation-receipt.v1"
+    evaluator_version: Literal["awe.evaluator.v1"] = "awe.evaluator.v1"
+    baseline_digest: Sha256Digest
+    candidate_digest: Sha256Digest
+    dataset_digest: Sha256Digest
+    policy_digest: Sha256Digest
+    status: Literal["pass", "review", "block"]
+    reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()
+    baseline: EvaluationMetrics
+    candidate: EvaluationMetrics
+    receipt_hash: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_status(self) -> Self:
+        if self.status == "pass" and self.reasons:
+            raise ValueError("passing evaluation cannot contain reasons")
+        if self.status != "pass" and not self.reasons:
+            raise ValueError("review or block evaluation requires reasons")
+        return self
+
+
+class EvaluateRequest(ContractModel):
+    baseline: EvaluationBundle
+    candidate: EvaluationBundle
+    policy: EvaluationPolicy = EvaluationPolicy()
+
+
+class PromotionReceipt(ContractModel):
+    """Human decision bound to exact candidate, evaluation, actor, and commit."""
+
+    schema_version: Literal["awe.promotion-receipt.v1"] = "awe.promotion-receipt.v1"
+    candidate_digest: Sha256Digest
+    evaluation_receipt_hash: Sha256Digest
+    evaluation_status: Literal["pass", "review", "block"]
+    decision: Literal["approved", "rejected"]
+    actor_id: ActorIdentifier
+    commit_sha: GitCommitSha
+    issued_at: datetime
+    rationale: Annotated[str, StringConstraints(min_length=1, max_length=1_024)]
+    receipt_hash: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_promotion(self) -> Self:
+        if self.issued_at.utcoffset() != timedelta(0):
+            raise ValueError("issued_at must include the UTC timezone")
+        if self.decision == "approved" and self.evaluation_status != "pass":
+            raise ValueError("approval requires a passing evaluation receipt")
+        return self
+
+
+class RedactionSummary(ContractModel):
+    """Deterministic report for the built-in conservative JSON redactor."""
+
+    schema_version: Literal["awe.redaction-summary.v1"] = "awe.redaction-summary.v1"
+    policy_version: Literal["awe.redaction.v1"] = "awe.redaction.v1"
+    input_digest: Sha256Digest
+    output_digest: Sha256Digest
+    changed: bool
+    replacements: Annotated[int, Field(ge=0)]
+    categories: dict[str, Annotated[int, Field(ge=0)]]
+
+
+class VerifyRequest(ContractModel):
+    receipt: CompilationReceipt
+    traces: Annotated[tuple[ExecutionTrace, ...], Field(strict=False)] | None = None
 
 
 class HealthResponse(ContractModel):

@@ -6,13 +6,14 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from awe_harness.cli import main
-from awe_harness.compiler import compile_traces
-from awe_harness.contracts import ExecutionTrace, canonical_digest
+from awe_tracegate.cli import main
+from awe_tracegate.compiler import compile_traces
+from awe_tracegate.contracts import ExecutionTrace, canonical_digest
 
 EXAMPLE_TRACES = (
     Path(__file__).parents[1] / "examples" / "repo_analysis" / "traces.jsonl"
 )
+GOLDEN_RECEIPT = Path(__file__).parent / "golden" / "repo-analysis-receipt.json"
 
 
 def load_traces() -> tuple[ExecutionTrace, ...]:
@@ -58,6 +59,13 @@ def test_receipt_is_canonical_when_trace_order_changes() -> None:
     assert forward.receipt_hash == reversed_order.receipt_hash
     assert forward.input_bundle_digest == reversed_order.input_bundle_digest
     assert forward.candidate == reversed_order.candidate
+
+
+def test_receipt_matches_frozen_cross_platform_golden() -> None:
+    receipt = compile_traces(load_traces())
+    expected = json.loads(GOLDEN_RECEIPT.read_text(encoding="utf-8"))
+
+    assert receipt.model_dump(mode="json", exclude_none=False) == expected
 
 
 def test_receipt_binds_evidence_not_only_candidate_structure() -> None:

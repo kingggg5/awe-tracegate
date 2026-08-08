@@ -1,0 +1,97 @@
+{
+  "candidate": {
+    "candidate_digest": "sha256:4715249d4e3efbc7fc54d3959211b2877cc99a855c666cbbdda4ffe32a85eab8",
+    "dependencies": [
+      {
+        "consumer_input": "changes",
+        "consumer_node": "score_release_risk",
+        "evidence_digest": "sha256:b04a49c7955448bebcdb5aea2802cba2baf46f3ac7b6f4b0d1969e1e640833a7",
+        "observation_count": 2,
+        "producer_field": "/changes",
+        "producer_node": "detect_dependencies",
+        "trace_ids": ["repo_analysis_001", "repo_analysis_002"]
+      },
+      {
+        "consumer_input": "diff",
+        "consumer_node": "detect_dependencies",
+        "evidence_digest": "sha256:cc63cef8c7ad5563c12e2967821999b3148e753a0d3f62748af9b472fa806726",
+        "observation_count": 2,
+        "producer_field": "/diff",
+        "producer_node": "read_diff",
+        "trace_ids": ["repo_analysis_001", "repo_analysis_002"]
+      },
+      {
+        "consumer_input": "head_sha",
+        "consumer_node": "score_release_risk",
+        "evidence_digest": "sha256:f5bc015d9473e273ae65bc7494dec661cf32678d88497c87ef29d39139ccef61",
+        "observation_count": 2,
+        "producer_field": "/head_sha",
+        "producer_node": "read_diff",
+        "trace_ids": ["repo_analysis_001", "repo_analysis_002"]
+      }
+    ],
+    "effect_scope": "pure_or_read",
+    "intent": "repo_analysis",
+    "nodes": [
+      {
+        "effect": "read",
+        "inputs": [
+          {
+            "input_name": "repository",
+            "source_field": "/repository",
+            "source_kind": "workflow_input",
+            "source_node": null
+          }
+        ],
+        "node_id": "read_diff",
+        "output_fields": ["/diff", "/head_sha"],
+        "tool": "repo.read_diff",
+        "tool_version": "1.0.0"
+      },
+      {
+        "effect": "read",
+        "inputs": [
+          {
+            "input_name": "diff",
+            "source_field": "/diff",
+            "source_kind": "step_output",
+            "source_node": "read_diff"
+          }
+        ],
+        "node_id": "detect_dependencies",
+        "output_fields": ["/changes"],
+        "tool": "repo.detect_dependencies",
+        "tool_version": "1.0.0"
+      },
+      {
+        "effect": "pure",
+        "inputs": [
+          {
+            "input_name": "changes",
+            "source_field": "/changes",
+            "source_kind": "step_output",
+            "source_node": "detect_dependencies"
+          },
+          {
+            "input_name": "head_sha",
+            "source_field": "/head_sha",
+            "source_kind": "step_output",
+            "source_node": "read_diff"
+          }
+        ],
+        "node_id": "score_release_risk",
+        "output_fields": ["/reasons", "/risk_score"],
+        "tool": "risk.score",
+        "tool_version": "1.0.0"
+      }
+    ],
+    "schema_version": "awe.candidate.v1",
+    "source_trace_ids": ["repo_analysis_001", "repo_analysis_002"]
+  },
+  "compiler_version": "awe.compiler.v1",
+  "input_bundle_digest": "sha256:351cc5ab98177204e0bbd25ae91ee6cab069bce54e626ad5093b3b384d053234",
+  "reasons": [],
+  "receipt_hash": "sha256:f4bab189f87c108abdd2ae12791391b24288056788865b099d017aaca0fe22ed",
+  "schema_version": "awe.compilation-receipt.v1",
+  "status": "compiled"
+}

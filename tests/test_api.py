@@ -4,13 +4,14 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from awe_harness.api import app
-from awe_harness.contracts import ExecutionTrace
+from awe_tracegate.api import app
+from awe_tracegate.contracts import ExecutionTrace
 
 EXAMPLE_TRACES = (
     Path(__file__).parents[1] / "examples" / "repo_analysis" / "traces.jsonl"
 )
 CLIENT = TestClient(app)
+EVALUATION_DIRECTORY = Path(__file__).parents[1] / "examples" / "evaluation"
 
 
 def request_payload() -> dict[str, object]:
@@ -57,3 +58,36 @@ def test_health_is_explicitly_keyless() -> None:
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "mode": "offline_keyless"}
+
+
+def test_verify_endpoint_replays_source_traces() -> None:
+    compile_response = CLIENT.post("/v1/compile", json=request_payload())
+
+    response = CLIENT.post(
+        "/v1/verify",
+        json={
+            "receipt": compile_response.json(),
+            "traces": request_payload()["traces"],
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "valid"
+    assert response.json()["traces_verified"] is True
+
+
+def test_evaluate_endpoint_returns_policy_decision() -> None:
+    baseline = (EVALUATION_DIRECTORY / "baseline.json").read_text(encoding="utf-8")
+    candidate = (EVALUATION_DIRECTORY / "candidate.json").read_text(encoding="utf-8")
+    policy = (EVALUATION_DIRECTORY / "policy.json").read_text(encoding="utf-8")
+
+    response = CLIENT.post(
+        "/v1/evaluate",
+        content=(
+            f'{{"baseline":{baseline},"candidate":{candidate},"policy":{policy}}}'
+        ),
+        headers={"content-type": "application/json"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "pass"

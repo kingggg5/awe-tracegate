@@ -9,7 +9,12 @@ stable contract release.
 
 ### Added
 
-- Initial evidence-gated trace-to-workflow compiler vertical slice.
-- Strict trace, policy, candidate, and receipt contracts.
-- Offline repository-analysis fixture, CLI, API, and automated tests.
-- Security boundaries, related-work review, and open-source contribution files.
+- AWE TraceGate naming and collision-resistant repository/package identity.
+- Offline compilation receipt verification with exact-trace replay.
+- Frozen baseline/candidate evaluation and fail-closed policy receipts.
+- Actor- and commit-bound human promotion receipts.
+- Conservative JSON evidence redaction and redaction summaries.
+- Versioned JSON Schema export and typed verify/evaluate API endpoints.
+- Composite GitHub Action plus signed release-artifact provenance workflow.
+- Cross-platform golden receipt and expanded adversarial tests.
+- Real-output demo artwork and release-oriented usage documentation.

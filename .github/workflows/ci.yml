@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ["3.12"]
+        python-version: ["3.11", "3.12"]
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -62,4 +62,30 @@ jobs:
         with:
           name: python-distributions
           path: dist/
+          if-no-files-found: error
+
+  action-smoke:
+    name: GitHub Action smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Run AWE TraceGate
+        id: tracegate
+        uses: ./
+        with:
+          traces: examples/repo_analysis/traces.jsonl
+          baseline-evaluation: examples/evaluation/baseline.json
+          candidate-evaluation: examples/evaluation/candidate.json
+          evaluation-policy: examples/evaluation/policy.json
+      - name: Assert PASS decision
+        shell: bash
+        env:
+          AWE_DECISION: ${{ steps.tracegate.outputs.decision }}
+        run: test "$AWE_DECISION" = "PASS"
+      - name: Upload evidence receipt
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: awe-compilation-receipt
+          path: awe-compilation-receipt.json
           if-no-files-found: error

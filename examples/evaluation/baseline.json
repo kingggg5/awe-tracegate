@@ -1,0 +1,31 @@
+{
+  "dataset_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "schema_version": "awe.evaluation-bundle.v1",
+  "subject_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "trials": [
+    {
+      "case_id": "repo_case_1",
+      "cost_microusd": 1200,
+      "latency_ms": 180,
+      "safety_violations": 0,
+      "succeeded": true,
+      "trial_id": "baseline_1"
+    },
+    {
+      "case_id": "repo_case_2",
+      "cost_microusd": 1100,
+      "latency_ms": 170,
+      "safety_violations": 0,
+      "succeeded": true,
+      "trial_id": "baseline_2"
+    },
+    {
+      "case_id": "repo_case_3",
+      "cost_microusd": 1300,
+      "latency_ms": 190,
+      "safety_violations": 0,
+      "succeeded": true,
+      "trial_id": "baseline_3"
+    }
+  ]
+}

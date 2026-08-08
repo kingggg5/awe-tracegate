@@ -1,6 +1,6 @@
 # Security model
 
-AWE Agent Harness is a pre-alpha, offline reviewer. Its safest useful boundary
+AWE TraceGate is a pre-alpha, offline reviewer. Its safest useful boundary
 is intentionally narrow: parse untrusted trace data, derive a read-only workflow
 candidate when the evidence is sufficient, and otherwise refuse.
 
@@ -31,11 +31,17 @@ policy, grant a capability, approve a step, or change an effect class.
 - Invalid, incomplete, or ambiguous evidence fails closed as malformed input or
   a typed refusal.
 - A receipt hash can be recomputed offline.
+- Evaluation receipts fail closed on dataset/case mismatch, seeded safety
+  violations, and excessive success regression.
+- Human approval requires a valid passing evaluation receipt and records the
+  actor plus exact commit SHA.
 
 ## Important limitations
 
 - SHA-256 integrity is not signer identity. Until a receipt is signed or anchored
   externally, call it content-addressed—not authenticated or tamper-proof.
+- Actor IDs in promotion receipts are assertions, not authenticated identities;
+  use an operator-owned identity boundary before relying on them.
 - A `compiled` decision does not prove semantic correctness, policy compliance,
   usefulness, or production safety.
 - Repeated successful traces may contain correlated mistakes or incomplete
@@ -56,6 +62,12 @@ may be guessed and metadata can still be sensitive.
 Operators remain responsible for classifying, minimizing, redacting, retaining,
 and deleting their trace data before AWE reads it. The project does not claim an
 automatic PII or secret-redaction guarantee.
+
+The built-in redactor is deliberately conservative and deterministic. It
+handles explicit sensitive keys plus common email and token patterns, but it
+cannot understand every customer schema, encoded secret, free-form identifier,
+or inference attack. A redaction summary is evidence that rules ran—not proof
+that an export is safe.
 
 ## API guidance
 

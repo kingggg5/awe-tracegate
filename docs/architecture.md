@@ -1,6 +1,6 @@
 # Architecture
 
-AWE Agent Harness is deliberately smaller than a general agent platform. Its
+AWE TraceGate is deliberately smaller than a general agent platform. Its
 v0 contract is a pure, read-only transformation:
 
 ```text
@@ -19,12 +19,17 @@ effect and evidence gate
 compiled  refused
       \   /
        v v
-canonical SHA-256 receipt
+canonical SHA-256 receipt -> replay verifier
+                               |
+frozen evaluation bundles -> policy gate -> pass / review / block
+                               |
+human actor + commit SHA ----> promotion receipt
 ```
 
-The compiler has no model, tool, browser, network, or workflow-execution loop.
-Given the same supported inputs and package version, it must return the same
-canonical decision.
+The compiler, verifier, evaluator, redactor, and promotion recorder have no
+model, tool, browser, network, or workflow-execution loop. Given the same
+supported inputs and contract versions, they must return the same canonical
+decision.
 
 ## Design goals
 
@@ -77,6 +82,18 @@ ordering does not change the receipt. The receipt hash detects modification
 after creation. It is not a digital signature and does not establish who
 produced the receipt.
 
+### Evaluation and promotion receipts
+
+An `EvaluationBundle` binds external trial outcomes to one subject and frozen
+dataset digest. The evaluator first enforces dataset/case parity and hard safety
+and success gates, then marks excessive latency or cost regression for review.
+It does not run the trials or grade model output itself.
+
+A promotion receipt records a human decision only after verifying the
+evaluation receipt hash. Approval requires a `pass` result and binds the actor,
+candidate, evaluation, commit SHA, UTC timestamp, and rationale. It neither
+authenticates the actor nor executes the candidate.
+
 ## Compilation rules
 
 The preview intentionally admits a narrow corpus:
@@ -110,6 +127,8 @@ The optional API is a thin adapter over the same compiler:
 
 - `GET /healthz`
 - `POST /v1/compile`
+- `POST /v1/verify`
+- `POST /v1/evaluate`
 
 It introduces no alternate decision path and should return the same typed
 receipt for the same request.
