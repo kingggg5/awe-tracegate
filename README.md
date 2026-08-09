@@ -4,6 +4,7 @@
 [![CodeQL](https://github.com/kingggg5/awe-tracegate/actions/workflows/codeql.yml/badge.svg)](https://github.com/kingggg5/awe-tracegate/actions/workflows/codeql.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB.svg)](https://www.python.org/)
+[![GitHub Action](https://img.shields.io/badge/GitHub_Action-@3-2088ff?logo=githubactions&logoColor=white)](https://github.com/marketplace/actions/awe-tracegate)
 
 **Build better agents through experiments you can actually verify.**
 
@@ -34,6 +35,9 @@ human decision into content-addressed artifacts that another reviewer can replay
 | Review an Agent Skill | A deterministic Skill BOM for the exact file tree |
 | Connect an eval harness | Strict evidence envelopes and conformance checks |
 | Share results | Consent-aware redaction, signing, and a local disclosure workflow |
+| Work across agent hosts | The same focused Skills for Codex, Claude Code, npm, or Git installs |
+| Avoid another model credential | The verifier is offline and needs no LLM-provider key |
+| Reproduce a decision later | Content-addressed traces, evaluation inputs, Skill BOM, and receipt hashes |
 
 The trusted path is offline, keyless, model-independent, and fail-closed. Skills
 or chat output may orchestrate it, but they can never issue or override a gate
@@ -120,6 +124,43 @@ Evidence-touching Skills require explicit invocation. For example:
 $tracegate-compare-change compare the candidate retry Skill with the baseline.
 Freeze the cases and success rule, preserve failed trials, and stop before promotion.
 ```
+
+## Why use the plugin instead of another prompt
+
+A prompt can suggest a good review process, but it cannot prove which files,
+traces, cases, policy, or candidate were evaluated. The plugin gives Codex and
+Claude Code a shared operational contract around the deterministic engine:
+
+- **Portable workflow:** install the same Skill set per repository without
+  copying long instructions into every conversation.
+- **Focused context:** compatible hosts can load the matching Skill on demand,
+  avoiding the need to paste the full TraceGate manual into every task.
+- **Host-independent evidence:** Codex and Claude Code can explain results in
+  different words while producing and citing the same gate contract.
+- **Safer defaults:** evidence-changing workflows are explicit-only, artifact
+  content is treated as untrusted data, and missing links fail closed.
+- **Framework interoperability:** adapt exports from an existing evaluation or
+  telemetry harness rather than replacing the harness or running another agent.
+- **Supply-chain visibility:** bind the exact Skill tree through a deterministic
+  Skill BOM so a reviewer knows which instructions changed.
+- **Reviewable sharing:** redact and package evidence locally before a human
+  decides whether it may leave the repository.
+
+The plugin does not make TraceGate an autonomous agent. It never runs trials,
+chooses a winner, promotes a Skill, uploads evidence, or bypasses host approval.
+
+## Practical workflows
+
+| Goal | Example invocation | Result |
+| --- | --- | --- |
+| Check whether the project is ready | `$tracegate-check inspect this repository and list missing local prerequisites.` | Read-only capability and evidence readiness report. |
+| Compare a prompt or Skill revision | `$tracegate-compare-change compare candidate retry behavior with the frozen baseline; preserve every failed trial.` | Baseline/candidate plan with measurable rules and no silent trial deletion. |
+| Gate existing eval artifacts | `$tracegate-verify-evidence gate ./evidence and cite the receipt digest.` | Atomic `PASS`, `REVIEW`, `BLOCK`, or `ERROR` receipt bound to the candidate. |
+| Connect another harness | `$tracegate-integrate-evidence map this OTLP or eval export into a strict envelope; do not invent missing fields.` | Conformance report and explicit unknown/unsupported fields. |
+| Share a review bundle | `$tracegate-share-evidence prepare a redacted local bundle for external review; do not upload it.` | Consent-aware disclosure manifest, redaction summary, and residual-risk warning. |
+
+This separation lets teams keep their preferred agent and eval stack while using
+one small, auditable gate at the point where a change becomes reusable.
 
 ## Install the evidence engine
 

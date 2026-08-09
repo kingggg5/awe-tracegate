@@ -12,6 +12,8 @@ stable contract release.
 - Added a copy-ready GitHub Marketplace Action example for release tag `3`,
   its exact full-SHA production pin, and clearer Agent Workflow Experimentation
   positioning without claiming that the trusted verifier runs experiments.
+- Expanded the plugin guide with cross-host benefits, token and credential
+  boundaries, five copy-ready developer workflows, and their auditable outputs.
 
 ### Added
 
