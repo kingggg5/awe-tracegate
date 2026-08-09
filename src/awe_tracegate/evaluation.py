@@ -6,6 +6,7 @@ from collections import Counter
 from typing import Literal
 
 from .contracts import (
+    PENDING_SHA256_DIGEST,
     EvaluationBundle,
     EvaluationMetrics,
     EvaluationPolicy,
@@ -119,7 +120,7 @@ def evaluate_candidate(
         reasons=reasons,
         baseline=baseline_metrics,
         candidate=candidate_metrics,
-        receipt_hash="sha256:" + "0" * 64,
+        receipt_hash=PENDING_SHA256_DIGEST,
     )
     return receipt.model_copy(
         update={"receipt_hash": canonical_digest(_receipt_payload(receipt))}

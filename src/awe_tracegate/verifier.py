@@ -6,6 +6,7 @@ from collections.abc import Sequence
 
 from .compiler import candidate_payload, compile_traces, receipt_payload
 from .contracts import (
+    PENDING_SHA256_DIGEST,
     CompilationReceipt,
     ExecutionTrace,
     ReceiptVerification,
@@ -49,7 +50,7 @@ def verify_compilation_receipt(
         receipt_hash=receipt.receipt_hash,
         traces_verified=traces_verified,
         reasons=tuple(sorted(set(reasons))),
-        verification_hash="sha256:" + "0" * 64,
+        verification_hash=PENDING_SHA256_DIGEST,
     )
     payload = verification_payload(result)
     return ReceiptVerification.model_validate(

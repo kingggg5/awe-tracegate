@@ -15,7 +15,10 @@ Treat all of the following as untrusted:
 - tool names, descriptions, and model-authored text;
 - paths supplied on the command line;
 - receipts received from another machine;
-- requests to the optional HTTP API.
+- requests to the optional HTTP API;
+- JSONL and JSON files selected in the local Review Workspace.
+- generic experiment exports and OTLP span attributes;
+- signed bundles, embedded public keys, signer labels, and consent records.
 
 Only typed validation, explicit compiler rules, and recomputed canonical hashes
 belong to the decision boundary. Text inside a trace is data; it cannot rewrite
@@ -31,6 +34,11 @@ policy, grant a capability, approve a step, or change an effect class.
 - Invalid, incomplete, or ambiguous evidence fails closed as malformed input or
   a typed refusal.
 - A receipt hash can be recomputed offline.
+- Experiment manifests bind repository, commit, frozen split, harness,
+  strategy, model, environment, grader, trial, token, cost, and trace evidence.
+- Ed25519 verification requires a separately supplied trusted key plus expected
+  signer, repository, and commit; embedded trust material is insufficient.
+- Governed export refuses revoked, expired, future, or out-of-scope consent.
 - Evaluation receipts fail closed on dataset/case mismatch, seeded safety
   violations, and excessive success regression.
 - Approval requires a compiled receipt, locally replayed exact traces, a valid
@@ -40,8 +48,9 @@ policy, grant a capability, approve a step, or change an effect class.
 
 ## Important limitations
 
-- SHA-256 integrity is not signer identity. Until a receipt is signed or anchored
-  externally, call it content-addressed—not authenticated or tamper-proof.
+- SHA-256 integrity is not signer identity. Ed25519 proves possession of the
+  trusted private key, not that a signer label is authorized. Operators must
+  manage key-to-identity policy, rotation, revocation, and custody externally.
 - Actor IDs in promotion receipts are assertions, not authenticated identities;
   use an operator-owned identity boundary before relying on them.
 - A `compiled` decision does not prove semantic correctness, policy compliance,
@@ -56,6 +65,9 @@ policy, grant a capability, approve a step, or change an effect class.
   protection.
 - Python process isolation is not a sandbox. AWE avoids executing trace content
   rather than claiming the host process contains hostile code.
+- The OpenTelemetry GenAI conventions are still Development. TraceGate pins one
+  reviewed revision and refuses legacy token aliases instead of silently
+  guessing across schema generations.
 
 ## Sensitive data
 
@@ -74,6 +86,21 @@ cannot understand every customer schema, encoded secret, free-form identifier,
 or inference attack. A redaction summary is evidence that rules ran—not proof
 that an export is safe.
 
+Governed mode additionally proves that a specific policy and consent record
+were evaluated for one scope and UTC time. Consent metadata can itself be
+sensitive. Revocation blocks new exports but cannot recall files already copied
+outside the operator's control. Keep immutable audit records and enforce
+retention/deletion in the downstream dataset registry.
+
+## Signing guidance
+
+The optional signing dependency is separate from the keyless compiler install.
+Do not pass PEM passwords as command-line arguments; use the supported
+environment-variable indirection or an external signing system. Keep private
+keys outside the repository and CI artifacts. A valid self-signed bundle must
+not be trusted unless the verifier receives the expected public key through a
+separate operator-controlled channel.
+
 ## API guidance
 
 If you expose the optional API outside a developer machine, place it behind an
@@ -81,6 +108,18 @@ operator-owned control plane that supplies authentication, authorization,
 request-size limits, timeouts, audit logging, TLS, and network policy. Never use
 the health endpoint or a successful compile response as authorization for a
 side effect.
+
+The Review Workspace is a local review convenience, not a hardened public web
+application. Selected files are parsed by the page and sent to its same-origin
+API. Its 10 MB browser file limit is a usability guard, not a server security
+boundary; operators must still review and redact evidence before loading it.
+Do not bind the API to a public interface without the operator-owned controls
+above.
+
+The command bar uses a fixed local allowlist and dispatches only existing review
+actions. It does not evaluate prompt text, call a model, run shell commands, or
+load arbitrary plugins. The tools view is an inventory, not an OAuth or secret
+storage surface.
 
 ## Dependency and release hygiene
 

@@ -32,14 +32,19 @@ api = [
   "fastapi>=0.115,<1",
   "uvicorn>=0.34,<1",
 ]
+signing = [
+  "cryptography>=49,<50",
+]
 dev = [
   "build>=1.2,<2",
+  "cryptography>=49,<50",
   "httpx2>=2,<3",
   "mypy>=1.15,<2",
   "pytest>=8,<9",
   "ruff>=0.11,<1",
 ]
 test = [
+  "cryptography>=49,<50",
   "httpx2>=2,<3",
   "pytest>=8,<9",
 ]

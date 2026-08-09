@@ -1,0 +1,62 @@
+{
+  "experiment_id": "synthetic-compression-eval-001",
+  "repository_uri": "https://github.com/example/synthetic-agent",
+  "commit_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "subject_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "dataset_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "dataset_split_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "harness_name": "synthetic.harness",
+  "harness_version": "1.0.0",
+  "harness_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "strategy_name": "synthetic.compression",
+  "strategy_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "model_provider": "example.provider",
+  "model_name": "synthetic-model",
+  "model_config_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "environment_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "grader_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "trials": [
+    {
+      "trial_id": "synthetic-trial-1",
+      "case_id": "synthetic-case-1",
+      "succeeded": true,
+      "safety_violations": 0,
+      "latency_ms": 420,
+      "cost_microusd": 1200,
+      "input_tokens": 800,
+      "output_tokens": 120,
+      "cached_input_tokens": 200,
+      "trace_id": "00000000000000000000000000000001",
+      "grader_result_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      "seed": 41
+    },
+    {
+      "trial_id": "synthetic-trial-2",
+      "case_id": "synthetic-case-2",
+      "succeeded": true,
+      "safety_violations": 0,
+      "latency_ms": 390,
+      "cost_microusd": 1100,
+      "input_tokens": 760,
+      "output_tokens": 115,
+      "cached_input_tokens": 180,
+      "trace_id": "00000000000000000000000000000002",
+      "grader_result_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "seed": 42
+    },
+    {
+      "trial_id": "synthetic-trial-3",
+      "case_id": "synthetic-case-3",
+      "succeeded": true,
+      "safety_violations": 0,
+      "latency_ms": 405,
+      "cost_microusd": 1150,
+      "input_tokens": 780,
+      "output_tokens": 118,
+      "cached_input_tokens": 190,
+      "trace_id": "00000000000000000000000000000003",
+      "grader_result_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+      "seed": 43
+    }
+  ]
+}

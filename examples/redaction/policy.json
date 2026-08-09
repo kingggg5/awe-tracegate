@@ -1,0 +1,15 @@
+{
+  "schema_version": "awe.redaction-policy.v1",
+  "policy_id": "synthetic-public-eval",
+  "policy_version": "1.0.0",
+  "allowed_top_level_keys": [
+    "metadata",
+    "result"
+  ],
+  "additional_sensitive_keys": {
+    "internal_note": "customer_data"
+  },
+  "denied_keys": {
+    "tenant_id": "customer_data"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schema_version": "awe.external-pilot.v1",
+  "scope": "maintainer_run_compatibility",
+  "repository_uri": "https://github.com/pallets/itsdangerous",
+  "commit_sha": "672971d66a2ef9f85151e53283113f33d642dabd",
+  "observed_files": [
+    {
+      "path": "pyproject.toml",
+      "size_bytes": 4649,
+      "content_digest": "sha256:44eb5a8e436c86362118c79609a0d3d30db054d876f25429c9f07ce00d0a5211"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 1579,
+      "content_digest": "sha256:f05ab9ed6530a02ce14cef6e2fd35ed9c96853f5e515ac82bfa37253895a4e29"
+    }
+  ],
+  "upstream_test_command": "python -m pytest -q",
+  "upstream_test_environment": {
+    "platform": "windows",
+    "python_version": "3.12.10",
+    "pytest_version": "9.1.1",
+    "freezegun_version": "1.5.5"
+  },
+  "upstream_tests_passed": 297,
+  "upstream_test_status": "passed",
+  "clean_install_smoke": {
+    "platform": "windows",
+    "python_version": "3.12",
+    "source": "local_checkout",
+    "elapsed_seconds": 14.51,
+    "verification_status": "valid",
+    "traces_verified": true
+  },
+  "compilation_receipt_hash": "sha256:23b00749f0116765775356bbdcfed980639d1b6630af407d24252faf37809948",
+  "verification_hash": "sha256:de3cfaf5cce7769a88ec139cad92bc4b1b49346e2b0f48ef1888ab238e1a357c",
+  "claims": [
+    "The public upstream repository was cloned at the exact commit.",
+    "The upstream test suite passed in a temporary isolated virtual environment.",
+    "TraceGate compiled and replayed read-only file-analysis traces derived from that snapshot."
+  ],
+  "limitations": [
+    "This is a maintainer-run compatibility pilot, not evidence of an external adopter.",
+    "The upstream test result is recorded metadata and is not an authenticated evaluation receipt.",
+    "The install timing is one local smoke measurement, not a performance benchmark.",
+    "No upstream source content is redistributed; only paths, sizes, and SHA-256 digests are retained."
+  ]
+}

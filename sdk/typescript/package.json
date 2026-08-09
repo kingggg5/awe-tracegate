@@ -1,0 +1,41 @@
+{
+  "name": "@awe-tracegate/sdk",
+  "version": "0.2.0",
+  "description": "Generated TypeScript client for the AWE TraceGate HTTP API",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "openapi.json"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "generate": "openapi-typescript openapi.json -o src/schema.d.ts",
+    "check": "tsc --noEmit",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "openapi-fetch": "0.17.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "js-yaml": "4.3.1"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kingggg5/awe-tracegate.git",
+    "directory": "sdk/typescript"
+  }
+}

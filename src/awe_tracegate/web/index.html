@@ -1,0 +1,2502 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>AWE TraceGate Review Workspace</title>
+    <!--
+      THESIS: A command-led local workspace for reviewing one evidence chain.
+      OWN-WORLD: Pale-blue navigation, cool paper, graphite type, measured blue.
+      STORY: Open evidence, run the deterministic gate, inspect it, record review.
+      FIRST VIEWPORT: Review session, five-stage evidence path, and command bar.
+      FORM: Agent command center around a calibration bench, established world.
+    -->
+    <style>
+      :root {
+        --paper: #f7f8fa;
+        --surface: #ffffff;
+        --surface-muted: #f0f2f5;
+        --ink: #1f2328;
+        --muted: #59636e;
+        --line: #d8dee4;
+        --line-strong: #afb8c1;
+        --app-line: #cbd7e4;
+        --nav-field: #dfeaf7;
+        --ink-border-subtle: rgba(31, 35, 40, 0.09);
+        --blue: #0969da;
+        --blue-deep: #0550ae;
+        --blue-soft: #ddf4ff;
+        --green: #1a7f37;
+        --green-soft: #dafbe1;
+        --amber: #7d4e00;
+        --amber-soft: #fff8c5;
+        --red: #cf222e;
+        --red-soft: #ffebe9;
+        --disabled-text: #8b95a3;
+        --shadow: 0 8px 24px rgba(31, 35, 40, 0.08);
+        --app-shadow: 0 18px 48px rgba(42, 55, 73, 0.14);
+        --command-shadow: 0 12px 32px rgba(31, 35, 40, 0.15);
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-app: 16px;
+        --radius-command: 13px;
+        --font-ui: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        --font-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono",
+          monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      html {
+        background: var(--paper);
+      }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+        color: var(--ink);
+        background: #eaf0f7;
+        font-family: var(--font-ui);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .app-frame {
+        display: grid;
+        grid-template-columns: 244px minmax(0, 1fr);
+        width: min(1540px, calc(100% - 28px));
+        min-height: calc(100vh - 28px);
+        margin: 14px auto;
+        overflow: hidden;
+        border: 1px solid var(--app-line);
+        border-radius: var(--radius-app);
+        background: var(--surface);
+        box-shadow: var(--app-shadow);
+      }
+
+      .workspace-nav {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        padding: 16px 12px;
+        border-right: 1px solid var(--app-line);
+        background: var(--nav-field);
+      }
+
+      .nav-identity {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 36px;
+        padding: 0 6px;
+        font-weight: 680;
+      }
+
+      .nav-identity .brand-mark {
+        width: 28px;
+        height: 28px;
+      }
+
+      .nav-section-label {
+        margin: 20px 8px 8px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 650;
+      }
+
+      .nav-action,
+      .nav-item {
+        display: flex;
+        width: 100%;
+        min-height: 38px;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 10px;
+        border: 0;
+        border-radius: var(--radius-sm);
+        color: var(--ink);
+        background: transparent;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .nav-action {
+        justify-content: center;
+        margin-top: 14px;
+        border: 1px solid var(--ink-border-subtle);
+        background: rgba(255, 255, 255, 0.74);
+        font-weight: 650;
+      }
+
+      .nav-action:hover,
+      .nav-item:hover,
+      .nav-item[aria-current="page"] {
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      .nav-item[aria-current="page"] {
+        font-weight: 650;
+      }
+
+      .nav-icon {
+        display: grid;
+        width: 20px;
+        height: 20px;
+        flex: 0 0 auto;
+        place-items: center;
+        color: var(--muted);
+      }
+
+      .nav-copy {
+        min-width: 0;
+      }
+
+      .nav-copy strong,
+      .nav-copy small {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .nav-copy strong {
+        font-size: 13px;
+      }
+
+      .nav-copy small {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 400;
+      }
+
+      .nav-spacer {
+        flex: 1;
+      }
+
+      .app-content {
+        min-width: 0;
+        background: var(--paper);
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button,
+      a,
+      input,
+      select,
+      textarea,
+      summary {
+        outline-offset: 3px;
+      }
+
+      :focus-visible {
+        outline: 3px solid rgba(40, 95, 158, 0.34);
+      }
+
+      .topbar {
+        position: sticky;
+        z-index: 5;
+        top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 52px;
+        padding: 0 24px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.96);
+      }
+
+      .brand,
+      .topbar-actions,
+      .status-pair,
+      .button-row {
+        display: flex;
+        align-items: center;
+      }
+
+      .brand {
+        gap: 11px;
+        font-weight: 680;
+        letter-spacing: -0.01em;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        border-radius: 9px;
+        color: #ffffff;
+        background: var(--ink);
+      }
+
+      .topbar-actions {
+        gap: 10px;
+      }
+
+      .topbar a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+
+      .topbar a:hover {
+        color: var(--blue-deep);
+        text-decoration: underline;
+        text-underline-offset: 4px;
+      }
+
+      .mode-chip,
+      .source-chip,
+      .status-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        gap: 7px;
+        padding: 3px 9px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .mode-chip {
+        color: var(--green);
+        background: var(--green-soft);
+      }
+
+      .mode-chip[data-state="checking"] {
+        color: var(--muted);
+        background: var(--surface-muted);
+      }
+
+      .mode-chip[data-state="offline"] {
+        color: var(--red);
+        background: var(--red-soft);
+      }
+
+      .mode-chip::before {
+        width: 7px;
+        height: 7px;
+        content: "";
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      main {
+        width: min(1180px, 100%);
+        margin: 0 auto;
+        padding: 30px 24px 112px;
+      }
+
+      .page-heading {
+        display: grid;
+        grid-template-columns: minmax(0, 720px) auto;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+
+      .page-heading h1 {
+        margin: 0 0 6px;
+        font-size: 2.25rem;
+        font-weight: 680;
+        line-height: 1.2;
+        letter-spacing: -0.025em;
+        text-wrap: balance;
+      }
+
+      .page-heading p {
+        max-width: 70ch;
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .source-chip {
+        align-self: start;
+        justify-self: start;
+        color: var(--amber);
+        background: var(--amber-soft);
+      }
+
+      .source-chip[data-source="local"] {
+        color: var(--blue-deep);
+        background: var(--blue-soft);
+      }
+
+      .lab-shell {
+        display: block;
+        min-height: 720px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .sequence {
+        padding: 18px 28px 16px;
+        border-bottom: 1px solid var(--line);
+        background: #fbfcfd;
+      }
+
+      .sequence h2,
+      .panel-title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .sequence-note {
+        margin: 4px 0 14px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .stage-list {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(106px, 1fr));
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+        overflow-x: auto;
+        list-style: none;
+      }
+
+      .stage-list::before {
+        position: absolute;
+        top: 23px;
+        right: 32px;
+        left: 14px;
+        height: 1px;
+        content: "";
+        background: var(--line-strong);
+      }
+
+      .stage {
+        position: relative;
+        display: grid;
+        grid-template-columns: 30px minmax(0, 1fr);
+        gap: 9px;
+        min-height: 58px;
+        padding: 9px 8px 8px 0;
+        border-radius: var(--radius-sm);
+      }
+
+      .stage-marker {
+        z-index: 1;
+        display: grid;
+        width: 29px;
+        height: 29px;
+        place-items: center;
+        border: 1px solid var(--line-strong);
+        border-radius: 50%;
+        color: var(--muted);
+        background: #f6f8fa;
+        font-size: 11px;
+        font-weight: 750;
+      }
+
+      .stage strong {
+        display: block;
+        margin: 2px 0 1px;
+        font-size: 13px;
+      }
+
+      .stage small {
+        display: block;
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 11px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .stage[data-state="running"] {
+        background: var(--blue-soft);
+      }
+
+      .stage[data-state="running"] .stage-marker {
+        color: #ffffff;
+        border-color: var(--blue);
+        background: var(--blue);
+      }
+
+      .stage[data-state="passed"] .stage-marker {
+        color: #ffffff;
+        border-color: var(--green);
+        background: var(--green);
+      }
+
+      .stage[data-state="review"] .stage-marker {
+        color: var(--amber);
+        border-color: var(--amber);
+        background: var(--amber-soft);
+      }
+
+      .stage[data-state="failed"] .stage-marker {
+        color: #ffffff;
+        border-color: var(--red);
+        background: var(--red);
+      }
+
+      .workbench {
+        min-width: 0;
+        padding: 24px 28px 32px;
+      }
+
+      .bench-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .bench-header h2 {
+        margin: 0 0 3px;
+        font-size: 19px;
+        letter-spacing: -0.02em;
+      }
+
+      .bench-header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .button-row {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .button {
+        min-height: 40px;
+        padding: 8px 14px;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-sm);
+        color: var(--ink);
+        background: var(--surface);
+        font-weight: 650;
+        cursor: pointer;
+        transition:
+          background-color 140ms ease-out,
+          border-color 140ms ease-out,
+          transform 140ms ease-out;
+      }
+
+      .button:hover:not(:disabled) {
+        border-color: var(--blue);
+        background: var(--blue-soft);
+        transform: translateY(-1px);
+      }
+
+      .button-primary {
+        color: #ffffff;
+        border-color: var(--blue);
+        background: var(--blue);
+      }
+
+      .button-primary:hover:not(:disabled) {
+        border-color: var(--blue-deep);
+        background: var(--blue-deep);
+      }
+
+      .button:disabled {
+        color: #8b95a3;
+        border-color: var(--line);
+        background: var(--surface-muted);
+        cursor: not-allowed;
+      }
+
+      .button[aria-busy="true"] {
+        cursor: wait;
+      }
+
+      .notice {
+        display: none;
+        margin: 18px 0 0;
+        padding: 11px 13px;
+        border: 1px solid color-mix(in srgb, var(--red) 28%, transparent);
+        border-radius: var(--radius-sm);
+        color: var(--red);
+        background: var(--red-soft);
+        font-size: 13px;
+        overflow-wrap: anywhere;
+      }
+
+      .notice.is-visible {
+        display: block;
+      }
+
+      .notice-success {
+        color: var(--green);
+        border-color: color-mix(in srgb, var(--green) 28%, transparent);
+        background: var(--green-soft);
+      }
+
+      .source-panel {
+        margin-top: 20px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        background: #fbfcfd;
+      }
+
+      .source-panel summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 16px;
+        color: var(--ink);
+        font-weight: 650;
+        cursor: pointer;
+      }
+
+      .source-panel summary::marker {
+        color: var(--muted);
+      }
+
+      .source-summary {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 400;
+        text-align: end;
+      }
+
+      .source-content {
+        padding: 0 16px 16px;
+        border-top: 1px solid var(--line);
+      }
+
+      .source-copy {
+        max-width: 74ch;
+        margin: 14px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .privacy-note {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .candidate-field {
+        min-height: 188px;
+        padding: 28px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .candidate-field-header,
+      .section-heading {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .candidate-field-header p,
+      .section-heading p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .trajectory {
+        display: flex;
+        align-items: center;
+        min-height: 112px;
+        margin-top: 16px;
+        overflow-x: auto;
+        padding: 8px 2px 12px;
+      }
+
+      .empty-state {
+        display: grid;
+        width: 100%;
+        min-width: 0;
+        min-height: 94px;
+        place-items: center;
+        padding: 12px;
+        border: 1px dashed var(--line-strong);
+        border-radius: var(--radius-sm);
+        color: var(--muted);
+        overflow-wrap: anywhere;
+        text-align: center;
+      }
+
+      .node {
+        flex: 0 0 198px;
+        min-height: 92px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        background: #fbfcfe;
+      }
+
+      .node span {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--blue-deep);
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .node strong {
+        display: block;
+        overflow-wrap: anywhere;
+        font-size: 13px;
+      }
+
+      .node code {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-family: var(--font-mono);
+        font-size: 10px;
+      }
+
+      .arrow {
+        position: relative;
+        flex: 0 0 42px;
+        height: 1px;
+        background: var(--line-strong);
+      }
+
+      .arrow::after {
+        position: absolute;
+        top: -4px;
+        right: 0;
+        width: 8px;
+        height: 8px;
+        content: "";
+        border-top: 1px solid var(--line-strong);
+        border-right: 1px solid var(--line-strong);
+        transform: rotate(45deg);
+      }
+
+      .result-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+        gap: 30px;
+        padding-top: 28px;
+      }
+
+      .metric-table {
+        width: 100%;
+        margin-top: 14px;
+        border-collapse: collapse;
+        font-variant-numeric: tabular-nums;
+        table-layout: fixed;
+      }
+
+      .metric-table th:first-child {
+        width: 44%;
+      }
+
+      .metric-table th,
+      .metric-table td {
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--line);
+        text-align: right;
+      }
+
+      .metric-table th:first-child,
+      .metric-table td:first-child {
+        padding-left: 0;
+        text-align: left;
+      }
+
+      .metric-table th {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 650;
+      }
+
+      .metric-table td {
+        font-size: 13px;
+      }
+
+      .artifact-list {
+        display: grid;
+        gap: 0;
+        margin: 14px 0 0;
+      }
+
+      .artifact {
+        display: grid;
+        grid-template-columns: 128px minmax(0, 1fr);
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .artifact dt {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .artifact dd {
+        min-width: 0;
+        margin: 0;
+      }
+
+      .artifact-value {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .artifact code {
+        display: block;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .copy-button {
+        flex: 0 0 auto;
+        padding: 2px 6px;
+        border: 0;
+        border-radius: var(--radius-sm);
+        color: var(--blue-deep);
+        background: transparent;
+        font-size: 11px;
+        cursor: pointer;
+      }
+
+      .copy-button:hover {
+        background: var(--blue-soft);
+      }
+
+      .promotion {
+        margin-top: 26px;
+        padding-top: 24px;
+        border-top: 1px solid var(--line);
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 15px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field-wide {
+        grid-column: 1 / -1;
+      }
+
+      .field label {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 650;
+      }
+
+      .field input,
+      .field select,
+      .field textarea {
+        width: 100%;
+        min-height: 40px;
+        padding: 8px 10px;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-sm);
+        color: var(--ink);
+        background: var(--surface);
+      }
+
+      .field textarea {
+        min-height: 84px;
+        resize: vertical;
+      }
+
+      .field input:focus,
+      .field select:focus,
+      .field textarea:focus {
+        border-color: var(--blue);
+      }
+
+      .field input[aria-invalid="true"],
+      .field textarea[aria-invalid="true"] {
+        border-color: var(--red);
+      }
+
+      .field-hint {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .field-error {
+        min-height: 16px;
+        color: var(--red);
+        font-size: 11px;
+      }
+
+      .promotion-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .promotion-note {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .input-panel {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        padding-top: 14px;
+      }
+
+      .file-field {
+        display: grid;
+        gap: 5px;
+      }
+
+      .file-field label {
+        font-size: 11px;
+        font-weight: 650;
+      }
+
+      .file-field small {
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      .file-field input {
+        width: 100%;
+        padding: 9px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        font-size: 12px;
+      }
+
+      .file-field input::file-selector-button {
+        margin-inline-end: 8px;
+        padding: 5px 8px;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-sm);
+        color: var(--ink);
+        background: var(--surface-muted);
+        cursor: pointer;
+      }
+
+      .input-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-top: 4px;
+      }
+
+      .status-chip[data-status="pass"],
+      .status-chip[data-status="valid"],
+      .status-chip[data-status="compiled"],
+      .status-chip[data-status="approved"] {
+        color: var(--green);
+        background: var(--green-soft);
+      }
+
+      .status-chip[data-status="review"] {
+        color: var(--amber);
+        background: var(--amber-soft);
+      }
+
+      .status-chip[data-status="block"],
+      .status-chip[data-status="invalid"],
+      .status-chip[data-status="refused"] {
+        color: var(--red);
+        background: var(--red-soft);
+      }
+
+      .status-chip[data-status="waiting"] {
+        color: var(--muted);
+        background: var(--surface-muted);
+      }
+
+      .footer-note {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px 16px;
+        margin: 24px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        text-align: center;
+      }
+
+      .footer-note a {
+        color: var(--blue-deep);
+      }
+
+      .tools-surface[hidden],
+      .review-surface[hidden],
+      .command-dock[hidden] {
+        display: none;
+      }
+
+      .tools-surface {
+        min-height: 720px;
+        padding: 8px 0 40px;
+      }
+
+      .tools-heading {
+        max-width: 700px;
+        margin-bottom: 26px;
+      }
+
+      .tools-heading h1 {
+        margin: 0 0 6px;
+        font-size: 2.25rem;
+        line-height: 1.15;
+        letter-spacing: -0.025em;
+      }
+
+      .tools-heading p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .tool-list {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+      }
+
+      .tool-row {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 14px;
+        min-height: 76px;
+        padding: 12px 18px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .tool-row:last-child {
+        border-bottom: 0;
+      }
+
+      .tool-mark {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface-muted);
+        font-weight: 750;
+      }
+
+      .tool-copy strong,
+      .tool-copy small {
+        display: block;
+      }
+
+      .tool-copy strong {
+        font-size: 14px;
+      }
+
+      .tool-copy small {
+        max-width: 66ch;
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .tool-state {
+        min-width: 92px;
+        color: var(--green);
+        font-size: 12px;
+        font-weight: 650;
+        text-align: right;
+        text-decoration: none;
+      }
+
+      .tool-state:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .tool-state[data-state="external"] {
+        color: var(--amber);
+      }
+
+      .tools-note {
+        max-width: 76ch;
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .command-dock {
+        position: fixed;
+        z-index: 10;
+        right: max(28px, calc((100vw - 1540px) / 2 + 28px));
+        bottom: 24px;
+        left: max(272px, calc((100vw - 1540px) / 2 + 272px));
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 8px 8px 8px 14px;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-command);
+        background: rgba(255, 255, 255, 0.97);
+        box-shadow: var(--command-shadow);
+      }
+
+      .command-copy {
+        min-width: 0;
+      }
+
+      .command-input {
+        width: 100%;
+        min-height: 30px;
+        padding: 2px 0;
+        border: 0;
+        color: var(--ink);
+        background: transparent;
+      }
+
+      .command-input:focus {
+        outline: 0;
+      }
+
+      .command-hint {
+        display: block;
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 10px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .command-submit {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        color: #ffffff;
+        background: var(--blue);
+        font-weight: 750;
+        cursor: pointer;
+      }
+
+      .command-submit:hover {
+        background: var(--blue-deep);
+      }
+
+      .command-submit:disabled {
+        color: var(--disabled-text);
+        background: var(--surface-muted);
+      }
+
+      @media (max-width: 1080px) {
+        .app-frame {
+          grid-template-columns: 208px minmax(0, 1fr);
+        }
+
+        .command-dock {
+          left: 228px;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .app-frame {
+          display: block;
+          width: 100%;
+          min-height: 100vh;
+          margin: 0;
+          border: 0;
+          border-radius: 0;
+        }
+
+        .workspace-nav {
+          position: sticky;
+          z-index: 8;
+          top: 0;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto auto;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 12px;
+          border-right: 0;
+          border-bottom: 1px solid var(--app-line);
+        }
+
+        .workspace-nav .nav-action,
+        .workspace-nav .nav-section-label,
+        .workspace-nav .session-item,
+        .workspace-nav .nav-spacer {
+          display: none;
+        }
+
+        .workspace-nav .nav-item {
+          width: auto;
+        }
+
+        .workspace-nav .nav-copy small {
+          display: none;
+        }
+
+        .topbar {
+          top: 53px;
+        }
+
+        .command-dock {
+          right: 14px;
+          bottom: 14px;
+          left: 14px;
+        }
+
+        .page-heading {
+          grid-template-columns: 1fr;
+          gap: 18px;
+        }
+
+        .workbench {
+          width: 100%;
+          overflow: hidden;
+        }
+
+        .sequence {
+          border-bottom: 1px solid var(--line);
+        }
+
+        .result-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .result-grid > * {
+          min-width: 0;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .topbar {
+          padding: 0 16px;
+        }
+
+        .topbar .brand span:last-child {
+          display: none;
+        }
+
+        .mode-chip {
+          display: none;
+        }
+
+        main {
+          padding: 26px 14px 108px;
+        }
+
+        .lab-shell {
+          border-radius: 10px;
+        }
+
+        .sequence,
+        .workbench {
+          padding: 18px 16px;
+        }
+
+        .bench-header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .button-row {
+          justify-content: flex-start;
+        }
+
+        .result-grid {
+          gap: 22px;
+        }
+
+        .field-grid,
+        .input-panel {
+          grid-template-columns: 1fr;
+        }
+
+        .field-wide,
+        .input-actions {
+          grid-column: auto;
+        }
+
+        .promotion-actions {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .source-panel summary {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .source-summary {
+          text-align: start;
+        }
+
+        .tool-row {
+          grid-template-columns: 38px minmax(0, 1fr);
+        }
+
+        .tool-state {
+          grid-column: 2;
+          text-align: left;
+        }
+      }
+
+      @media (forced-colors: active) {
+        .stage-marker,
+        .status-chip,
+        .source-chip,
+        .mode-chip {
+          border: 1px solid currentColor;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-frame">
+      <aside class="workspace-nav" aria-label="Workspace navigation">
+        <div class="nav-identity">
+          <span class="brand-mark" aria-hidden="true">A</span>
+          <span>AWE TraceGate</span>
+        </div>
+        <button class="nav-action" id="newReviewButton" type="button">+ New review</button>
+
+        <p class="nav-section-label">Workspace</p>
+        <button class="nav-item" id="reviewNavButton" type="button" aria-current="page">
+          <span class="nav-icon" aria-hidden="true">&#9678;</span>
+          <span class="nav-copy"><strong>Review</strong><small>Validate one evidence chain</small></span>
+        </button>
+        <button class="nav-item" id="toolsNavButton" type="button">
+          <span class="nav-icon" aria-hidden="true">&#9881;</span>
+          <span class="nav-copy"><strong>Tools</strong><small>Available integration surfaces</small></span>
+        </button>
+
+        <p class="nav-section-label">Current review</p>
+        <button class="nav-item session-item" id="currentReviewButton" type="button">
+          <span class="nav-icon" aria-hidden="true">&#9679;</span>
+          <span class="nav-copy"><strong id="sessionTitle">Sample evidence</strong><small id="sessionStatus">Not validated</small></span>
+        </button>
+        <div class="nav-spacer"></div>
+        <a class="nav-item" href="https://github.com/kingggg5/awe-tracegate">
+          <span class="nav-icon" aria-hidden="true">&#8599;</span>
+          <span class="nav-copy"><strong>GitHub</strong><small>Source, issues, and releases</small></span>
+        </a>
+      </aside>
+
+      <div class="app-content">
+        <header class="topbar">
+          <div class="brand">
+            <span id="surfaceTitle">Review workspace</span>
+          </div>
+          <div class="topbar-actions">
+            <span class="mode-chip" id="serverStatus" data-state="checking">Checking server</span>
+            <a href="/docs">API docs</a>
+          </div>
+        </header>
+
+        <main>
+      <div class="review-surface" id="reviewSurface">
+      <section class="page-heading" aria-labelledby="page-title">
+        <div>
+          <h1 id="page-title">Review a workflow candidate</h1>
+          <p>
+            Validate repeated traces, replay the exact evidence, compare frozen
+            evaluations, and record a review decision. No model credentials are
+            required.
+          </p>
+        </div>
+        <span class="source-chip" id="sourceChip">Sample data</span>
+      </section>
+
+      <section class="lab-shell" aria-label="Workflow review workspace">
+        <aside class="sequence" aria-label="Review progress">
+          <h2>Review status</h2>
+          <p class="sequence-note">Each step must finish before a decision is recorded.</p>
+          <ol class="stage-list">
+            <li class="stage" id="stageEvidence" data-state="waiting">
+              <span class="stage-marker">1</span>
+              <span><strong>Inputs</strong><small>Sample data loaded</small></span>
+            </li>
+            <li class="stage" id="stageCompile" data-state="waiting">
+              <span class="stage-marker">2</span>
+              <span><strong>Compile</strong><small>Waiting</small></span>
+            </li>
+            <li class="stage" id="stageReplay" data-state="waiting">
+              <span class="stage-marker">3</span>
+              <span><strong>Verify</strong><small>Waiting</small></span>
+            </li>
+            <li class="stage" id="stageEvaluate" data-state="waiting">
+              <span class="stage-marker">4</span>
+              <span><strong>Evaluate</strong><small>Waiting</small></span>
+            </li>
+            <li class="stage" id="stagePromote" data-state="waiting">
+              <span class="stage-marker">5</span>
+              <span><strong>Decide</strong><small>Human required</small></span>
+            </li>
+          </ol>
+        </aside>
+
+        <div class="workbench">
+          <header class="bench-header">
+            <div>
+              <h2>Evidence review</h2>
+              <p id="sourceDescription">2 sample traces loaded; validation has not run</p>
+            </div>
+            <div class="button-row">
+              <button class="button" id="downloadButton" type="button" disabled>
+                Export review
+              </button>
+              <button class="button button-primary" id="runButton" type="button">
+                Validate evidence
+              </button>
+            </div>
+          </header>
+
+          <div class="notice" id="errorNotice" role="alert" aria-live="assertive"></div>
+          <div class="notice notice-success" id="successNotice" role="status" aria-live="polite"></div>
+
+          <details class="source-panel" id="sourcePanel">
+            <summary>
+              <span>Evidence files</span>
+              <span class="source-summary" id="sourceSummary">Using the included sample dataset</span>
+            </summary>
+            <div class="source-content">
+              <p class="source-copy">
+                Select all four required files to review your own candidate. An
+                experiment run is optional and is normalized into a content-addressed
+                manifest for export.
+              </p>
+              <div class="input-panel">
+                <div class="file-field">
+                  <label for="traceFile">Execution traces</label>
+                  <small>Required · JSONL · one trace per line</small>
+                  <input id="traceFile" type="file" accept=".jsonl,application/x-ndjson,application/json" />
+                </div>
+                <div class="file-field">
+                  <label for="baselineFile">Baseline evaluation</label>
+                  <small>Required · awe.evaluation-bundle.v1 JSON</small>
+                  <input id="baselineFile" type="file" accept=".json,application/json" />
+                </div>
+                <div class="file-field">
+                  <label for="candidateFile">Candidate evaluation</label>
+                  <small>Required · awe.evaluation-bundle.v1 JSON</small>
+                  <input id="candidateFile" type="file" accept=".json,application/json" />
+                </div>
+                <div class="file-field">
+                  <label for="policyFile">Evaluation policy</label>
+                  <small>Required · awe.evaluation-policy.v1 JSON</small>
+                  <input id="policyFile" type="file" accept=".json,application/json" />
+                </div>
+                <div class="file-field field-wide">
+                  <label for="experimentFile">Experiment run</label>
+                  <small>Optional · generic evaluation JSON</small>
+                  <input id="experimentFile" type="file" accept=".json,application/json" />
+                </div>
+                <div class="input-actions">
+                  <button class="button button-primary" id="loadButton" type="button">Use selected files</button>
+                  <button class="button" id="restoreButton" type="button">Load sample data</button>
+                </div>
+              </div>
+              <p class="privacy-note">
+                Selected files are sent only to this TraceGate server for validation.
+                TraceGate does not send them to an LLM provider.
+              </p>
+            </div>
+          </details>
+
+          <section class="candidate-field" aria-labelledby="candidate-title">
+            <div class="candidate-field-header">
+              <h3 class="panel-title" id="candidate-title">Compiled workflow</h3>
+              <span class="status-chip" id="compileStatus" data-status="waiting">Waiting</span>
+            </div>
+            <div class="trajectory" id="trajectory">
+              <div class="empty-state">Select evidence, then run validation.</div>
+            </div>
+          </section>
+
+          <div class="result-grid">
+            <section aria-labelledby="evaluation-title">
+              <div class="section-heading">
+                <h3 class="panel-title" id="evaluation-title">Evaluation comparison</h3>
+                <span class="status-chip" id="evaluationStatus" data-status="waiting">Waiting</span>
+              </div>
+              <table class="metric-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Measure</th>
+                    <th scope="col">Baseline</th>
+                    <th scope="col">Candidate</th>
+                  </tr>
+                </thead>
+                <tbody id="metricBody">
+                  <tr><td>Trials</td><td>Waiting</td><td>Waiting</td></tr>
+                  <tr><td>Success</td><td>Waiting</td><td>Waiting</td></tr>
+                  <tr><td>p95 latency</td><td>Waiting</td><td>Waiting</td></tr>
+                  <tr><td>Total cost</td><td>Waiting</td><td>Waiting</td></tr>
+                </tbody>
+              </table>
+            </section>
+
+            <section aria-labelledby="artifact-title">
+              <div class="section-heading">
+                <h3 class="panel-title" id="artifact-title">Evidence artifacts</h3>
+                <span class="status-chip" id="replayStatus" data-status="waiting">Waiting</span>
+              </div>
+              <dl class="artifact-list" id="artifactList">
+                <div class="artifact"><dt>Compilation</dt><dd>Not created</dd></div>
+                <div class="artifact"><dt>Verification</dt><dd>Not created</dd></div>
+                <div class="artifact"><dt>Evaluation</dt><dd>Not created</dd></div>
+              </dl>
+            </section>
+          </div>
+
+          <section class="promotion" aria-labelledby="promotion-title">
+            <div class="section-heading">
+              <h3 class="panel-title" id="promotion-title">Human decision</h3>
+              <span class="status-chip" id="promotionStatus" data-status="waiting">Not recorded</span>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="decision">Decision</label>
+                <select id="decision">
+                  <option value="approved">Approve candidate</option>
+                  <option value="rejected">Reject candidate</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="actor">Reviewer ID</label>
+                <input id="actor" required maxlength="128" autocomplete="username" placeholder="name@example.com" aria-describedby="actorHint actorError" />
+                <span class="field-hint" id="actorHint">Letters, numbers, and . _ : @ + -</span>
+                <span class="field-error" id="actorError"></span>
+              </div>
+              <div class="field field-wide">
+                <label for="commitSha">Commit SHA</label>
+                <input id="commitSha" required minlength="40" maxlength="64" spellcheck="false" autocomplete="off" placeholder="40- or 64-character lowercase commit SHA" aria-describedby="commitError" />
+                <span class="field-error" id="commitError"></span>
+              </div>
+              <div class="field field-wide">
+                <label for="rationale">Review notes</label>
+                <textarea id="rationale" required maxlength="1024" placeholder="Explain why this candidate should be approved or rejected." aria-describedby="rationaleError"></textarea>
+                <span class="field-error" id="rationaleError"></span>
+              </div>
+            </div>
+            <div class="promotion-actions">
+              <button class="button" id="promoteButton" type="button" disabled>
+                Record decision
+              </button>
+              <span class="promotion-note" id="promotionNote">
+                Complete verification and evaluation before recording a decision.
+              </span>
+            </div>
+          </section>
+
+        </div>
+      </section>
+
+      <p class="footer-note">
+        <span>No model call, tool execution, or automatic promotion.</span>
+        <span>Signing, OTLP import, and governed redaction are available in the CLI.</span>
+        <a href="https://github.com/kingggg5/awe-tracegate#cli">CLI guide</a>
+      </p>
+      </div>
+
+      <section class="tools-surface" id="toolsSurface" hidden aria-labelledby="tools-title">
+        <div class="tools-heading">
+          <h1 id="tools-title">Integration surfaces</h1>
+          <p>
+            Connect an existing harness to one deterministic evidence contract.
+            TraceGate never borrows an agent credential or executes a tool on its behalf.
+          </p>
+        </div>
+        <div class="tool-list">
+          <article class="tool-row">
+            <span class="tool-mark" aria-hidden="true">CLI</span>
+            <span class="tool-copy"><strong>Command line</strong><small>Compile, replay, evaluate, redact, sign, and record a human decision locally.</small></span>
+            <a class="tool-state" href="https://github.com/kingggg5/awe-tracegate#try-it-locally">Open guide</a>
+          </article>
+          <article class="tool-row">
+            <span class="tool-mark" aria-hidden="true">API</span>
+            <span class="tool-copy"><strong>Typed HTTP API</strong><small>FastAPI and OpenAPI expose the same Pydantic contracts used by the CLI.</small></span>
+            <a class="tool-state" id="apiToolState" href="/docs">Checking</a>
+          </article>
+          <article class="tool-row">
+            <span class="tool-mark" aria-hidden="true">GH</span>
+            <span class="tool-copy"><strong>GitHub Action</strong><small>Run the gate in CI and upload compilation and verification receipts as build artifacts.</small></span>
+            <a class="tool-state" data-state="external" href="https://github.com/kingggg5/awe-tracegate#github-action">Set up</a>
+          </article>
+          <article class="tool-row">
+            <span class="tool-mark" aria-hidden="true">TS</span>
+            <span class="tool-copy"><strong>TypeScript client</strong><small>Generated from the committed OpenAPI document and checked for contract drift in CI.</small></span>
+            <a class="tool-state" href="https://github.com/kingggg5/awe-tracegate/tree/main/sdk/typescript">Open client</a>
+          </article>
+          <article class="tool-row">
+            <span class="tool-mark" aria-hidden="true">OT</span>
+            <span class="tool-copy"><strong>OTLP GenAI import</strong><small>Normalize one pinned OpenTelemetry GenAI revision into the provider-neutral experiment manifest.</small></span>
+            <a class="tool-state" data-state="external" href="https://github.com/kingggg5/awe-tracegate#interfaces">Open guide</a>
+          </article>
+          <article class="tool-row">
+            <span class="tool-mark" aria-hidden="true">SIG</span>
+            <span class="tool-copy"><strong>Signed receipt bundles</strong><small>Optional Ed25519 signing binds an artifact to repository, commit, signer, and trusted-key policy.</small></span>
+            <a class="tool-state" href="https://github.com/kingggg5/awe-tracegate#interfaces">Open guide</a>
+          </article>
+        </div>
+        <p class="tools-note">
+          Browser, email, shell, and deployment connectors are intentionally outside
+          this trusted core. A future AWE Workspace may orchestrate them behind explicit
+          permissions while TraceGate remains the independent promotion gate.
+        </p>
+      </section>
+        </main>
+
+        <form class="command-dock" id="commandForm" role="search">
+          <div class="command-copy">
+            <label class="sr-only" for="commandInput">Review command</label>
+            <input class="command-input" id="commandInput" type="text" autocomplete="off" placeholder="Try: validate evidence" />
+            <span class="command-hint" id="commandHint">Local commands only · /validate · /files · /export · /tools · /help</span>
+          </div>
+          <button class="command-submit" id="commandSubmit" type="submit" aria-label="Run command">&#8593;</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      "use strict";
+
+      const syntheticInputs = {
+        traces: [
+          {
+            schema_version: "awe.trace.v1",
+            trace_id: "repo_analysis_001",
+            intent: "repo_analysis",
+            succeeded: true,
+            workflow_inputs: [{ field: "/repository", value_digest: "sha256:" + "1".repeat(64) }],
+            steps: [
+              {
+                node_id: "read_diff",
+                tool: "repo.read_diff",
+                tool_version: "1.0.0",
+                effect: "read",
+                inputs: [{ input_name: "repository", source_kind: "workflow_input", source_field: "/repository", observed_value_digest: "sha256:" + "1".repeat(64), source_node: null }],
+                outputs: [
+                  { field: "/diff", value_digest: "sha256:" + "2".repeat(64) },
+                  { field: "/head_sha", value_digest: "sha256:" + "3".repeat(64) }
+                ]
+              },
+              {
+                node_id: "detect_dependencies",
+                tool: "repo.detect_dependencies",
+                tool_version: "1.0.0",
+                effect: "read",
+                inputs: [{ input_name: "diff", source_kind: "step_output", source_field: "/diff", observed_value_digest: "sha256:" + "2".repeat(64), source_node: "read_diff" }],
+                outputs: [{ field: "/changes", value_digest: "sha256:" + "4".repeat(64) }]
+              },
+              {
+                node_id: "score_release_risk",
+                tool: "risk.score",
+                tool_version: "1.0.0",
+                effect: "pure",
+                inputs: [
+                  { input_name: "changes", source_kind: "step_output", source_field: "/changes", observed_value_digest: "sha256:" + "4".repeat(64), source_node: "detect_dependencies" },
+                  { input_name: "head_sha", source_kind: "step_output", source_field: "/head_sha", observed_value_digest: "sha256:" + "3".repeat(64), source_node: "read_diff" }
+                ],
+                outputs: [
+                  { field: "/risk_score", value_digest: "sha256:" + "5".repeat(64) },
+                  { field: "/reasons", value_digest: "sha256:" + "6".repeat(64) }
+                ]
+              }
+            ]
+          },
+          {
+            schema_version: "awe.trace.v1",
+            trace_id: "repo_analysis_002",
+            intent: "repo_analysis",
+            succeeded: true,
+            workflow_inputs: [{ field: "/repository", value_digest: "sha256:" + "7".repeat(64) }],
+            steps: [
+              {
+                node_id: "read_diff",
+                tool: "repo.read_diff",
+                tool_version: "1.0.0",
+                effect: "read",
+                inputs: [{ input_name: "repository", source_kind: "workflow_input", source_field: "/repository", observed_value_digest: "sha256:" + "7".repeat(64), source_node: null }],
+                outputs: [
+                  { field: "/diff", value_digest: "sha256:" + "8".repeat(64) },
+                  { field: "/head_sha", value_digest: "sha256:" + "9".repeat(64) }
+                ]
+              },
+              {
+                node_id: "detect_dependencies",
+                tool: "repo.detect_dependencies",
+                tool_version: "1.0.0",
+                effect: "read",
+                inputs: [{ input_name: "diff", source_kind: "step_output", source_field: "/diff", observed_value_digest: "sha256:" + "8".repeat(64), source_node: "read_diff" }],
+                outputs: [{ field: "/changes", value_digest: "sha256:" + "a".repeat(64) }]
+              },
+              {
+                node_id: "score_release_risk",
+                tool: "risk.score",
+                tool_version: "1.0.0",
+                effect: "pure",
+                inputs: [
+                  { input_name: "changes", source_kind: "step_output", source_field: "/changes", observed_value_digest: "sha256:" + "a".repeat(64), source_node: "detect_dependencies" },
+                  { input_name: "head_sha", source_kind: "step_output", source_field: "/head_sha", observed_value_digest: "sha256:" + "9".repeat(64), source_node: "read_diff" }
+                ],
+                outputs: [
+                  { field: "/risk_score", value_digest: "sha256:" + "b".repeat(64) },
+                  { field: "/reasons", value_digest: "sha256:" + "c".repeat(64) }
+                ]
+              }
+            ]
+          }
+        ],
+        baseline: {
+          schema_version: "awe.evaluation-bundle.v1",
+          subject_digest: "sha256:" + "b".repeat(64),
+          dataset_digest: "sha256:" + "d".repeat(64),
+          trials: [
+            { trial_id: "baseline_1", case_id: "repo_case_1", succeeded: true, safety_violations: 0, latency_ms: 180, cost_microusd: 1200 },
+            { trial_id: "baseline_2", case_id: "repo_case_2", succeeded: true, safety_violations: 0, latency_ms: 170, cost_microusd: 1100 },
+            { trial_id: "baseline_3", case_id: "repo_case_3", succeeded: true, safety_violations: 0, latency_ms: 190, cost_microusd: 1300 }
+          ]
+        },
+        candidate: {
+          schema_version: "awe.evaluation-bundle.v1",
+          subject_digest: "sha256:4715249d4e3efbc7fc54d3959211b2877cc99a855c666cbbdda4ffe32a85eab8",
+          dataset_digest: "sha256:" + "d".repeat(64),
+          trials: [
+            { trial_id: "candidate_1", case_id: "repo_case_1", succeeded: true, safety_violations: 0, latency_ms: 120, cost_microusd: 800 },
+            { trial_id: "candidate_2", case_id: "repo_case_2", succeeded: true, safety_violations: 0, latency_ms: 125, cost_microusd: 850 },
+            { trial_id: "candidate_3", case_id: "repo_case_3", succeeded: true, safety_violations: 0, latency_ms: 130, cost_microusd: 900 }
+          ]
+        },
+        policy: {
+          schema_version: "awe.evaluation-policy.v1",
+          minimum_trials: 3,
+          maximum_success_regression_bps: 200,
+          maximum_latency_increase_bps: 2500,
+          maximum_cost_increase_bps: 2500,
+          require_zero_safety_violations: true
+        }
+      };
+
+      const REQUEST_TIMEOUT_MS = 30000;
+      const MAX_FILE_BYTES = 10 * 1024 * 1024;
+      const ACTOR_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_.:@+-]*$/;
+      const COMMIT_PATTERN = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
+      const REASON_LABELS = Object.freeze({
+        ambiguous_dependency: "A dependency has more than one possible source",
+        ambiguous_workflow_input: "A workflow input has more than one possible source",
+        candidate_digest_mismatch: "The candidate digest does not match",
+        dataset_digest_mismatch: "The evaluation datasets do not match",
+        duplicate_trace_ids: "Trace IDs must be unique",
+        insufficient_trace_evidence: "At least two successful traces are required",
+        mixed_intents: "All traces must describe the same intent",
+        model_decision_binding: "A model decision cannot become a deterministic binding",
+        safety_violations: "The candidate introduced a safety violation",
+        success_regression: "Candidate success regressed beyond policy",
+        trace_not_successful: "A source trace did not succeed",
+        unsafe_effect: "A write or high-impact step cannot be compiled",
+        workflow_shape_mismatch: "The traces do not share one workflow shape"
+      });
+      const stageIds = ["Evidence", "Compile", "Replay", "Evaluate", "Promote"];
+      const COMMAND_ALIASES = Object.freeze({
+        "/docs": "docs",
+        "/export": "export",
+        "/files": "files",
+        "/help": "help",
+        "/new": "new",
+        "/sample": "sample",
+        "/tools": "tools",
+        "/validate": "validate",
+        "export review": "export",
+        "load sample data": "sample",
+        "new review": "new",
+        "open api docs": "docs",
+        "open evidence files": "files",
+        "show integrations": "tools",
+        "show tools": "tools",
+        "validate evidence": "validate"
+      });
+      const state = {
+        inputs: clone(syntheticInputs),
+        source: "synthetic",
+        sourceFiles: null,
+        compilation: null,
+        verification: null,
+        evaluation: null,
+        experimentManifest: null,
+        promotion: null
+      };
+
+      const elements = Object.freeze({
+        actor: document.getElementById("actor"),
+        actorError: document.getElementById("actorError"),
+        apiToolState: document.getElementById("apiToolState"),
+        baselineFile: document.getElementById("baselineFile"),
+        candidateFile: document.getElementById("candidateFile"),
+        commandForm: document.getElementById("commandForm"),
+        commandHint: document.getElementById("commandHint"),
+        commandInput: document.getElementById("commandInput"),
+        commitError: document.getElementById("commitError"),
+        commitSha: document.getElementById("commitSha"),
+        currentReviewButton: document.getElementById("currentReviewButton"),
+        decision: document.getElementById("decision"),
+        downloadButton: document.getElementById("downloadButton"),
+        errorNotice: document.getElementById("errorNotice"),
+        experimentFile: document.getElementById("experimentFile"),
+        loadButton: document.getElementById("loadButton"),
+        newReviewButton: document.getElementById("newReviewButton"),
+        policyFile: document.getElementById("policyFile"),
+        promoteButton: document.getElementById("promoteButton"),
+        rationale: document.getElementById("rationale"),
+        rationaleError: document.getElementById("rationaleError"),
+        restoreButton: document.getElementById("restoreButton"),
+        reviewNavButton: document.getElementById("reviewNavButton"),
+        reviewSurface: document.getElementById("reviewSurface"),
+        runButton: document.getElementById("runButton"),
+        serverStatus: document.getElementById("serverStatus"),
+        sessionStatus: document.getElementById("sessionStatus"),
+        sessionTitle: document.getElementById("sessionTitle"),
+        sourceChip: document.getElementById("sourceChip"),
+        sourceDescription: document.getElementById("sourceDescription"),
+        sourcePanel: document.getElementById("sourcePanel"),
+        sourceSummary: document.getElementById("sourceSummary"),
+        successNotice: document.getElementById("successNotice"),
+        surfaceTitle: document.getElementById("surfaceTitle"),
+        toolsNavButton: document.getElementById("toolsNavButton"),
+        toolsSurface: document.getElementById("toolsSurface"),
+        traceFile: document.getElementById("traceFile")
+      });
+
+      const runButton = elements.runButton;
+      const downloadButton = elements.downloadButton;
+      const promoteButton = elements.promoteButton;
+      const decisionSelect = elements.decision;
+
+      function clone(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      function titleCase(value) {
+        return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+      }
+
+      function readableReason(reason) {
+        const [code, ...context] = String(reason).split(":");
+        const message = REASON_LABELS[code] || titleCase(code).replace(/\bId\b/g, "ID");
+        return context.length ? message + " (" + context.join(" · ") + ")" : message;
+      }
+
+      function readableReasons(reasons) {
+        return reasons && reasons.length ? reasons.map(readableReason).join("; ") : "No reason was provided";
+      }
+
+      function shortDigest(value) {
+        if (!value || value.length < 24) return value || "Unavailable";
+        return value.slice(0, 16) + "…" + value.slice(-8);
+      }
+
+      function setSurface(surface) {
+        const showTools = surface === "tools";
+        elements.reviewSurface.hidden = showTools;
+        elements.toolsSurface.hidden = !showTools;
+        elements.reviewNavButton.toggleAttribute("aria-current", !showTools);
+        elements.toolsNavButton.toggleAttribute("aria-current", showTools);
+        elements.surfaceTitle.textContent = showTools ? "Tools" : "Review workspace";
+        document.title = showTools
+          ? "AWE TraceGate Tools"
+          : "AWE TraceGate Review Workspace";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function updateSession(status) {
+        elements.sessionTitle.textContent = state.sourceFiles
+          ? state.sourceFiles.traces
+          : "Sample evidence";
+        elements.sessionStatus.textContent = status;
+      }
+
+      function setCommandHint(message) {
+        elements.commandHint.textContent = message;
+      }
+
+      async function executeCommand(rawCommand) {
+        const normalized = rawCommand.trim().toLowerCase().replace(/\s+/g, " ");
+        const command = COMMAND_ALIASES[normalized];
+        if (!command) {
+          setCommandHint("Command not recognized · try /validate, /files, /export, /tools, /sample, /new, or /help");
+          return;
+        }
+
+        if (command === "help") {
+          setCommandHint("Commands · /validate · /files · /export · /tools · /sample · /new · /docs");
+        } else if (command === "validate") {
+          setSurface("review");
+          if (runButton.disabled) {
+            setCommandHint("Validation is already running.");
+          } else {
+            setCommandHint("Running the deterministic evidence chain…");
+            await runEvidenceLoop();
+            const outcome = state.compilation && state.compilation.status === "refused"
+              ? "REFUSED"
+              : state.evaluation
+                ? state.evaluation.status.toUpperCase()
+                : "INCOMPLETE";
+            setCommandHint("Validation finished · " + outcome + " · inspect the evidence before recording a decision");
+          }
+        } else if (command === "files") {
+          setSurface("review");
+          elements.sourcePanel.open = true;
+          elements.sourcePanel.scrollIntoView({ behavior: "smooth", block: "center" });
+          elements.traceFile.focus();
+          setCommandHint("Choose all four required files, then select Use selected files.");
+        } else if (command === "export") {
+          setSurface("review");
+          if (downloadButton.disabled) {
+            setCommandHint("Validate evidence before exporting a review.");
+          } else {
+            downloadReceipts();
+            setCommandHint("Review export downloaded.");
+          }
+        } else if (command === "sample") {
+          setSurface("review");
+          restoreSyntheticEvidence();
+          setCommandHint("Included sample evidence is ready to validate.");
+        } else if (command === "new") {
+          setSurface("review");
+          restoreSyntheticEvidence();
+          elements.sourcePanel.open = true;
+          elements.sourcePanel.scrollIntoView({ behavior: "smooth", block: "start" });
+          setCommandHint("New review ready · select evidence files or keep the labelled sample.");
+        } else if (command === "tools") {
+          setSurface("tools");
+          setCommandHint("Showing integration surfaces that are implemented today.");
+        } else if (command === "docs") {
+          window.location.assign("/docs");
+        }
+      }
+
+      function setStage(name, stageState, detail) {
+        const stage = document.getElementById("stage" + name);
+        stage.dataset.state = stageState;
+        stage.querySelector("small").textContent = detail;
+      }
+
+      function setStatus(elementId, status, label) {
+        const element = document.getElementById(elementId);
+        element.dataset.status = status;
+        element.textContent = label || titleCase(status);
+      }
+
+      function showError(message) {
+        elements.successNotice.classList.remove("is-visible");
+        elements.errorNotice.textContent = message;
+        elements.errorNotice.classList.add("is-visible");
+      }
+
+      function showSuccess(message) {
+        elements.errorNotice.classList.remove("is-visible");
+        elements.successNotice.textContent = message;
+        elements.successNotice.classList.add("is-visible");
+      }
+
+      function clearNotices() {
+        [elements.errorNotice, elements.successNotice].forEach((notice) => {
+          notice.textContent = "";
+          notice.classList.remove("is-visible");
+        });
+      }
+
+      function setBusy(button, busy, idleLabel, busyLabel) {
+        button.disabled = busy;
+        button.setAttribute("aria-busy", String(busy));
+        button.textContent = busy ? busyLabel : idleLabel;
+      }
+
+      function formatApiDetail(detail) {
+        if (Array.isArray(detail)) {
+          return detail
+            .slice(0, 4)
+            .map((item) => {
+              const location = Array.isArray(item.loc) ? item.loc.slice(1).join(".") : "input";
+              return location + ": " + (item.msg || "invalid value");
+            })
+            .join("; ");
+        }
+        return typeof detail === "string" ? detail : JSON.stringify(detail);
+      }
+
+      async function fetchJson(path, payload) {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+        try {
+          const response = await fetch(path, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+          elements.serverStatus.dataset.state = "online";
+          elements.serverStatus.textContent = "Connected · keyless";
+          const body = await response.json().catch(() => null);
+          if (!response.ok) {
+            const detail = body && body.detail
+              ? formatApiDetail(body.detail)
+              : response.statusText || "request failed";
+            throw new Error("The server rejected the request (" + response.status + "): " + detail);
+          }
+          return body;
+        } catch (error) {
+          if (error instanceof DOMException && error.name === "AbortError") {
+            throw new Error("The server did not respond within 30 seconds. Check its status and try again.");
+          }
+          if (error instanceof TypeError) {
+            elements.serverStatus.dataset.state = "offline";
+            elements.serverStatus.textContent = "Server unavailable";
+            throw new Error("Could not reach the TraceGate server. Confirm it is running, then try again.");
+          }
+          throw error;
+        } finally {
+          window.clearTimeout(timeout);
+        }
+      }
+
+      function resetResults() {
+        state.compilation = null;
+        state.verification = null;
+        state.evaluation = null;
+        state.promotion = null;
+        stageIds.forEach((name) => setStage(name, "waiting", name === "Promote" ? "Review required" : "Waiting"));
+        setStage("Evidence", "passed", state.inputs.traces.length + " traces loaded");
+        setStatus("compileStatus", "waiting", "Waiting");
+        setStatus("replayStatus", "waiting", "Waiting");
+        setStatus("evaluationStatus", "waiting", "Waiting");
+        setStatus("promotionStatus", "waiting", "Not recorded");
+        document.getElementById("trajectory").replaceChildren(createEmpty("Run validation to compile a workflow candidate."));
+        renderMetrics(null);
+        renderArtifacts();
+        updatePromotionEligibility();
+        downloadButton.disabled = true;
+        elements.sourceDescription.textContent =
+          state.inputs.traces.length + " traces loaded; validation has not run";
+      }
+
+      function clearDecisionContext() {
+        elements.decision.value = "approved";
+        elements.commitSha.value = "";
+        elements.rationale.value = "";
+        [elements.commitSha, elements.rationale].forEach((field) => {
+          field.removeAttribute("aria-invalid");
+        });
+        elements.commitError.textContent = "";
+        elements.rationaleError.textContent = "";
+      }
+
+      function createEmpty(message) {
+        const element = document.createElement("div");
+        element.className = "empty-state";
+        element.textContent = message;
+        return element;
+      }
+
+      function renderCandidate(receipt) {
+        const trajectory = document.getElementById("trajectory");
+        trajectory.replaceChildren();
+        if (!receipt || receipt.status !== "compiled" || !receipt.candidate) {
+          trajectory.append(createEmpty(receipt ? readableReasons(receipt.reasons) : "No candidate was compiled."));
+          return;
+        }
+        receipt.candidate.nodes.forEach((node, index) => {
+          if (index > 0) {
+            const arrow = document.createElement("span");
+            arrow.className = "arrow";
+            arrow.setAttribute("aria-hidden", "true");
+            trajectory.append(arrow);
+          }
+          const item = document.createElement("article");
+          item.className = "node";
+          const effect = document.createElement("span");
+          effect.textContent = titleCase(node.effect) + " · v" + node.tool_version;
+          const name = document.createElement("strong");
+          name.textContent = node.tool;
+          const id = document.createElement("code");
+          id.textContent = node.node_id;
+          item.append(effect, name, id);
+          trajectory.append(item);
+        });
+      }
+
+      function renderMetrics(receipt) {
+        const body = document.getElementById("metricBody");
+        body.replaceChildren();
+        const rows = receipt
+          ? [
+              ["Trials", receipt.baseline.trial_count, receipt.candidate.trial_count],
+              ["Success", (receipt.baseline.success_rate_bps / 100).toFixed(1) + "%", (receipt.candidate.success_rate_bps / 100).toFixed(1) + "%"],
+              ["p95 latency", receipt.baseline.p95_latency_ms + " ms", receipt.candidate.p95_latency_ms + " ms"],
+              ["Total cost", receipt.baseline.total_cost_microusd + " µUSD", receipt.candidate.total_cost_microusd + " µUSD"]
+            ]
+          : [["Trials", "Waiting", "Waiting"], ["Success", "Waiting", "Waiting"], ["p95 latency", "Waiting", "Waiting"], ["Total cost", "Waiting", "Waiting"]];
+        rows.forEach((values) => {
+          const row = document.createElement("tr");
+          values.forEach((value) => {
+            const cell = document.createElement("td");
+            cell.textContent = String(value);
+            row.append(cell);
+          });
+          body.append(row);
+        });
+      }
+
+      function renderArtifacts() {
+        const list = document.getElementById("artifactList");
+        list.replaceChildren();
+        const artifacts = [
+          ["Compilation", state.compilation && state.compilation.receipt_hash],
+          ["Verification", state.verification && state.verification.verification_hash],
+          ["Evaluation", state.evaluation && state.evaluation.receipt_hash],
+          ["Experiment", state.experimentManifest && state.experimentManifest.manifest_digest],
+          ["Promotion", state.promotion && state.promotion.receipt_hash]
+        ];
+        artifacts.forEach(([label, digest]) => {
+          const row = document.createElement("div");
+          row.className = "artifact";
+          const term = document.createElement("dt");
+          term.textContent = label;
+          const value = document.createElement("dd");
+          if (digest) {
+            value.className = "artifact-value";
+            const code = document.createElement("code");
+            code.textContent = shortDigest(digest);
+            code.title = digest;
+            const copyButton = document.createElement("button");
+            copyButton.className = "copy-button";
+            copyButton.type = "button";
+            copyButton.textContent = "Copy";
+            copyButton.setAttribute("aria-label", "Copy " + label.toLowerCase() + " digest");
+            copyButton.addEventListener("click", async () => {
+              try {
+                await navigator.clipboard.writeText(digest);
+                showSuccess(label + " digest copied.");
+              } catch {
+                showError("Clipboard access was denied. Select the full digest from its tooltip instead.");
+              }
+            });
+            value.append(code, copyButton);
+          } else {
+            value.textContent = "Not created";
+          }
+          row.append(term, value);
+          list.append(row);
+        });
+      }
+
+      function evidenceChainReady() {
+        return Boolean(
+          state.compilation &&
+          state.compilation.status === "compiled" &&
+          state.verification &&
+          state.verification.status === "valid" &&
+          state.verification.traces_verified &&
+          state.evaluation
+        );
+      }
+
+      function approvalEligible() {
+        return Boolean(
+          evidenceChainReady() &&
+          state.evaluation.status === "pass" &&
+          state.compilation.candidate.candidate_digest === state.evaluation.candidate_digest
+        );
+      }
+
+      function reviewFieldError(field) {
+        const value = field.value.trim();
+        if (field === elements.actor) {
+          return value && ACTOR_PATTERN.test(value) ? "" : "Enter a valid reviewer ID.";
+        }
+        if (field === elements.commitSha) {
+          return COMMIT_PATTERN.test(value) ? "" : "Enter a lowercase 40- or 64-character commit SHA.";
+        }
+        return value ? "" : "Add review notes before recording the decision.";
+      }
+
+      function renderReviewFieldError(field) {
+        const output = field === elements.actor
+          ? elements.actorError
+          : field === elements.commitSha
+            ? elements.commitError
+            : elements.rationaleError;
+        const message = reviewFieldError(field);
+        output.textContent = message;
+        field.setAttribute("aria-invalid", String(Boolean(message)));
+        return !message;
+      }
+
+      function validateReviewFields() {
+        return [elements.actor, elements.commitSha, elements.rationale]
+          .map(renderReviewFieldError)
+          .every(Boolean);
+      }
+
+      function updatePromotionEligibility() {
+        const isApproval = decisionSelect.value === "approved";
+        promoteButton.disabled = isApproval ? !approvalEligible() : !evidenceChainReady();
+        const note = document.getElementById("promotionNote");
+        if (!evidenceChainReady()) {
+          note.textContent = "Exact replay and evaluation are required before a decision can be recorded.";
+        } else if (isApproval && !approvalEligible()) {
+          note.textContent = "Approval requires PASS and a candidate digest matching the compilation receipt.";
+        } else {
+          note.textContent = "Enter the reviewer, exact commit SHA, and review notes. Recording creates a receipt only.";
+        }
+      }
+
+      async function checkHealth() {
+        try {
+          const response = await fetch("/healthz", { headers: { accept: "application/json" } });
+          if (!response.ok) throw new Error("health check failed");
+          const health = await response.json();
+          elements.serverStatus.dataset.state = "online";
+          elements.serverStatus.textContent = health.mode === "offline_keyless"
+            ? "Connected · keyless"
+            : "Connected";
+          elements.apiToolState.textContent = "Connected";
+          elements.apiToolState.removeAttribute("data-state");
+        } catch {
+          elements.serverStatus.dataset.state = "offline";
+          elements.serverStatus.textContent = "Server unavailable";
+          elements.apiToolState.textContent = "Unavailable";
+          elements.apiToolState.dataset.state = "external";
+        }
+      }
+
+      async function runEvidenceLoop() {
+        clearNotices();
+        resetResults();
+        setBusy(runButton, true, "Validate evidence", "Validating…");
+        elements.loadButton.disabled = true;
+        elements.restoreButton.disabled = true;
+        try {
+          setStage("Compile", "running", "Checking trace bindings");
+          state.compilation = await fetchJson("/v1/compile", { traces: state.inputs.traces });
+          renderCandidate(state.compilation);
+          setStatus("compileStatus", state.compilation.status);
+          if (state.compilation.status !== "compiled") {
+            setStage("Compile", "failed", readableReasons(state.compilation.reasons));
+            renderArtifacts();
+            downloadButton.disabled = false;
+            updateSession("REFUSED · review reasons");
+            showError("No candidate was compiled. Review the refusal reasons shown in the workflow section.");
+            return;
+          }
+          setStage("Compile", "passed", state.compilation.candidate.nodes.length + " nodes admitted");
+
+          setStage("Replay", "running", "Recomputing exact evidence");
+          state.verification = await fetchJson("/v1/verify", {
+            receipt: state.compilation,
+            traces: state.inputs.traces
+          });
+          setStatus("replayStatus", state.verification.status, state.verification.status === "valid" ? "Evidence verified" : "Verification failed");
+          if (state.verification.status !== "valid" || !state.verification.traces_verified) {
+            setStage("Replay", "failed", readableReasons(state.verification.reasons));
+            renderArtifacts();
+            downloadButton.disabled = false;
+            updateSession("INVALID · evidence mismatch");
+            return;
+          }
+          setStage("Replay", "passed", "Exact evidence matched");
+
+          setStage("Evaluate", "running", "Comparing frozen trials");
+          state.evaluation = await fetchJson("/v1/evaluate", {
+            baseline: state.inputs.baseline,
+            candidate: state.inputs.candidate,
+            policy: state.inputs.policy
+          });
+          setStatus("evaluationStatus", state.evaluation.status);
+          renderMetrics(state.evaluation);
+          const evaluationState = state.evaluation.status === "pass" ? "passed" : state.evaluation.status === "review" ? "review" : "failed";
+          const evaluationDetail = state.evaluation.reasons.length ? readableReasons(state.evaluation.reasons) : "All policy checks passed";
+          setStage("Evaluate", evaluationState, evaluationDetail);
+          setStage("Promote", "review", "Ready for review");
+          updateSession(state.evaluation.status.toUpperCase() + " · human review required");
+          elements.sourceDescription.textContent =
+            state.inputs.traces.length + " traces · " + state.compilation.candidate.nodes.length + " nodes · " + state.evaluation.candidate.trial_count + " evaluation trials";
+          renderArtifacts();
+          updatePromotionEligibility();
+          downloadButton.disabled = false;
+          showSuccess("Validation finished. Review the results before recording a decision.");
+        } catch (error) {
+          showError(error instanceof Error ? error.message : String(error));
+          updateSession("Validation failed");
+        } finally {
+          setBusy(runButton, false, "Validate evidence", "Validating…");
+          elements.loadButton.disabled = false;
+          elements.restoreButton.disabled = false;
+        }
+      }
+
+      async function recordDecision() {
+        clearNotices();
+        if (!validateReviewFields()) {
+          showError("Complete the reviewer ID, commit SHA, and review notes.");
+          return;
+        }
+        setBusy(promoteButton, true, "Record decision", "Recording…");
+        runButton.disabled = true;
+        elements.loadButton.disabled = true;
+        elements.restoreButton.disabled = true;
+        try {
+          state.promotion = await fetchJson("/v1/promote", {
+            compilation: state.compilation,
+            verification: state.verification,
+            traces: state.inputs.traces,
+            evaluation: state.evaluation,
+            decision: decisionSelect.value,
+            actor_id: elements.actor.value.trim(),
+            commit_sha: elements.commitSha.value.trim(),
+            issued_at: new Date().toISOString(),
+            rationale: elements.rationale.value.trim()
+          });
+          setStatus("promotionStatus", state.promotion.decision);
+          setStage("Promote", state.promotion.decision === "approved" ? "passed" : "failed", "Receipt recorded by " + state.promotion.actor_id);
+          renderArtifacts();
+          downloadButton.disabled = false;
+          showSuccess("Decision recorded. Export the review to save all receipts together.");
+        } catch (error) {
+          showError(error instanceof Error ? error.message : String(error));
+          setStage("Promote", "failed", "Decision was not recorded");
+        } finally {
+          setBusy(promoteButton, false, "Record decision", "Recording…");
+          runButton.disabled = false;
+          elements.loadButton.disabled = false;
+          elements.restoreButton.disabled = false;
+          updatePromotionEligibility();
+        }
+      }
+
+      function requireSupportedFile(file, label) {
+        if (file.size === 0) {
+          throw new Error(label + " is empty.");
+        }
+        if (file.size > MAX_FILE_BYTES) {
+          throw new Error(label + " is larger than the 10 MB browser limit. Use the CLI for larger evidence sets.");
+        }
+      }
+
+      async function parseJsonFile(file, label) {
+        requireSupportedFile(file, label);
+        try {
+          return JSON.parse(await file.text());
+        } catch (error) {
+          throw new Error(label + " is not valid JSON: " + (error instanceof Error ? error.message : String(error)));
+        }
+      }
+
+      async function parseTraceFile(file) {
+        requireSupportedFile(file, "Execution traces");
+        const lines = (await file.text()).split(/\r?\n/);
+        const traces = [];
+        for (let index = 0; index < lines.length; index += 1) {
+          if (!lines[index].trim()) continue;
+          try {
+            traces.push(JSON.parse(lines[index]));
+          } catch (error) {
+            throw new Error("Execution traces contain invalid JSON on line " + (index + 1) + ".");
+          }
+        }
+        if (!traces.length) throw new Error("Execution traces do not contain any records.");
+        return traces;
+      }
+
+      async function loadSelectedFiles() {
+        clearNotices();
+        const traceFile = elements.traceFile.files[0];
+        const baselineFile = elements.baselineFile.files[0];
+        const candidateFile = elements.candidateFile.files[0];
+        const policyFile = elements.policyFile.files[0];
+        const experimentFile = elements.experimentFile.files[0];
+        if (!traceFile || !baselineFile || !candidateFile || !policyFile) {
+          showError("Select execution traces, baseline evaluation, candidate evaluation, and policy files.");
+          elements.sourcePanel.open = true;
+          return;
+        }
+        setBusy(elements.loadButton, true, "Use selected files", "Loading files…");
+        runButton.disabled = true;
+        elements.restoreButton.disabled = true;
+        try {
+          const inputs = {
+            traces: await parseTraceFile(traceFile),
+            baseline: await parseJsonFile(baselineFile, "Baseline evaluation"),
+            candidate: await parseJsonFile(candidateFile, "Candidate evaluation"),
+            policy: await parseJsonFile(policyFile, "Evaluation policy")
+          };
+          const experimentManifest = experimentFile
+            ? await fetchJson(
+                "/v1/experiments/import/generic",
+                await parseJsonFile(experimentFile, "Experiment run")
+              )
+            : null;
+          state.inputs = inputs;
+          state.source = "local";
+          state.sourceFiles = {
+            traces: traceFile.name,
+            baseline: baselineFile.name,
+            candidate: candidateFile.name,
+            policy: policyFile.name,
+            experiment: experimentFile ? experimentFile.name : null
+          };
+          state.experimentManifest = experimentManifest;
+          elements.sourceChip.textContent = "Local files";
+          elements.sourceChip.dataset.source = "local";
+          elements.sourceSummary.textContent = inputs.traces.length + " traces from " + traceFile.name;
+          updateSession("Evidence loaded · not validated");
+          clearDecisionContext();
+          resetResults();
+          renderArtifacts();
+          elements.sourcePanel.open = false;
+          showSuccess("Local evidence loaded. Run validation to check the complete chain.");
+        } catch (error) {
+          showError(error instanceof Error ? error.message : String(error));
+          elements.sourcePanel.open = true;
+        } finally {
+          setBusy(elements.loadButton, false, "Use selected files", "Loading files…");
+          runButton.disabled = false;
+          elements.restoreButton.disabled = false;
+        }
+      }
+
+      function restoreSyntheticEvidence() {
+        state.inputs = clone(syntheticInputs);
+        state.source = "synthetic";
+        state.sourceFiles = null;
+        state.experimentManifest = null;
+        elements.sourceChip.textContent = "Sample data";
+        elements.sourceChip.removeAttribute("data-source");
+        elements.sourceSummary.textContent = "Using the included sample dataset";
+        updateSession("Not validated");
+        [elements.traceFile, elements.baselineFile, elements.candidateFile, elements.policyFile, elements.experimentFile]
+          .forEach((input) => { input.value = ""; });
+        clearDecisionContext();
+        clearNotices();
+        resetResults();
+        renderArtifacts();
+        showSuccess("Sample data restored.");
+      }
+
+      function downloadReceipts() {
+        const artifacts = {
+          schema_version: "awe.review-export.v1",
+          exported_at: new Date().toISOString(),
+          source: state.source,
+          source_files: state.sourceFiles,
+          compilation: state.compilation,
+          verification: state.verification,
+          evaluation: state.evaluation,
+          experiment_manifest: state.experimentManifest,
+          promotion: state.promotion
+        };
+        const blob = new Blob([JSON.stringify(artifacts, null, 2)], { type: "application/json" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "awe-tracegate-review-" + new Date().toISOString().slice(0, 10) + ".json";
+        document.body.append(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        showSuccess("Review export downloaded.");
+      }
+
+      runButton.addEventListener("click", runEvidenceLoop);
+      promoteButton.addEventListener("click", recordDecision);
+      decisionSelect.addEventListener("change", updatePromotionEligibility);
+      downloadButton.addEventListener("click", downloadReceipts);
+      document.getElementById("loadButton").addEventListener("click", loadSelectedFiles);
+      document.getElementById("restoreButton").addEventListener("click", restoreSyntheticEvidence);
+      elements.reviewNavButton.addEventListener("click", () => setSurface("review"));
+      elements.currentReviewButton.addEventListener("click", () => setSurface("review"));
+      elements.toolsNavButton.addEventListener("click", () => setSurface("tools"));
+      elements.newReviewButton.addEventListener("click", () => executeCommand("/new"));
+      elements.commandForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const command = elements.commandInput.value;
+        if (!command.trim()) {
+          setCommandHint("Enter a command or type /help.");
+          return;
+        }
+        elements.commandInput.value = "";
+        await executeCommand(command);
+      });
+      [elements.actor, elements.commitSha, elements.rationale].forEach((input) => {
+        input.addEventListener("input", () => {
+          input.removeAttribute("aria-invalid");
+          const output = input === elements.actor
+            ? elements.actorError
+            : input === elements.commitSha
+              ? elements.commitError
+              : elements.rationaleError;
+          output.textContent = "";
+        });
+        input.addEventListener("blur", () => renderReviewFieldError(input));
+      });
+      checkHealth();
+      resetResults();
+      updateSession("Not validated");
+    </script>
+  </body>
+</html>

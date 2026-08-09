@@ -1,0 +1,8 @@
+{
+  "reasons": [],
+  "receipt_hash": "sha256:23b00749f0116765775356bbdcfed980639d1b6630af407d24252faf37809948",
+  "schema_version": "awe.receipt-verification.v2",
+  "status": "valid",
+  "traces_verified": true,
+  "verification_hash": "sha256:de3cfaf5cce7769a88ec139cad92bc4b1b49346e2b0f48ef1888ab238e1a357c"
+}

@@ -1,0 +1,116 @@
+{
+  "candidate": {
+    "candidate_digest": "sha256:de42189c517943692caa803786f7da0c9e89bbdb0152f5bb38d524efe3e3e8e9",
+    "dependencies": [
+      {
+        "consumer_input": "metadata",
+        "consumer_node": "summarize_project",
+        "evidence_digest": "sha256:7cb51ebdf4e40c3bba08ccdd6b5581627975ef6c19496a8dd17810fbb93e02f0",
+        "observation_count": 2,
+        "producer_field": "/metadata",
+        "producer_node": "inspect_document",
+        "trace_ids": [
+          "external_itsdangerous_001",
+          "external_itsdangerous_002"
+        ]
+      },
+      {
+        "consumer_input": "commit",
+        "consumer_node": "summarize_project",
+        "evidence_digest": "sha256:5f874041c4a60544829f67a5a3e28397ad6ec304b7dd59d1a796addd2da47038",
+        "observation_count": 2,
+        "producer_field": "/commit",
+        "producer_node": "read_file",
+        "trace_ids": [
+          "external_itsdangerous_001",
+          "external_itsdangerous_002"
+        ]
+      },
+      {
+        "consumer_input": "content",
+        "consumer_node": "inspect_document",
+        "evidence_digest": "sha256:b42683d4ab23535784321ede5df090275f94c2ed4f4b1aa9e8056bd95e220263",
+        "observation_count": 2,
+        "producer_field": "/content",
+        "producer_node": "read_file",
+        "trace_ids": [
+          "external_itsdangerous_001",
+          "external_itsdangerous_002"
+        ]
+      }
+    ],
+    "effect_scope": "pure_or_read",
+    "intent": "repository_analysis",
+    "nodes": [
+      {
+        "effect": "read",
+        "inputs": [
+          {
+            "input_name": "repository_snapshot",
+            "source_field": "/repository_snapshot",
+            "source_kind": "workflow_input",
+            "source_node": null
+          }
+        ],
+        "node_id": "read_file",
+        "output_fields": [
+          "/commit",
+          "/content"
+        ],
+        "tool": "pilot.read_file",
+        "tool_version": "1.0.0"
+      },
+      {
+        "effect": "read",
+        "inputs": [
+          {
+            "input_name": "content",
+            "source_field": "/content",
+            "source_kind": "step_output",
+            "source_node": "read_file"
+          }
+        ],
+        "node_id": "inspect_document",
+        "output_fields": [
+          "/metadata"
+        ],
+        "tool": "pilot.inspect_document",
+        "tool_version": "1.0.0"
+      },
+      {
+        "effect": "pure",
+        "inputs": [
+          {
+            "input_name": "commit",
+            "source_field": "/commit",
+            "source_kind": "step_output",
+            "source_node": "read_file"
+          },
+          {
+            "input_name": "metadata",
+            "source_field": "/metadata",
+            "source_kind": "step_output",
+            "source_node": "inspect_document"
+          }
+        ],
+        "node_id": "summarize_project",
+        "output_fields": [
+          "/summary"
+        ],
+        "tool": "pilot.summarize_project",
+        "tool_version": "1.0.0"
+      }
+    ],
+    "schema_version": "awe.candidate.v1",
+    "source_trace_ids": [
+      "external_itsdangerous_001",
+      "external_itsdangerous_002"
+    ]
+  },
+  "compiler_version": "awe.compiler.v1",
+  "input_bundle_digest": "sha256:33b2ac581aae2692a5b74ce1ecf90d47a9f13215c8f6b8b48b8d54b9810aacb6",
+  "reasons": [],
+  "receipt_hash": "sha256:23b00749f0116765775356bbdcfed980639d1b6630af407d24252faf37809948",
+  "schema_version": "awe.compilation-receipt.v1",
+  "status": "compiled"
+}

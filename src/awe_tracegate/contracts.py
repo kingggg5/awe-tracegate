@@ -56,11 +56,34 @@ Sha256Digest = Annotated[
     str,
     StringConstraints(pattern=r"^sha256:[0-9a-f]{64}$"),
 ]
+# Valid only while constructing an immutable content-addressed model. Callers
+# must replace it with the canonical digest before returning the artifact.
+PENDING_SHA256_DIGEST: Sha256Digest = "sha256:" + "0" * 64
 GitCommitSha = Annotated[
     str,
     StringConstraints(pattern=r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$"),
 ]
 Reason = Annotated[str, StringConstraints(min_length=1, max_length=512)]
+DisplayName = Annotated[str, StringConstraints(min_length=1, max_length=256)]
+RepositoryUri = Annotated[
+    str,
+    StringConstraints(
+        min_length=12,
+        max_length=512,
+        pattern=(
+            r"^https://[A-Za-z0-9.-]+(?::[0-9]{1,5})?"
+            r"/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+$"
+        ),
+    ),
+]
+SignerIdentity = Annotated[
+    str,
+    StringConstraints(
+        min_length=1,
+        max_length=256,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9._:/@+-]*$",
+    ),
+]
 
 
 def _parse_rfc3339_utc(value: object) -> object:
@@ -78,6 +101,8 @@ UtcDateTime = Annotated[datetime, BeforeValidator(_parse_rfc3339_utc)]
 
 EffectClass = Literal["pure", "read", "write", "high_impact"]
 BindingSource = Literal["workflow_input", "step_output", "model_decision"]
+DatasetScope = Literal["evaluation", "research", "training"]
+RedactionCategory = Literal["secret", "pii", "customer_data", "policy_denied"]
 
 
 class ContractModel(BaseModel):
@@ -377,6 +402,149 @@ class EvaluationReceipt(ContractModel):
         return self
 
 
+class ExperimentTrial(ContractModel):
+    """One frozen trial with quality, safety, token, cost, and trace evidence."""
+
+    trial_id: TraceIdentifier
+    case_id: TraceIdentifier
+    succeeded: bool
+    safety_violations: Annotated[int, Field(ge=0)] = 0
+    latency_ms: Annotated[int, Field(ge=0)]
+    cost_microusd: Annotated[int, Field(ge=0)]
+    input_tokens: Annotated[int, Field(ge=0)]
+    output_tokens: Annotated[int, Field(ge=0)]
+    cached_input_tokens: Annotated[int, Field(ge=0)] = 0
+    trace_id: TraceIdentifier | None = None
+    grader_result_digest: Sha256Digest
+    seed: Annotated[int, Field(ge=0, le=9_223_372_036_854_775_807)] | None = None
+
+    @model_validator(mode="after")
+    def validate_cached_tokens(self) -> Self:
+        if self.cached_input_tokens > self.input_tokens:
+            raise ValueError("cached input tokens cannot exceed input tokens")
+        return self
+
+
+class ExperimentRun(ContractModel):
+    """Provider-neutral evidence shared by generic and telemetry importers."""
+
+    experiment_id: TraceIdentifier
+    repository_uri: RepositoryUri
+    commit_sha: GitCommitSha
+    subject_digest: Sha256Digest
+    dataset_digest: Sha256Digest
+    dataset_split_digest: Sha256Digest
+    harness_name: ToolName
+    harness_version: ToolVersion
+    harness_digest: Sha256Digest
+    strategy_name: ToolName
+    strategy_digest: Sha256Digest
+    model_provider: ToolName
+    model_name: DisplayName
+    model_config_digest: Sha256Digest
+    environment_digest: Sha256Digest
+    grader_digest: Sha256Digest
+    trials: Annotated[
+        tuple[ExperimentTrial, ...],
+        Field(min_length=1, max_length=100_000, strict=False),
+    ]
+
+    @model_validator(mode="after")
+    def validate_unique_trials(self) -> Self:
+        trial_ids = [trial.trial_id for trial in self.trials]
+        if len(trial_ids) != len(set(trial_ids)):
+            raise ValueError("experiment trial ids must be unique")
+        return self
+
+
+class ExperimentManifest(ExperimentRun):
+    """Content-addressed experiment evidence imported from one pinned format."""
+
+    schema_version: Literal["awe.experiment-manifest.v1"] = "awe.experiment-manifest.v1"
+    source_format: ToolName
+    source_revision: ToolVersion
+    manifest_digest: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_manifest_digest(self) -> Self:
+        expected = canonical_digest(
+            self.model_dump(mode="json", exclude={"manifest_digest"})
+        )
+        if self.manifest_digest != expected:
+            raise ValueError("experiment manifest digest is invalid")
+        return self
+
+
+class SignedReceiptBundle(ContractModel):
+    """A receipt artifact signed by one externally trusted Ed25519 identity."""
+
+    schema_version: Literal["awe.signed-receipt-bundle.v1"] = (
+        "awe.signed-receipt-bundle.v1"
+    )
+    signature_algorithm: Literal["ed25519"] = "ed25519"
+    artifact_kind: Literal[
+        "compilation",
+        "verification",
+        "evaluation",
+        "experiment",
+        "promotion",
+    ]
+    artifact_digest: Sha256Digest
+    artifact: dict[str, Any]
+    repository_uri: RepositoryUri
+    commit_sha: GitCommitSha
+    signer_id: SignerIdentity
+    issued_at: UtcDateTime
+    public_key_b64: Annotated[
+        str,
+        StringConstraints(
+            min_length=44, max_length=44, pattern=r"^[A-Za-z0-9+/]{43}=$"
+        ),
+    ]
+    public_key_fingerprint: Sha256Digest
+    signature_b64: Annotated[
+        str,
+        StringConstraints(
+            min_length=88, max_length=88, pattern=r"^[A-Za-z0-9+/]{86}==$"
+        ),
+    ]
+
+    @model_validator(mode="after")
+    def validate_bundle(self) -> Self:
+        if self.issued_at.utcoffset() != timedelta(0):
+            raise ValueError("issued_at must include the UTC timezone")
+        if canonical_digest(self.artifact) != self.artifact_digest:
+            raise ValueError("signed artifact digest is invalid")
+        return self
+
+
+class SignatureVerification(ContractModel):
+    """Deterministic verification result against an explicit trusted key."""
+
+    schema_version: Literal["awe.signature-verification.v1"] = (
+        "awe.signature-verification.v1"
+    )
+    status: Literal["valid", "invalid"]
+    bundle_digest: Sha256Digest
+    signer_id: SignerIdentity
+    public_key_fingerprint: Sha256Digest
+    reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()
+    verification_hash: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_verification(self) -> Self:
+        if self.status == "valid" and self.reasons:
+            raise ValueError("valid signature verification cannot contain reasons")
+        if self.status == "invalid" and not self.reasons:
+            raise ValueError("invalid signature verification requires reasons")
+        expected = canonical_digest(
+            self.model_dump(mode="json", exclude={"verification_hash"})
+        )
+        if self.verification_hash != expected:
+            raise ValueError("signature verification hash is invalid")
+        return self
+
+
 class EvaluateRequest(ContractModel):
     baseline: EvaluationBundle
     candidate: EvaluationBundle
@@ -432,6 +600,96 @@ class RedactionSummary(ContractModel):
     changed: bool
     replacements: Annotated[int, Field(ge=0)]
     categories: dict[str, Annotated[int, Field(ge=0)]]
+
+
+class RedactionPolicy(ContractModel):
+    """Safe configurable key policy; regular expressions remain built in."""
+
+    schema_version: Literal["awe.redaction-policy.v1"] = "awe.redaction-policy.v1"
+    policy_id: TraceIdentifier
+    policy_version: ToolVersion
+    allowed_top_level_keys: Annotated[
+        tuple[DisplayName, ...], Field(max_length=256, strict=False)
+    ] = ()
+    additional_sensitive_keys: Annotated[
+        dict[DisplayName, RedactionCategory], Field(max_length=256)
+    ] = Field(default_factory=dict)
+    denied_keys: Annotated[
+        dict[DisplayName, RedactionCategory], Field(max_length=256)
+    ] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_normalized_keys(self) -> Self:
+        collections = (
+            self.allowed_top_level_keys,
+            tuple(self.additional_sensitive_keys),
+            tuple(self.denied_keys),
+        )
+        if any(key != key.lower() for keys in collections for key in keys):
+            raise ValueError("redaction policy keys must be lowercase")
+        if len(self.allowed_top_level_keys) != len(set(self.allowed_top_level_keys)):
+            raise ValueError("allowed top-level keys must be unique")
+        overlap = set(self.additional_sensitive_keys) & set(self.denied_keys)
+        if overlap:
+            raise ValueError("sensitive and denied key rules cannot overlap")
+        return self
+
+
+class DatasetConsentRecord(ContractModel):
+    """Immutable consent state evaluated explicitly before governed export."""
+
+    schema_version: Literal["awe.dataset-consent.v1"] = "awe.dataset-consent.v1"
+    consent_id: TraceIdentifier
+    data_subject_digest: Sha256Digest
+    scopes: Annotated[
+        tuple[DatasetScope, ...], Field(min_length=1, max_length=3, strict=False)
+    ]
+    status: Literal["active", "revoked"]
+    actor_id: ActorIdentifier
+    granted_at: UtcDateTime
+    expires_at: UtcDateTime | None = None
+    revoked_at: UtcDateTime | None = None
+
+    @model_validator(mode="after")
+    def validate_consent(self) -> Self:
+        timestamps = (self.granted_at, self.expires_at, self.revoked_at)
+        if any(
+            value is not None and value.utcoffset() != timedelta(0)
+            for value in timestamps
+        ):
+            raise ValueError("consent timestamps must include the UTC timezone")
+        if len(self.scopes) != len(set(self.scopes)) or self.scopes != tuple(
+            sorted(self.scopes)
+        ):
+            raise ValueError("consent scopes must be unique and sorted")
+        if self.expires_at is not None and self.expires_at <= self.granted_at:
+            raise ValueError("consent expiry must follow grant time")
+        if self.status == "active" and self.revoked_at is not None:
+            raise ValueError("active consent cannot have revoked_at")
+        if self.status == "revoked" and self.revoked_at is None:
+            raise ValueError("revoked consent requires revoked_at")
+        if self.revoked_at is not None and self.revoked_at < self.granted_at:
+            raise ValueError("consent revocation cannot precede grant time")
+        return self
+
+
+class GovernedRedactionSummary(ContractModel):
+    """Auditable output of policy- and consent-gated dataset redaction."""
+
+    schema_version: Literal["awe.governed-redaction-summary.v1"] = (
+        "awe.governed-redaction-summary.v1"
+    )
+    input_digest: Sha256Digest
+    output_digest: Sha256Digest
+    changed: bool
+    replacements: Annotated[int, Field(ge=0)]
+    removed_fields: Annotated[int, Field(ge=0)]
+    categories: dict[str, Annotated[int, Field(ge=0)]]
+    policy_digest: Sha256Digest
+    consent_record_digest: Sha256Digest
+    consent_id: TraceIdentifier
+    scope: DatasetScope
+    evaluated_at: UtcDateTime
 
 
 class VerifyRequest(ContractModel):
