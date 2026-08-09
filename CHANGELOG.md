@@ -9,6 +9,10 @@ stable contract release.
 
 ### Added
 
+- A repository-local Codex plugin with focused setup, Discovery, evidence-review,
+  and regression-diagnosis Skills.
+- A cross-platform, dependency-free Skill installer that refuses implicit
+  overwrites and accepts only known Skill names.
 - A local TraceGate Review UI that drives the real compile, exact replay, frozen
   evaluation, and human-decision API path, with local evidence-file loading.
 - A content-addressed experiment manifest with frozen split, harness, strategy,
@@ -29,6 +33,8 @@ stable contract release.
 
 ### Changed
 
+- Reframed the README around explicit Skill invocation and the CLI-first evidence
+  engine, with TraceGate Review documented as an optional surface.
 - Indexed dependency observations in one pass, removing repeated cross-trace
   scans for large candidates while preserving canonical receipts.
 - Cached the packaged TraceGate Review document per process and sourced the

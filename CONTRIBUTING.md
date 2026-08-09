@@ -32,6 +32,7 @@ python -m ruff check .
 python -m mypy src
 python -m pytest
 awe schema --out-dir schemas
+python scripts/install_skills.py --list
 ```
 
 Exercise the public CLI against the repository fixture:
@@ -49,11 +50,16 @@ A focused pull request should include:
 - tests for normal, boundary, malformed, and refusal behavior;
 - golden receipt updates for intentional canonical-output changes;
 - documentation for public contract or CLI changes;
+- plugin validation and trigger-policy tests for Skill changes;
 - no unrelated formatting or dependency churn.
 
 Compiler changes must remain deterministic. The same normalized evidence under
 the same compiler and contract versions must produce the same decision and
 canonical receipt. Never weaken a refusal rule only to make a fixture compile.
+
+Keep each Skill focused. Safety-sensitive setup, Discovery, and evidence-review
+skills must remain explicitly invoked. Skill output is guidance and may never be
+accepted as a receipt, evaluation result, or human decision.
 
 ## Project boundaries
 

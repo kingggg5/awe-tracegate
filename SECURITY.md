@@ -37,6 +37,8 @@ Examples include:
 - trace content causing code, command, network, or tool execution;
 - API input bypassing the compiler’s typed validation;
 - leakage of trace contents through default output or error handling.
+- a bundled Skill or installer escaping the selected repository path, silently
+  replacing an existing Skill, or weakening the documented evidence boundary.
 
 ## Out of scope
 
@@ -48,6 +50,11 @@ contradicts the documented contract:
 - missing production controls on the local development API;
 - denial of service that requires trusted local access and unrealistic input;
 - unsupported runtime, browser, write-action, or autonomous-agent scenarios.
+
+Treat Skill instructions as code during dependency review and pin the repository
+revision before installing them. The bundled installer refuses existing Skill
+directories unless `--force` is supplied and accepts only known Skill names.
+Neither Skill text nor agent output is trusted evidence.
 
 See [docs/security.md](docs/security.md) for the full threat model and current
 limitations.

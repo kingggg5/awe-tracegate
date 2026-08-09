@@ -1,0 +1,7 @@
+interface:
+  display_name: "AWE Discovery Loop"
+  short_description: "Run evidence-governed experiments"
+  default_prompt: "Use $awe-discovery-loop to compare one workflow candidate against its baseline."
+
+policy:
+  allow_implicit_invocation: false
