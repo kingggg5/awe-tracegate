@@ -124,3 +124,29 @@ jobs:
             awe-compilation-receipt.json
             awe-verification-receipt.json
           if-no-files-found: error
+
+  container-smoke:
+    name: Build and smoke container
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Build image
+        run: docker build --tag awe-tracegate:ci .
+      - name: Verify non-root runtime and health
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --name awe-tracegate-ci \
+            --publish 127.0.0.1:8080:8080 awe-tracegate:ci
+          trap 'docker logs awe-tracegate-ci; docker rm --force awe-tracegate-ci' EXIT
+
+          test "$(docker exec awe-tracegate-ci id -u)" != "0"
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8080/healthz \
+              | grep --quiet '"mode":"offline_keyless"'; then
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
