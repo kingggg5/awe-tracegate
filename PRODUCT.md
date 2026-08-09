@@ -4,7 +4,8 @@
 
 ## Platform
 
-web
+Codex Skill/Plugin suite, CLI, GitHub Action, typed API, and optional local web
+review surface.
 
 ## Users
 
@@ -43,8 +44,10 @@ replay. All included demonstration evidence is synthetic and visibly labeled.
 - Trace content is untrusted data and is never executed.
 - TraceGate does not plan work, run agents, invoke tools, promote candidates
   automatically, or authorize production actions.
-- TraceGate Review uses explicit buttons and forms. The separate AWE Workspace
-  owns the goal/command composer and agent-facing task experience.
+- AWE Skills orchestrate setup, Discovery, evidence review, and diagnosis but
+  remain outside the evidence boundary. Skill text cannot issue a decision.
+- TraceGate Review uses explicit buttons and forms and is optional; it is not an
+  agent chat or goal composer.
 - Promotion records an asserted reviewer identifier and reviewed evidence
   chain; it is not an identity-provider-backed authorization.
 
@@ -63,6 +66,8 @@ described as refused rather than inferred.
 - Golden canonical receipts and adversarial tests in `tests/`.
 - TraceGate Review with explicit evidence controls, plus the released CLI,
   FastAPI surface, Docker image, and GitHub Action at v0.2.0.
+- A repository-local Codex plugin and five focused Skills with explicit
+  invocation policy and deterministic installer tests.
 - No customer, production benchmark, or real-corpus claim is available and none
   may be fabricated.
 

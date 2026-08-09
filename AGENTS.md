@@ -6,6 +6,7 @@
 - Python import: `awe_tracegate`.
 - CLI: `awe compile|verify|evaluate|redact|promote|schema`.
 - Optional API: `GET /healthz` and typed `/v1/*` endpoints.
+- Codex plugin: `.codex-plugin/plugin.json` with focused skills under `skills/`.
 - Public decisions are exactly `compiled` or `refused`.
 - Evaluation decisions are `pass`, `review`, or `block`; verification decisions
   are `valid` or `invalid`.
@@ -23,6 +24,7 @@
 - Only explicit, consistent bindings may prove hard dependency edges.
 - The canonical SHA-256 receipt is the review artifact.
 - CLI and API must use the same compiler path and return the same contract.
+- Skills may orchestrate the CLI but never produce evidence or own decisions.
 - Promotion approval requires a compiled receipt, a valid locally replayed
   verification receipt, and a passing evaluation for the same candidate. It
   must bind compilation/input, verification, dataset/policy, actor, commit SHA,
@@ -62,6 +64,7 @@ python -m ruff format --check .
 python -m ruff check .
 python -m mypy src
 python -m pytest
+python scripts/install_skills.py --list
 awe compile --traces examples/repo_analysis/traces.jsonl
 awe verify --receipt receipt.json --traces examples/repo_analysis/traces.jsonl
 awe evaluate --baseline examples/evaluation/baseline.json --candidate examples/evaluation/candidate.json
