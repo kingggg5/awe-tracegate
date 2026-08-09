@@ -1,5 +1,5 @@
 name: AWE TraceGate
-description: Compile and gate repeated agent traces without an LLM key.
+description: Atomically gate repeated agent traces with exact replay and frozen evaluation.
 author: kingggg5
 
 branding:
@@ -10,124 +10,172 @@ inputs:
   traces:
     description: Path to an awe.trace.v1 JSONL file.
     required: true
-  receipt-path:
-    description: Path where the compilation receipt will be written.
-    required: false
-    default: awe-compilation-receipt.json
-  verification-path:
-    description: Path where the replayed verification receipt will be written.
-    required: false
-    default: awe-verification-receipt.json
   baseline-evaluation:
-    description: Optional frozen baseline evaluation bundle.
-    required: false
-    default: ""
+    description: Path to the frozen baseline evaluation bundle.
+    required: true
   candidate-evaluation:
-    description: Optional candidate evaluation bundle.
-    required: false
-    default: ""
+    description: Path to the candidate evaluation bundle.
+    required: true
   evaluation-policy:
     description: Optional evaluation policy JSON.
+    required: false
+    default: ""
+  receipt-path:
+    description: Path where the atomic awe.gate-receipt.v1 receipt will be written.
+    required: false
+    default: awe-gate-receipt.json
+  evidence-package:
+    description: Optional provenance package binding all exact gate inputs.
+    required: false
+    default: ""
+  repository:
+    description: Expected repository URI when evidence-package is supplied.
+    required: false
+    default: ""
+  commit-sha:
+    description: Expected commit SHA when evidence-package is supplied.
+    required: false
+    default: ""
+  evaluated-at:
+    description: Explicit RFC 3339 UTC time for evidence age checks.
+    required: false
+    default: ""
+  max-age-seconds:
+    description: Optional maximum evidence age in seconds.
+    required: false
+    default: ""
+  minimum-provenance:
+    description: Optional declared provenance floor; v0.3 safely enforces asserted only.
+    required: false
+    default: ""
+  skill-bom:
+    description: Optional exact awe.skill-bom.v1 artifact for a skill-specific gate.
     required: false
     default: ""
 
 outputs:
   decision:
-    description: PASS, REVIEW, BLOCK, or ERROR.
+    description: Atomic PASS, REVIEW, BLOCK, or ERROR gate decision.
     value: ${{ steps.gate.outputs.decision }}
   receipt-hash:
-    description: Canonical compilation receipt digest.
+    description: Canonical atomic gate receipt digest.
     value: ${{ steps.gate.outputs.receipt-hash }}
-  verification-hash:
-    description: Canonical replay verification receipt digest.
-    value: ${{ steps.gate.outputs.verification-hash }}
-  verification-path:
-    description: Path to the generated replay verification receipt.
-    value: ${{ steps.gate.outputs.verification-path }}
   receipt-path:
-    description: Path to the generated compilation receipt.
+    description: Path to the generated atomic gate receipt.
     value: ${{ steps.gate.outputs.receipt-path }}
 
 runs:
   using: composite
   steps:
     - name: Set up Python
-      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
       with:
         python-version: "3.12"
-        cache: pip
+
     - name: Install AWE TraceGate
       shell: bash
-      run: python -m pip install "${GITHUB_ACTION_PATH}"
-    - name: Compile and evaluate evidence
+      run: >-
+        python -m pip install --disable-pip-version-check
+        "${GITHUB_ACTION_PATH}"
+
+    - name: Gate exact evidence
       id: gate
       shell: bash
       env:
         AWE_BASELINE: ${{ inputs.baseline-evaluation }}
         AWE_CANDIDATE: ${{ inputs.candidate-evaluation }}
+        AWE_COMMIT_SHA: ${{ inputs.commit-sha }}
+        AWE_EVALUATED_AT: ${{ inputs.evaluated-at }}
+        AWE_EVIDENCE_PACKAGE: ${{ inputs.evidence-package }}
+        AWE_MAX_AGE_SECONDS: ${{ inputs.max-age-seconds }}
+        AWE_MINIMUM_PROVENANCE: ${{ inputs.minimum-provenance }}
         AWE_POLICY: ${{ inputs.evaluation-policy }}
         AWE_RECEIPT_PATH: ${{ inputs.receipt-path }}
+        AWE_REPOSITORY_URI: ${{ inputs.repository }}
+        AWE_SKILL_BOM: ${{ inputs.skill-bom }}
         AWE_TRACES: ${{ inputs.traces }}
-        AWE_VERIFICATION_PATH: ${{ inputs.verification-path }}
       run: |
-        set +e
-        awe compile --traces "$AWE_TRACES" --out "$AWE_RECEIPT_PATH"
-        compile_exit=$?
-        set -e
-        if [ "$compile_exit" -eq 1 ]; then
-          echo "decision=ERROR" >> "$GITHUB_OUTPUT"
+        set -uo pipefail
+
+        # Establish fail-closed outputs before parsing any repository input.
+        {
+          echo "decision=ERROR"
+          echo "receipt-hash="
+        } >> "${GITHUB_OUTPUT}"
+
+        if [[ -z "${AWE_TRACES}" || -z "${AWE_BASELINE}" || -z "${AWE_CANDIDATE}" ]]; then
+          echo "traces, baseline-evaluation, and candidate-evaluation are required" >&2
           exit 1
         fi
 
-        set +e
-        awe verify \
-          --receipt "$AWE_RECEIPT_PATH" \
-          --traces "$AWE_TRACES" \
-          --out "$AWE_VERIFICATION_PATH"
-        verification_exit=$?
-        set -e
-        if [ "$verification_exit" -eq 1 ]; then
-          echo "decision=ERROR" >> "$GITHUB_OUTPUT"
-          exit 1
-        fi
-
-        evaluation_path=""
-        evaluation_exit=0
-        if [ -n "$AWE_BASELINE" ] || [ -n "$AWE_CANDIDATE" ]; then
-          if [ -z "$AWE_BASELINE" ] || [ -z "$AWE_CANDIDATE" ]; then
-            echo "Both baseline-evaluation and candidate-evaluation are required." >&2
-            echo "decision=ERROR" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-          evaluation_path="${RUNNER_TEMP}/awe-evaluation-receipt.json"
-          policy_args=()
-          if [ -n "$AWE_POLICY" ]; then
-            policy_args=(--policy "$AWE_POLICY")
-          fi
-          set +e
-          awe evaluate \
-            --baseline "$AWE_BASELINE" \
-            --candidate "$AWE_CANDIDATE" \
-            "${policy_args[@]}" \
-            --out "$evaluation_path"
-          evaluation_exit=$?
-          set -e
-          if [ "$evaluation_exit" -eq 1 ]; then
-            echo "decision=ERROR" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-        fi
-
-        summary_args=(
-          --receipt "$AWE_RECEIPT_PATH"
-          --verification "$AWE_VERIFICATION_PATH"
+        args=(
+          gate
+          --traces "${AWE_TRACES}"
+          --baseline "${AWE_BASELINE}"
+          --candidate "${AWE_CANDIDATE}"
+          --out "${AWE_RECEIPT_PATH}"
         )
-        if [ -n "$evaluation_path" ]; then
-          summary_args+=(--evaluation "$evaluation_path")
+        if [[ -n "${AWE_POLICY}" ]]; then
+          args+=(--policy "${AWE_POLICY}")
         fi
-        python "$GITHUB_ACTION_PATH/scripts/github_action_summary.py" \
-          "${summary_args[@]}"
+        if [[ -n "${AWE_SKILL_BOM}" ]]; then
+          args+=(--skill-bom "${AWE_SKILL_BOM}")
+        fi
 
-        if [ "$compile_exit" -ne 0 ] || [ "$verification_exit" -ne 0 ] || [ "$evaluation_exit" -ne 0 ]; then
-          exit 2
+        provenance_requested=false
+        for value in \
+          "${AWE_REPOSITORY_URI}" \
+          "${AWE_COMMIT_SHA}" \
+          "${AWE_EVALUATED_AT}" \
+          "${AWE_MAX_AGE_SECONDS}" \
+          "${AWE_MINIMUM_PROVENANCE}"; do
+          if [[ -n "${value}" ]]; then
+            provenance_requested=true
+          fi
+        done
+
+        if [[ -n "${AWE_EVIDENCE_PACKAGE}" ]]; then
+          repository_uri="${AWE_REPOSITORY_URI:-${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}}"
+          commit_sha="${AWE_COMMIT_SHA:-${GITHUB_SHA}}"
+          args+=(
+            --evidence-package "${AWE_EVIDENCE_PACKAGE}"
+            --repository "${repository_uri}"
+            --commit-sha "${commit_sha}"
+          )
+          if [[ -n "${AWE_EVALUATED_AT}" ]]; then
+            args+=(--evaluated-at "${AWE_EVALUATED_AT}")
+          fi
+          if [[ -n "${AWE_MAX_AGE_SECONDS}" ]]; then
+            if [[ -z "${AWE_EVALUATED_AT}" ]]; then
+              echo "evaluated-at is required when max-age-seconds is set" >&2
+              exit 1
+            fi
+            args+=(--max-age-seconds "${AWE_MAX_AGE_SECONDS}")
+          fi
+          if [[ -n "${AWE_MINIMUM_PROVENANCE}" ]]; then
+            args+=(--minimum-provenance "${AWE_MINIMUM_PROVENANCE}")
+          fi
+        elif [[ "${provenance_requested}" == true ]]; then
+          echo "repository, commit-sha, age, and provenance checks require evidence-package" >&2
+          exit 1
         fi
+
+        set +e
+        awe "${args[@]}"
+        gate_exit=$?
+        if [[ -f "${AWE_RECEIPT_PATH}" ]]; then
+          python "${GITHUB_ACTION_PATH}/scripts/github_action_summary.py" \
+            --receipt "${AWE_RECEIPT_PATH}"
+          summary_exit=$?
+        else
+          echo "AWE did not produce an atomic gate receipt" >&2
+          summary_exit=1
+        fi
+        set -e
+
+        if [[ "${gate_exit}" -ne "${summary_exit}" ]]; then
+          echo "gate CLI exit ${gate_exit} disagrees with its typed receipt (${summary_exit})" >&2
+          echo "decision=ERROR" >> "${GITHUB_OUTPUT}"
+          exit 1
+        fi
+        exit "${gate_exit}"

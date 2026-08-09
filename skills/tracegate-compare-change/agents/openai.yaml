@@ -1,0 +1,7 @@
+interface:
+  display_name: "TraceGate Compare Change"
+  short_description: "Compare one agent change against a baseline"
+  default_prompt: "Use $tracegate-compare-change to compare this candidate with its frozen baseline."
+
+policy:
+  allow_implicit_invocation: false

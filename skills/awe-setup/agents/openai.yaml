@@ -1,7 +1,0 @@
-interface:
-  display_name: "AWE Setup"
-  short_description: "Inspect TraceGate readiness safely"
-  default_prompt: "Use $awe-setup to inspect this repository and report whether AWE TraceGate is ready."
-
-policy:
-  allow_implicit_invocation: false

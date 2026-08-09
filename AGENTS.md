@@ -4,10 +4,12 @@
 
 - Distribution name: `awe-tracegate`.
 - Python import: `awe_tracegate`.
-- CLI: `awe compile|verify|evaluate|redact|promote|schema`.
+- CLI: atomic `awe gate`, diagnostic compile/verify/evaluate, evidence
+  conformance, Skill inspection, redaction, signing, promotion, and schema export.
 - Optional API: `GET /healthz` and typed `/v1/*` endpoints.
 - Codex plugin: `.codex-plugin/plugin.json` with focused skills under `skills/`.
-- Public decisions are exactly `compiled` or `refused`.
+- Atomic gate decisions are `PASS`, `REVIEW`, `BLOCK`, or `ERROR`.
+- Diagnostic compilation decisions remain `compiled` or `refused`.
 - Evaluation decisions are `pass`, `review`, or `block`; verification decisions
   are `valid` or `invalid`.
 - CLI exits are `0` passed, `2` refused/reviewed/blocked/invalid, and `1`
@@ -23,6 +25,9 @@
   nodes and explicit `workflow_input` or `step_output` bindings.
 - Only explicit, consistent bindings may prove hard dependency edges.
 - The canonical SHA-256 receipt is the review artifact.
+- PASS requires compilation, exact trace replay, a passing frozen evaluation,
+  and identical candidate linkage. Optional Skill BOM and evidence-package
+  inputs must be digest-bound into the same gate receipt.
 - CLI and API must use the same compiler path and return the same contract.
 - Skills may orchestrate the CLI but never produce evidence or own decisions.
 - Promotion approval requires a compiled receipt, a valid locally replayed
@@ -65,9 +70,12 @@ python -m ruff check .
 python -m mypy src
 python -m pytest
 python scripts/install_skills.py --list
-awe compile --traces examples/repo_analysis/traces.jsonl
-awe verify --receipt receipt.json --traces examples/repo_analysis/traces.jsonl
-awe evaluate --baseline examples/evaluation/baseline.json --candidate examples/evaluation/candidate.json
+npm run test:installer
+awe gate \
+  --traces examples/repo_analysis/traces.jsonl \
+  --baseline examples/evaluation/baseline.json \
+  --candidate examples/evaluation/candidate.json \
+  --policy examples/evaluation/policy.json
 ```
 
 Documentation must describe implemented behavior, distinguish current scope

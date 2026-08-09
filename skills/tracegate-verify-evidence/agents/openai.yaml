@@ -1,0 +1,7 @@
+interface:
+  display_name: "TraceGate Verify Evidence"
+  short_description: "Replay and verify exact local evidence"
+  default_prompt: "Use $tracegate-verify-evidence to verify these local artifacts without executing them."
+
+policy:
+  allow_implicit_invocation: false

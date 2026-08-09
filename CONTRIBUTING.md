@@ -33,13 +33,18 @@ python -m mypy src
 python -m pytest
 awe schema --out-dir schemas
 python scripts/install_skills.py --list
+npm run test:installer
+npm pack --dry-run
 ```
 
 Exercise the public CLI against the repository fixture:
 
 ```bash
-awe compile --traces examples/repo_analysis/traces.jsonl
-awe evaluate --baseline examples/evaluation/baseline.json --candidate examples/evaluation/candidate.json
+awe gate \
+  --traces examples/repo_analysis/traces.jsonl \
+  --baseline examples/evaluation/baseline.json \
+  --candidate examples/evaluation/candidate.json \
+  --policy examples/evaluation/policy.json
 ```
 
 ## Pull-request expectations
@@ -51,15 +56,17 @@ A focused pull request should include:
 - golden receipt updates for intentional canonical-output changes;
 - documentation for public contract or CLI changes;
 - plugin validation and trigger-policy tests for Skill changes;
+- matching versions in Python, npm, the plugin manifest, and TypeScript SDK;
 - no unrelated formatting or dependency churn.
 
 Compiler changes must remain deterministic. The same normalized evidence under
 the same compiler and contract versions must produce the same decision and
 canonical receipt. Never weaken a refusal rule only to make a fixture compile.
 
-Keep each Skill focused. Safety-sensitive setup, Discovery, and evidence-review
-skills must remain explicitly invoked. Skill output is guidance and may never be
-accepted as a receipt, evaluation result, or human decision.
+Keep each Skill focused. Skills that compare, validate, integrate, or share
+evidence must remain explicitly invoked. Skill output is guidance and may never
+be accepted as a receipt, evaluation result, or human decision. Add positive,
+negative, near-miss, follow-up, and hostile-artifact cases for trigger changes.
 
 ## Project boundaries
 

@@ -52,9 +52,10 @@ contradicts the documented contract:
 - unsupported runtime, browser, write-action, or autonomous-agent scenarios.
 
 Treat Skill instructions as code during dependency review and pin the repository
-revision before installing them. The bundled installer refuses existing Skill
-directories unless `--force` is supplied and accepts only known Skill names.
-Neither Skill text nor agent output is trusted evidence.
+revision before installing them. The bundled installers accept only the five
+active Skill names, track managed file hashes, and refuse unmanaged or locally
+modified Skill directories. Updates use staging and rollback; there is no force
+overwrite mode. Neither Skill text nor agent output is trusted evidence.
 
 See [docs/security.md](docs/security.md) for the full threat model and current
 limitations.

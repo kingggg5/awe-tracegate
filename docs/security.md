@@ -18,6 +18,7 @@ Treat all of the following as untrusted:
 - requests to the optional HTTP API;
 - JSONL and JSON files selected in the local TraceGate Review UI;
 - generic experiment exports and OTLP span attributes;
+- Agent Skill folders, Skill BOMs, evidence envelopes, and evidence packages;
 - signed bundles, embedded public keys, signer labels, and consent records.
 
 Only typed validation, explicit compiler rules, and recomputed canonical hashes
@@ -41,6 +42,13 @@ policy, grant a capability, approve a step, or change an effect class.
 - Governed export refuses revoked, expired, future, or out-of-scope consent.
 - Evaluation receipts fail closed on dataset/case mismatch, seeded safety
   violations, and excessive success regression.
+- The atomic gate cannot pass without a compiled candidate, exact source-trace
+  replay, a passing frozen evaluation, and an identical candidate digest across
+  the compilation and evaluation.
+- Optional evidence packages bind the repository, exact commit, producer and
+  environment digests, capture time, provenance level, and every supplied gate
+  input. Signed or attested labels require a separate verification-artifact
+  digest rather than a bare string assertion.
 - Approval requires a compiled receipt, locally replayed exact traces, a valid
   verification receipt, and a passing evaluation for the identical candidate.
   The promotion receipt records every linked digest plus the actor and exact
@@ -61,9 +69,14 @@ policy, grant a capability, approve a step, or change an effect class.
   usefulness, or production safety.
 - Repeated successful traces may contain correlated mistakes or incomplete
   coverage. Compilation does not create missing branches or counterexamples.
-- Trace capture time and evidence freshness are not enforced in v0.2. Do not
-  label evidence as current merely because its receipt replays; freshness needs
-  immutable capture provenance and a pinned review time in a later contract.
+- Freshness is enforced only when a valid evidence package, an explicit UTC
+  evaluation time, and a maximum age are supplied to the gate. A receipt without
+  those fields proves no freshness, even when exact replay succeeds.
+- A `signature_verified` or `attested` provenance label plus a verification
+  artifact digest does not establish trust by itself. The caller must verify the
+  external signature or attestation against an operator-owned policy before
+  constructing that envelope. TraceGate v0.3 therefore records those labels but
+  refuses to use them as an enforceable minimum; only `asserted` is supported.
 - The local API is not an internet-facing deployment profile. It does not imply
   authentication, tenant isolation, rate limiting, or denial-of-service
   protection.
@@ -138,6 +151,9 @@ the same typed ingestion boundary as every other producer.
 - Keep compiler decisions covered by golden and adversarial fixtures.
 - Treat changes to schemas, canonicalization, effect classification, and refusal
   rules as security-sensitive.
+- Treat Skill, npm installer, Git marketplace, and Action changes as supply-chain
+  sensitive. Installers must not use lifecycle scripts or overwrite unmanaged
+  files.
 - Do not weaken a refusal to make a demo pass.
 
 Report suspected vulnerabilities through the private process in

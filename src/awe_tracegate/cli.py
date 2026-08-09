@@ -9,15 +9,17 @@ import sys
 from collections.abc import Sequence
 from datetime import datetime
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, NoReturn, TypeVar
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, TypeAdapter, ValidationError
 
+from . import __version__
 from .adapters import (
     evaluation_bundle_from_manifest,
     import_generic_evaluation,
     import_otel_genai_evaluation,
 )
+from .capabilities import describe_capabilities
 from .compiler import compile_traces
 from .contracts import (
     CompilationReceipt,
@@ -26,20 +28,34 @@ from .contracts import (
     EvaluationBundle,
     EvaluationPolicy,
     EvaluationReceipt,
+    EvidencePackage,
     ExecutionTrace,
+    GitCommitSha,
     GovernedRedactionSummary,
     ReceiptVerification,
     RedactionPolicy,
     RedactionSummary,
+    RepositoryUri,
     SignedReceiptBundle,
+    SkillBom,
 )
 from .evaluation import evaluate_candidate
+from .evidence import validate_evidence_envelope
+from .gate import gate_evidence
 from .promotion import create_promotion_receipt
 from .redaction import redact_governed_json, redact_json
 from .schemas import export_schemas
+from .skill_bom import inspect_skill
 from .verifier import verify_compilation_receipt
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
+
+
+class _AweArgumentParser(argparse.ArgumentParser):
+    """Route malformed CLI usage to the contract's exit code 1."""
+
+    def error(self, message: str) -> NoReturn:
+        raise ValueError(message)
 
 
 def _load_jsonl(path: Path) -> tuple[ExecutionTrace, ...]:
@@ -99,11 +115,65 @@ def _port(value: str) -> int:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = _AweArgumentParser(
         prog="awe",
         description="AWE TraceGate evidence compiler and verifier",
     )
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
+    )
     subcommands = parser.add_subparsers(dest="command", required=True)
+
+    capabilities_parser = subcommands.add_parser(
+        "capabilities", help="print the machine-readable offline core surface"
+    )
+    capabilities_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="emit JSON (the only stable output format)",
+    )
+
+    gate_parser = subcommands.add_parser(
+        "gate", help="atomically compile, replay, and evaluate exact evidence"
+    )
+    gate_parser.add_argument("--traces", type=Path, required=True)
+    gate_parser.add_argument("--baseline", type=Path, required=True)
+    gate_parser.add_argument("--candidate", type=Path, required=True)
+    gate_parser.add_argument("--policy", type=Path)
+    gate_parser.add_argument("--skill-bom", type=Path)
+    gate_parser.add_argument("--evidence-package", type=Path)
+    gate_parser.add_argument("--repository")
+    gate_parser.add_argument("--commit-sha")
+    gate_parser.add_argument("--max-age-seconds", type=int)
+    gate_parser.add_argument(
+        "--minimum-provenance",
+        choices=("asserted",),
+        help=(
+            "enforce declared provenance only; cryptographic and attestation "
+            "verification are not yet implemented"
+        ),
+    )
+    gate_parser.add_argument(
+        "--evaluated-at",
+        help="explicit RFC 3339 UTC time used by the max-age check",
+    )
+    _add_output(gate_parser)
+
+    conformance_parser = subcommands.add_parser(
+        "conformance", help="validate a provider-neutral evidence envelope"
+    )
+    conformance_parser.add_argument("--envelope", type=Path, required=True)
+    _add_output(conformance_parser)
+
+    skill_parser = subcommands.add_parser(
+        "skill", help="inspect portable Agent Skill artifacts without execution"
+    )
+    skill_subcommands = skill_parser.add_subparsers(dest="skill_command", required=True)
+    skill_inspect_parser = skill_subcommands.add_parser(
+        "inspect", help="create a content-addressed Skill BOM"
+    )
+    skill_inspect_parser.add_argument("--path", type=Path, required=True)
+    _add_output(skill_inspect_parser)
 
     compile_parser = subcommands.add_parser(
         "compile", help="compile repeated read-only execution traces"
@@ -197,7 +267,10 @@ def _build_parser() -> argparse.ArgumentParser:
             "verification",
             "evaluation",
             "experiment",
+            "gate",
+            "evidence_package",
             "promotion",
+            "skill_bom",
         ),
         required=True,
     )
@@ -228,6 +301,72 @@ def _compile(args: argparse.Namespace) -> int:
     receipt = compile_traces(_load_jsonl(args.traces))
     _emit(receipt, args.out)
     return 0 if receipt.status == "compiled" else 2
+
+
+def _capabilities(args: argparse.Namespace) -> int:
+    _emit(describe_capabilities(__version__))
+    return 0
+
+
+def _gate(args: argparse.Namespace) -> int:
+    policy = (
+        _load_model(args.policy, EvaluationPolicy)
+        if args.policy
+        else EvaluationPolicy()
+    )
+    evidence_package = (
+        _load_model(args.evidence_package, EvidencePackage)
+        if args.evidence_package
+        else None
+    )
+    skill_bom = _load_model(args.skill_bom, SkillBom) if args.skill_bom else None
+    evaluated_at = (
+        datetime.fromisoformat(args.evaluated_at.replace("Z", "+00:00"))
+        if args.evaluated_at
+        else None
+    )
+    repository = (
+        TypeAdapter(RepositoryUri).validate_python(args.repository)
+        if args.repository
+        else None
+    )
+    commit_sha = (
+        TypeAdapter(GitCommitSha).validate_python(args.commit_sha)
+        if args.commit_sha
+        else None
+    )
+    receipt = gate_evidence(
+        _load_jsonl(args.traces),
+        _load_model(args.baseline, EvaluationBundle),
+        _load_model(args.candidate, EvaluationBundle),
+        policy,
+        evidence_package=evidence_package,
+        expected_repository=repository,
+        expected_commit_sha=commit_sha,
+        evaluated_at=evaluated_at,
+        maximum_age_seconds=args.max_age_seconds,
+        minimum_provenance_level=args.minimum_provenance,
+        skill_bom=skill_bom,
+    )
+    _emit(receipt, args.out)
+    if receipt.status == "PASS":
+        return 0
+    if receipt.status in ("REVIEW", "BLOCK"):
+        return 2
+    return 1
+
+
+def _conformance(args: argparse.Namespace) -> int:
+    receipt = validate_evidence_envelope(_load_json(args.envelope))
+    _emit(receipt, args.out)
+    return 0 if receipt.status == "valid" else 2
+
+
+def _skill(args: argparse.Namespace) -> int:
+    if args.skill_command != "inspect":
+        raise ValueError(f"unsupported skill command: {args.skill_command}")
+    _emit(inspect_skill(args.path), args.out)
+    return 0
 
 
 def _verify(args: argparse.Namespace) -> int:
@@ -387,20 +526,24 @@ def _verify_signature(args: argparse.Namespace) -> int:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = _build_parser().parse_args(argv)
-    handlers = {
-        "compile": _compile,
-        "evaluate": _evaluate,
-        "import-experiment": _import_experiment,
-        "promote": _promote,
-        "redact": _redact,
-        "schema": _schema,
-        "serve": _serve,
-        "sign": _sign,
-        "verify": _verify,
-        "verify-signature": _verify_signature,
-    }
     try:
+        args = _build_parser().parse_args(argv)
+        handlers = {
+            "capabilities": _capabilities,
+            "compile": _compile,
+            "conformance": _conformance,
+            "evaluate": _evaluate,
+            "gate": _gate,
+            "import-experiment": _import_experiment,
+            "promote": _promote,
+            "redact": _redact,
+            "schema": _schema,
+            "serve": _serve,
+            "sign": _sign,
+            "skill": _skill,
+            "verify": _verify,
+            "verify-signature": _verify_signature,
+        }
         return handlers[args.command](args)
     except (
         KeyError,

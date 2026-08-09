@@ -1,81 +1,91 @@
-"""Render AWE receipts into GitHub Action outputs and a job summary."""
+"""Validate an atomic AWE gate receipt and render GitHub Action metadata."""
 
 from __future__ import annotations
 
 import argparse
-import json
+import html
 import os
 from pathlib import Path
-from typing import Any
+
+from awe_tracegate.contracts import GateReceipt
+
+MAX_RECEIPT_BYTES = 16 * 1024 * 1024
+MAX_OUTPUT_PATH_CHARS = 4_096
 
 
-def _load(path: Path) -> dict[str, Any]:
-    value = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} must contain a JSON object")
+def _safe_path_text(path: str | Path, *, label: str) -> str:
+    value = str(path)
+    if not value or len(value) > MAX_OUTPUT_PATH_CHARS:
+        raise ValueError(
+            f"{label} must contain between 1 and {MAX_OUTPUT_PATH_CHARS} characters"
+        )
+    if any(ord(character) < 32 or ord(character) == 127 for character in value):
+        raise ValueError(f"{label} contains a control character")
     return value
+
+
+def _load(path: Path) -> GateReceipt:
+    if path.stat().st_size > MAX_RECEIPT_BYTES:
+        raise ValueError(f"{path} exceeds the {MAX_RECEIPT_BYTES}-byte receipt limit")
+    return GateReceipt.model_validate_json(path.read_text(encoding="utf-8"))
 
 
 def _append(path: str | None, text: str) -> None:
     if path:
-        with Path(path).open("a", encoding="utf-8", newline="\n") as stream:
+        destination = Path(_safe_path_text(path, label="GitHub metadata path"))
+        with destination.open("a", encoding="utf-8", newline="\n") as stream:
             stream.write(text)
+
+
+def _code(value: object) -> str:
+    return f"<code>{html.escape(str(value), quote=True)}</code>"
+
+
+def render(receipt: GateReceipt, receipt_path: Path) -> str:
+    reasons = "<br>".join(_code(reason) for reason in receipt.reasons)
+    if not reasons:
+        reasons = "No blocking or review reasons."
+    replay = (
+        f"{receipt.verification.status}; "
+        f"traces_verified={str(receipt.verification.traces_verified).lower()}"
+    )
+    provenance = (
+        f"declared={receipt.evidence_provenance_level or 'not supplied'}; "
+        f"enforceable_minimum={receipt.minimum_provenance_level or 'not required'}"
+    )
+    skill_bom = getattr(receipt, "skill_bom_digest", None) or "not supplied"
+    return (
+        "## AWE TraceGate\n\n"
+        f"**Decision: {receipt.status}**\n\n"
+        "| Evidence | Result |\n"
+        "| --- | --- |\n"
+        f"| Compilation | {_code(receipt.compilation.status)} |\n"
+        f"| Exact trace replay | {_code(replay)} |\n"
+        f"| Frozen evaluation | {_code(receipt.evaluation.status)} |\n"
+        f"| Declared provenance | {_code(provenance)} |\n"
+        f"| Skill BOM | {_code(skill_bom)} |\n"
+        f"| Gate receipt | {_code(receipt.receipt_hash)} |\n"
+        f"| Receipt path | {_code(receipt_path)} |\n\n"
+        f"{reasons}\n"
+    )
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--receipt", type=Path, required=True)
-    parser.add_argument("--verification", type=Path, required=True)
-    parser.add_argument("--evaluation", type=Path)
     args = parser.parse_args()
 
-    receipt = _load(args.receipt)
-    verification = _load(args.verification)
-    compile_status = receipt.get("status")
-    verification_status = verification.get("status")
-    decision = (
-        "PASS"
-        if compile_status == "compiled" and verification_status == "valid"
-        else "BLOCK"
-    )
-    reasons = list(receipt.get("reasons") or [])
-    reasons.extend(verification.get("reasons") or [])
-    evaluation_status = "not supplied"
-
-    if args.evaluation is not None:
-        evaluation = _load(args.evaluation)
-        evaluation_status = str(evaluation.get("status", "invalid"))
-        decision = {
-            "block": "BLOCK",
-            "pass": decision,
-            "review": "REVIEW",
-        }.get(evaluation_status, "ERROR")
-        reasons.extend(evaluation.get("reasons") or [])
-
+    receipt_path = _safe_path_text(args.receipt, label="receipt path")
+    receipt = _load(Path(receipt_path))
     output = os.environ.get("GITHUB_OUTPUT")
-    _append(output, f"decision={decision}\n")
-    _append(output, f"receipt-hash={receipt.get('receipt_hash', '')}\n")
-    _append(output, f"verification-hash={verification.get('verification_hash', '')}\n")
-    _append(output, f"receipt-path={args.receipt}\n")
-    _append(output, f"verification-path={args.verification}\n")
+    _append(output, f"decision={receipt.status}\n")
+    _append(output, f"receipt-hash={receipt.receipt_hash}\n")
+    _append(output, f"receipt-path={receipt_path}\n")
 
-    reason_text = "<br>".join(f"`{reason}`" for reason in sorted(set(reasons)))
-    if not reason_text:
-        reason_text = "No blocking or review reasons."
-    summary = (
-        "## AWE TraceGate\n\n"
-        f"**Decision: {decision}**\n\n"
-        "| Evidence | Result |\n"
-        "| --- | --- |\n"
-        f"| Compilation | `{compile_status}` |\n"
-        f"| Exact trace replay | `{verification_status}` |\n"
-        f"| Evaluation | `{evaluation_status}` |\n"
-        f"| Receipt | `{receipt.get('receipt_hash', '')}` |\n\n"
-        f"{reason_text}\n"
-    )
+    summary = render(receipt, Path(receipt_path))
     _append(os.environ.get("GITHUB_STEP_SUMMARY"), summary)
     print(summary)
-    return 0
+    return {"PASS": 0, "REVIEW": 2, "BLOCK": 2, "ERROR": 1}[receipt.status]
 
 
 if __name__ == "__main__":

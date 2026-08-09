@@ -1,7 +1,0 @@
-interface:
-  display_name: "AWE"
-  short_description: "Choose the right TraceGate workflow"
-  default_prompt: "Use $awe to choose the safest AWE TraceGate workflow for this task."
-
-policy:
-  allow_implicit_invocation: false
