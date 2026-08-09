@@ -143,6 +143,19 @@ commands remain available, but their individual outputs are not an atomic pass.
 `awe skill inspect`, `awe conformance`, and `awe capabilities --json` provide
 non-executing integration surfaces for Skill authors, adapters, and installers.
 
+### Agent host adapters
+
+`skills/` is the canonical Codex/Agent Skills source. The Codex plugin consumes
+it directly. Claude Code requires host-specific invocation metadata, so
+`scripts/sync_claude_plugin.py` deterministically renders a namespaced adapter
+under `integrations/claude-code/`. CI requires byte parity after the documented
+frontmatter and invocation-name transformation. The adapter adds no hooks, MCP
+servers, tool grants, agent runtime, or alternate decision path.
+
+Evidence-changing Claude Skills set `disable-model-invocation: true`; only the
+read-only readiness check remains eligible for host selection. Both hosts call
+the same installed `awe` CLI, whose receipt remains authoritative.
+
 ### HTTP API
 
 The optional API is a thin adapter over the same compiler:

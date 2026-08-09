@@ -39,15 +39,26 @@ def _write_json(path: Path, value: Any) -> None:
 
 
 def _plugin_files(root: Path) -> tuple[Path, ...]:
-    required = root / ".codex-plugin" / "plugin.json"
-    if not required.is_file():
-        raise ValueError("plugin bundle requires .codex-plugin/plugin.json")
+    claude_root = root / "integrations" / "claude-code"
+    if claude_root.is_symlink():
+        raise ValueError(f"plugin bundle refuses symbolic link: {claude_root}")
+    required = (
+        root / ".codex-plugin" / "plugin.json",
+        root / ".claude-plugin" / "marketplace.json",
+        claude_root / ".claude-plugin" / "plugin.json",
+    )
+    missing = [
+        path.relative_to(root).as_posix() for path in required if not path.is_file()
+    ]
+    if missing:
+        raise ValueError(f"plugin bundle requires: {', '.join(missing)}")
 
-    candidates = [required]
+    candidates = list(required)
     marketplace = root / ".agents" / "plugins" / "marketplace.json"
     if marketplace.is_file():
         candidates.append(marketplace)
     candidates.extend((root / "skills").rglob("*"))
+    candidates.extend((claude_root / "skills").rglob("*"))
 
     files: list[Path] = []
     for path in candidates:
@@ -260,6 +271,13 @@ def write_release_metadata(
     plugin = json.loads(
         (root / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
     )
+    claude_plugin = json.loads(
+        (
+            root / "integrations" / "claude-code" / ".claude-plugin" / "plugin.json"
+        ).read_text(encoding="utf-8")
+    )
+    if claude_plugin["version"] != plugin["version"]:
+        raise ValueError("Codex and Claude plugin versions must match")
     npm = json.loads((root / "package.json").read_text(encoding="utf-8"))
     versions = {
         "npm": str(npm["version"]),

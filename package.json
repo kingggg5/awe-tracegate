@@ -1,7 +1,7 @@
 {
   "name": "awe-tracegate",
   "version": "0.3.0",
-  "description": "Zero-dependency installer for the AWE TraceGate agent skills and Codex plugin metadata.",
+  "description": "Zero-dependency distribution for AWE TraceGate Agent Skills and Codex/Claude Code plugin metadata.",
   "license": "Apache-2.0",
   "author": "kingggg5",
   "homepage": "https://github.com/kingggg5/awe-tracegate#readme",
@@ -18,7 +18,10 @@
   },
   "files": [
     ".agents/plugins/marketplace.json",
+    ".claude-plugin/marketplace.json",
     ".codex-plugin/plugin.json",
+    "integrations/claude-code/.claude-plugin/plugin.json",
+    "integrations/claude-code/skills",
     "npm/cli.mjs",
     "npm/install.mjs",
     "skills/tracegate-check",
@@ -37,6 +40,7 @@
   "keywords": [
     "agent-skills",
     "ai-agents",
+    "claude-code-plugin",
     "codex-plugin",
     "evaluation",
     "provenance"

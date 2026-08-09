@@ -11,6 +11,8 @@ from pathlib import Path
 
 import pytest
 
+from scripts.sync_claude_plugin import MANUAL_SKILLS, sync
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_SKILLS = (
     "tracegate-check",
@@ -41,6 +43,15 @@ def test_plugin_manifest_and_active_skill_inventory_are_complete() -> None:
     manifest = json.loads(
         (PROJECT_ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
     )
+    claude_manifest = json.loads(
+        (
+            PROJECT_ROOT
+            / "integrations"
+            / "claude-code"
+            / ".claude-plugin"
+            / "plugin.json"
+        ).read_text(encoding="utf-8")
+    )
     package = json.loads((PROJECT_ROOT / "package.json").read_text(encoding="utf-8"))
     python_project = tomllib.loads(
         (PROJECT_ROOT / "pyproject.toml").read_text(encoding="utf-8")
@@ -50,9 +61,14 @@ def test_plugin_manifest_and_active_skill_inventory_are_complete() -> None:
             encoding="utf-8"
         )
     )
-    assert manifest["name"] == package["name"] == "awe-tracegate"
+    assert {
+        manifest["name"],
+        claude_manifest["name"],
+        package["name"],
+    } == {"awe-tracegate"}
     versions = {
         manifest["version"],
+        claude_manifest["version"],
         package["version"],
         python_project["project"]["version"],
         typescript_package["version"],
@@ -61,6 +77,10 @@ def test_plugin_manifest_and_active_skill_inventory_are_complete() -> None:
     assert manifest["skills"] == "./skills/"
     assert "mcpServers" not in manifest
     assert "apps" not in manifest
+    assert "hooks" not in claude_manifest
+    assert "mcpServers" not in claude_manifest
+    assert "commands" not in claude_manifest
+    assert "agents" not in claude_manifest
 
     actual = tuple(
         sorted(
@@ -107,7 +127,7 @@ def test_each_skill_has_portable_trigger_evals() -> None:
         assert "hostile" in combined or "untrusted" in combined
 
 
-def test_marketplace_uses_git_source_and_required_policy() -> None:
+def test_codex_marketplace_uses_git_source_and_required_policy() -> None:
     marketplace = json.loads(
         (PROJECT_ROOT / ".agents" / "plugins" / "marketplace.json").read_text(
             encoding="utf-8"
@@ -128,6 +148,51 @@ def test_marketplace_uses_git_source_and_required_policy() -> None:
         "authentication": "ON_INSTALL",
     }
     assert plugin["category"] == "Developer Tools"
+
+
+def test_claude_marketplace_reuses_the_repository_root_plugin() -> None:
+    marketplace = json.loads(
+        (PROJECT_ROOT / ".claude-plugin" / "marketplace.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    manifest = json.loads(
+        (
+            PROJECT_ROOT
+            / "integrations"
+            / "claude-code"
+            / ".claude-plugin"
+            / "plugin.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert marketplace["$schema"] == (
+        "https://json.schemastore.org/claude-code-marketplace.json"
+    )
+    assert marketplace["name"] == "awe-tracegate"
+    assert marketplace["version"] == manifest["version"]
+    assert marketplace["owner"] == {"name": "kingggg5"}
+    assert len(marketplace["plugins"]) == 1
+    plugin = marketplace["plugins"][0]
+    assert plugin["name"] == manifest["name"]
+    assert plugin["version"] == manifest["version"]
+    assert plugin["source"] == "./integrations/claude-code"
+    assert plugin["category"] == "development"
+
+
+def test_claude_adapter_is_current_and_preserves_manual_evidence_invocation() -> None:
+    assert sync(PROJECT_ROOT, check=True) == ()
+    for skill in EXPECTED_SKILLS:
+        instructions = (
+            PROJECT_ROOT
+            / "integrations"
+            / "claude-code"
+            / "skills"
+            / skill
+            / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        expected = skill in MANUAL_SKILLS
+        assert ("disable-model-invocation: true" in instructions) is expected
+        assert "$tracegate-" not in instructions
 
 
 def test_python_installer_dry_run_install_check_and_managed_hashes(
@@ -253,6 +318,9 @@ def test_npm_package_is_zero_dependency_and_has_no_install_hooks() -> None:
     scripts = package.get("scripts", {})
     assert not {"preinstall", "install", "postinstall", "prepare"}.intersection(scripts)
     assert package["bin"] == {"awe-tracegate": "npm/cli.mjs"}
+    assert ".claude-plugin/marketplace.json" in package["files"]
+    assert "integrations/claude-code/.claude-plugin/plugin.json" in package["files"]
+    assert "integrations/claude-code/skills" in package["files"]
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node.js is unavailable")
@@ -314,6 +382,11 @@ def test_npm_pack_and_local_install_smoke(tmp_path: Path) -> None:
         assert f"skills/{skill}/SKILL.md" in packed_paths
         assert f"skills/{skill}/evals/evals.json" in packed_paths
     assert not any(path.startswith("skills/awe") for path in packed_paths)
+    assert ".codex-plugin/plugin.json" in packed_paths
+    assert ".claude-plugin/marketplace.json" in packed_paths
+    assert "integrations/claude-code/.claude-plugin/plugin.json" in packed_paths
+    for skill in EXPECTED_SKILLS:
+        assert f"integrations/claude-code/skills/{skill}/SKILL.md" in packed_paths
     tarball = pack_dir / filename
     assert tarball.is_file()
 

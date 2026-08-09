@@ -8,6 +8,10 @@
   conformance, Skill inspection, redaction, signing, promotion, and schema export.
 - Optional API: `GET /healthz` and typed `/v1/*` endpoints.
 - Codex plugin: `.codex-plugin/plugin.json` with focused skills under `skills/`.
+- Claude Code plugin: `integrations/claude-code/.claude-plugin/plugin.json` with
+  generated host-specific Skills and `.claude-plugin/marketplace.json` at the
+  repository root. Run `python scripts/sync_claude_plugin.py --root . --write`
+  after changing a canonical Skill; never hand-edit the generated adapter.
 - Atomic gate decisions are `PASS`, `REVIEW`, `BLOCK`, or `ERROR`.
 - Diagnostic compilation decisions remain `compiled` or `refused`.
 - Evaluation decisions are `pass`, `review`, or `block`; verification decisions
@@ -70,6 +74,7 @@ python -m ruff check .
 python -m mypy src
 python -m pytest
 python scripts/install_skills.py --list
+python scripts/sync_claude_plugin.py --root . --check
 npm run test:installer
 awe gate \
   --traces examples/repo_analysis/traces.jsonl \

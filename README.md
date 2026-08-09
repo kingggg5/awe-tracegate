@@ -8,7 +8,8 @@
 **Turn a prompt, Skill, or agent-workflow change into a replayable evidence
 receipt—without giving the verifier an LLM key.**
 
-AWE TraceGate is a portable Agent Skills plugin and deterministic change gate.
+AWE TraceGate is a portable Agent Skills plugin for Codex and Claude Code, plus
+a deterministic change gate.
 Use your existing agent or evaluation harness to run trials; TraceGate binds the
 exact Skill tree, traces, frozen evaluation, policy, repository revision, and
 human decision into content-addressed artifacts that another reviewer can replay.
@@ -70,7 +71,29 @@ codex plugin marketplace add kingggg5/awe-tracegate --ref main
 Restart the desktop app, open Plugins, choose **AWE TraceGate**, and install it.
 For protected environments, replace `main` with a reviewed immutable release tag.
 
-The installers copy only versioned Skill files into `.agents/skills/`. They do
+### Claude Code marketplace
+
+Run these inside Claude Code:
+
+```text
+/plugin marketplace add kingggg5/awe-tracegate
+/plugin install awe-tracegate@awe-tracegate
+```
+
+[Claude Code](https://code.claude.com/docs/en/plugins) namespaces plugin Skills.
+Invoke the evidence gate explicitly, for example:
+
+```text
+/awe-tracegate:tracegate-verify-evidence verify the evidence in ./evidence.
+```
+
+The four evidence-changing workflows are user-invoked only in Claude Code. The
+read-only readiness check may be selected automatically. No Skill grants tools,
+installs the Python engine, or weakens Claude Code permission prompts.
+
+The npm and Python installers copy only versioned Skill files into
+`.agents/skills/`; the Claude marketplace uses its generated, namespaced adapter.
+They do
 not install Python, fetch model dependencies, read credentials, start a service,
 or execute project code.
 
@@ -158,7 +181,7 @@ refused, timed-out, and missing trials remain visible.
 ```mermaid
 flowchart TB
     subgraph Outside["Outside the trusted decision boundary"]
-        Plugin["Agent Skills / Codex plugin"]
+        Plugin["Shared Skills / Codex + Claude Code plugins"]
         Harness["Promptfoo, Langfuse, Braintrust, OpenAI Evals, custom harness"]
         OTel["Pinned OTel / OpenInference exporters"]
     end
@@ -261,7 +284,8 @@ Implemented:
 - atomic exact-evidence gate and Skill BOM;
 - evidence package, provenance/freshness checks, and adapter conformance;
 - five portable Skills with 25 routing/effect eval cases;
-- safe zero-dependency npm and Python installers plus Git marketplace metadata;
+- safe zero-dependency npm and Python installers plus Codex and Claude Code
+  marketplace metadata;
 - deterministic compiler, evaluator, redaction, signing, Action, API, generated
   TypeScript client, and optional local UI.
 

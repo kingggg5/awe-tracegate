@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "awe-tracegate",
+  "version": "0.3.0",
+  "description": "Portable, evidence-first change gates for agent Skills and workflows.",
+  "owner": {
+    "name": "kingggg5"
+  },
+  "plugins": [
+    {
+      "name": "awe-tracegate",
+      "description": "Compare agent changes and verify exact local evidence without giving the verifier an LLM key.",
+      "version": "0.3.0",
+      "author": {
+        "name": "kingggg5"
+      },
+      "source": "./integrations/claude-code",
+      "category": "development",
+      "homepage": "https://github.com/kingggg5/awe-tracegate"
+    }
+  ]
+}

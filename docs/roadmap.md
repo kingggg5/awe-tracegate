@@ -19,7 +19,8 @@ Implemented in source:
   routing/effect evaluation cases;
 - zero-dependency npm and Python Skill installers with managed hashes, dry-run,
   check, atomic update, and refusal to overwrite unmanaged content;
-- Git-backed Codex marketplace metadata;
+- Git-backed Codex and Claude Code marketplace metadata with deterministic
+  host-adapter parity checks;
 - a GitHub Action that cannot PASS without the complete linked gate chain;
 - reproducible plugin/npm bundle tooling, checksums, and an SPDX release SBOM;
 - existing governed redaction, consent, signing, human decisions, API,

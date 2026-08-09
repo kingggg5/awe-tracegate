@@ -78,6 +78,12 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
+      - name: Check the generated Claude Code adapter
+        run: python scripts/sync_claude_plugin.py --root . --check
+      - name: Validate Claude Code plugin and marketplace
+        run: |
+          npx --yes @anthropic-ai/claude-code@2.1.226 plugin validate integrations/claude-code
+          npx --yes @anthropic-ai/claude-code@2.1.226 plugin validate .claude-plugin/marketplace.json
       - name: Test the zero-dependency installer
         run: npm run test:installer
       - name: Pack the root npm distribution

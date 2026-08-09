@@ -151,9 +151,10 @@ the same typed ingestion boundary as every other producer.
 - Keep compiler decisions covered by golden and adversarial fixtures.
 - Treat changes to schemas, canonicalization, effect classification, and refusal
   rules as security-sensitive.
-- Treat Skill, npm installer, Git marketplace, and Action changes as supply-chain
-  sensitive. Installers must not use lifecycle scripts or overwrite unmanaged
-  files.
+- Treat Skill, npm installer, Codex/Claude marketplace, generated host adapter,
+  and Action changes as supply-chain sensitive. Installers must not use
+  lifecycle scripts or overwrite unmanaged files. Claude evidence workflows
+  remain explicitly invoked and grant no tools through frontmatter.
 - Do not weaken a refusal to make a demo pass.
 
 Report suspected vulnerabilities through the private process in

@@ -56,6 +56,8 @@ def test_plugin_bundle_is_byte_reproducible(tmp_path: Path) -> None:
         names = archive.namelist()
         assert names == sorted(names)
         assert ".codex-plugin/plugin.json" in names
+        assert ".claude-plugin/marketplace.json" in names
+        assert "integrations/claude-code/.claude-plugin/plugin.json" in names
         assert any(name.endswith("/SKILL.md") for name in names)
         assert all(item.date_time == FIXED_ZIP_TIMESTAMP for item in archive.infolist())
 
@@ -97,6 +99,10 @@ def test_release_metadata_is_deterministic_and_hashes_every_subject(
     inventoried_files = {item["fileName"] for item in document["files"]}
     assert f"./{npm_archive}!/package/package.json" in inventoried_files
     assert "./awe-tracegate-plugin.zip!/.codex-plugin/plugin.json" in inventoried_files
+    assert (
+        "./awe-tracegate-plugin.zip!/integrations/claude-code/"
+        ".claude-plugin/plugin.json"
+    ) in inventoried_files
 
     lines = checksums.read_text(encoding="utf-8").splitlines()
     names = [line.split(" *", maxsplit=1)[1] for line in lines]

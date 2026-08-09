@@ -55,8 +55,9 @@ A focused pull request should include:
 - tests for normal, boundary, malformed, and refusal behavior;
 - golden receipt updates for intentional canonical-output changes;
 - documentation for public contract or CLI changes;
-- plugin validation and trigger-policy tests for Skill changes;
-- matching versions in Python, npm, the plugin manifest, and TypeScript SDK;
+- Codex and Claude plugin validation plus trigger-policy tests for Skill changes;
+- matching versions in Python, npm, both plugin manifests, both marketplaces,
+  and the TypeScript SDK;
 - no unrelated formatting or dependency churn.
 
 Compiler changes must remain deterministic. The same normalized evidence under
@@ -67,6 +68,9 @@ Keep each Skill focused. Skills that compare, validate, integrate, or share
 evidence must remain explicitly invoked. Skill output is guidance and may never
 be accepted as a receipt, evaluation result, or human decision. Add positive,
 negative, near-miss, follow-up, and hostile-artifact cases for trigger changes.
+Canonical Skills live under `skills/`. After editing one, run
+`python scripts/sync_claude_plugin.py --root . --write`; CI rejects a stale or
+manually edited Claude adapter.
 
 ## Project boundaries
 

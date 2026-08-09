@@ -21,6 +21,8 @@ stable contract release.
   dry-run/check modes, atomic updates, and refusal to overwrite unmanaged or
   locally modified content.
 - Git-backed Codex marketplace metadata and machine-readable capabilities.
+- A Claude Code marketplace and deterministic, namespaced Skill adapter that
+  preserves explicit invocation for all evidence-changing workflows.
 - Deterministic plugin/npm release bundles, SPDX SBOM generation, checksums, and
   a typed gate-attestation predicate builder.
 - A local TraceGate Review UI that drives the real compile, exact replay, frozen
