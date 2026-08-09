@@ -24,7 +24,7 @@ boundary explicit.
   intervention whose held-out effect must be measured against the baseline.
 
 These projects make “trace to reusable skill/workflow” an active field rather
-than a novelty claim available to AWE.
+than a novelty claim available to TraceGate.
 
 ## Workflow optimization and routing
 
@@ -37,7 +37,7 @@ than a novelty claim available to AWE.
 - [EvoRoute](https://arxiv.org/abs/2601.02695) uses prior experience for dynamic
   model routing across cost, latency, and performance objectives.
 
-AWE v0 does not route models or optimize configurations.
+TraceGate v0 does not route models or optimize configurations.
 
 ## Context and token optimization
 
@@ -69,8 +69,9 @@ token savings are experiment input, not verification evidence by themselves.
 - [Causal Agent Replay](https://arxiv.org/abs/2606.08275) studies
   counterfactual intervention over stochastic agent trajectories.
 
-AWE is not a durable runtime, observability backend, experiment tracker, or
-causal debugger.
+TraceGate is not a durable runtime, observability backend, experiment tracker,
+or causal debugger. AWE Workspace is a separate companion application; its
+runtime responsibilities are outside this verifier.
 
 ## Process and observability standards
 
@@ -83,7 +84,7 @@ causal debugger.
   importer pins revision `1d85c963ea51e9c7d24cc330ff67057f6e90e6c5` rather
   than treating `main` as a stable contract.
 
-## What AWE is trying to contribute
+## What TraceGate is trying to contribute
 
 The project’s distinction is deliberately operational rather than a claim of a
 new algorithm:
