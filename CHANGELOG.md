@@ -7,6 +7,12 @@ stable contract release.
 
 ## [Unreleased]
 
+### Documentation
+
+- Added a copy-ready GitHub Marketplace Action example for release tag `3`,
+  its exact full-SHA production pin, and clearer Agent Workflow Experimentation
+  positioning without claiming that the trusted verifier runs experiments.
+
 ### Added
 
 - An atomic `awe gate` contract that requires compilation, exact trace replay,

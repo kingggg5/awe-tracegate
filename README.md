@@ -5,8 +5,15 @@
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB.svg)](https://www.python.org/)
 
-**Turn a prompt, Skill, or agent-workflow change into a replayable evidence
-receipt—without giving the verifier an LLM key.**
+**Build better agents through experiments you can actually verify.**
+
+AWE stands for **Agent Workflow Experimentation**:
+
+```text
+Discover → Experiment → Evaluate → Verify → Improve
+                                  ↑
+                              TraceGate
+```
 
 AWE TraceGate is a portable Agent Skills plugin for Codex and Claude Code, plus
 a deterministic change gate.
@@ -236,7 +243,22 @@ replay the external verification artifact; they cannot satisfy a gate floor.
 
 ## GitHub Action
 
-Pin a reviewed commit SHA or immutable release tag in protected repositories:
+For a quick evaluation, use the current GitHub Marketplace release:
+
+```yaml
+- name: AWE TraceGate
+  id: tracegate
+  uses: kingggg5/awe-tracegate@3
+  with:
+    traces: evidence/traces.jsonl
+    baseline-evaluation: evidence/baseline.json
+    candidate-evaluation: evidence/candidate.json
+    evaluation-policy: evidence/policy.json
+```
+
+Release tag `3` currently resolves to commit
+`e94b4ee1d858c26ccc2ba04cecdb6628f44aa2e6`. Tags can be moved or deleted, so
+protected repositories should pin that full reviewed SHA:
 
 ```yaml
 name: TraceGate
@@ -251,7 +273,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - id: tracegate
-        uses: kingggg5/awe-tracegate@<PINNED_COMMIT_SHA>
+        uses: kingggg5/awe-tracegate@e94b4ee1d858c26ccc2ba04cecdb6628f44aa2e6
         with:
           traces: evidence/traces.jsonl
           baseline-evaluation: evidence/baseline.json
@@ -276,8 +298,10 @@ production control plane.
 
 ## Project status
 
-The current source prepares v0.3.0. The latest immutable tag remains v0.2.0
-until maintainers merge, review, and tag this release.
+The current GitHub Marketplace release is tag `3`, built from the merged v0.3
+source at `e94b4ee1d858c26ccc2ba04cecdb6628f44aa2e6`. A future release should restore
+SemVer naming (`v0.3.0` or later) while keeping tag `3` available for existing
+workflows.
 
 Implemented:
 
