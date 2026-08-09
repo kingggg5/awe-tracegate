@@ -1,0 +1,7 @@
+interface:
+  display_name: "AWE Regression Diagnosis"
+  short_description: "Diagnose workflow evaluation regressions"
+  default_prompt: "Use $awe-diagnose-regression to investigate why this candidate regressed."
+
+policy:
+  allow_implicit_invocation: true
