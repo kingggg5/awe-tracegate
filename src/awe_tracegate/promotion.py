@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Literal
 
 from .contracts import (
+    PENDING_SHA256_DIGEST,
     ActorIdentifier,
     CompilationReceipt,
     EvaluationReceipt,
@@ -71,7 +72,7 @@ def create_promotion_receipt(
         commit_sha=commit_sha,
         issued_at=issued_at,
         rationale=rationale,
-        receipt_hash="sha256:" + "0" * 64,
+        receipt_hash=PENDING_SHA256_DIGEST,
     )
     payload = receipt.model_dump(mode="json", exclude={"receipt_hash"})
     return PromotionReceipt.model_validate(

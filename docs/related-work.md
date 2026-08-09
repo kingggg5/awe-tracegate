@@ -19,6 +19,9 @@ boundary explicit.
   control-flow subgraphs and compiles them into executable skills.
 - [SkillOpt](https://github.com/microsoft/SkillOpt) optimizes natural-language
   skill documents through rollouts and held-out validation gates.
+- [SkillGen](https://www.microsoft.com/en-us/research/publication/skillgen-verified-inference-time-agent-skill-synthesis/)
+  uses successful and failed trajectories, then treats a generated skill as an
+  intervention whose held-out effect must be measured against the baseline.
 
 These projects make “trace to reusable skill/workflow” an active field rather
 than a novelty claim available to AWE.
@@ -35,6 +38,20 @@ than a novelty claim available to AWE.
   model routing across cost, latency, and performance objectives.
 
 AWE v0 does not route models or optimize configurations.
+
+## Context and token optimization
+
+- [Headroom](https://github.com/headroomlabs-ai/headroom) provides a local-first
+  context-compression layer across tool output, JSON, logs, code, files, and
+  agent integrations.
+- [LLMLingua](https://github.com/microsoft/LLMLingua) studies learned prompt
+  compression, including long-context and task-agnostic variants.
+
+TraceGate is not another compressor, proxy, or context-memory product. A
+discovery harness may evaluate these as interchangeable candidate strategies,
+but any promotion must bind the exact strategy and frozen dataset, preserve
+task and safety outcomes, and report latency, cost, and token usage. Claimed
+token savings are experiment input, not verification evidence by themselves.
 
 ## Runtimes, replay, and evaluation
 
@@ -62,8 +79,9 @@ causal debugger.
   agent roles and specifications from repository event logs.
 - [OpenTelemetry GenAI agent conventions](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-agent-spans.md)
   define developing conventions for agent, workflow, planning, and tool spans.
-  Their current Development status means an importer must pin and version the
-  schema it supports.
+  In 2026 they moved to a dedicated repository and remain Development, so the
+  importer pins revision `1d85c963ea51e9c7d24cc330ff67057f6e90e6c5` rather
+  than treating `main` as a stable contract.
 
 ## What AWE is trying to contribute
 

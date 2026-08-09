@@ -132,10 +132,25 @@ The optional API is a thin adapter over the same compiler:
 - `POST /v1/compile`
 - `POST /v1/verify`
 - `POST /v1/evaluate`
+- `POST /v1/experiments/import/generic`
 - `POST /v1/promote`
 
 It introduces no alternate decision path and should return the same typed
 receipt for the same request.
+
+### Command-led local Review Workspace
+
+`GET /` serves a dependency-free review workspace packaged with the Python
+distribution. It sends typed requests to the same local endpoints used by API
+integrators and presents candidate structure, evaluation metrics, chained
+digests, an optional experiment manifest, and the human-decision form. The
+bundled inputs are labeled as sample data; selected files are parsed in the
+browser, size-limited, and sent only to the same-origin API. Its command bar is
+a deterministic dispatcher for existing actions (`validate`, `files`,
+`export`, `tools`, `sample`, `new`, and `docs`), not a model conversation. The
+tools view reports implemented integration surfaces without claiming provider
+accounts are connected. The page does not add a planner, runtime, persistence
+layer, or alternate decision rule.
 
 ## Determinism and versioning
 
@@ -163,3 +178,47 @@ evidence, but execution permissions, model keys, and tool capabilities must
 remain outside this repository's trusted core. Repeated success is evidence,
 not permission: a candidate still needs verification, evaluation, and a human
 decision before a downstream registry could treat it as reusable software.
+
+A future AWE Workspace may own goals, sessions, research/code/file tools, and
+explicit user approvals. Its process boundary must prevent agent prose, tool
+output, or workspace state from mutating TraceGate policy or converting a
+refusal into approval. Native desktop packaging is an interface decision for
+that runtime, not a reason to rewrite this canonical decision engine.
+
+## Experiment interoperability
+
+`ExperimentManifest` is the normalization boundary for external Discovery Loop
+evidence. It binds one repository and commit to a frozen dataset split, exact
+harness, strategy, model configuration, environment, grader, trials, traces,
+tokens, latency, cost, and safety outcomes. The manifest is content-addressed;
+changing any trial or provenance field invalidates its digest.
+
+Two independent adapters currently emit this contract:
+
+- explicit provider-neutral JSON;
+- OTLP JSON annotated against OpenTelemetry GenAI revision
+  `1d85c963ea51e9c7d24cc330ff67057f6e90e6c5`.
+
+The OTLP adapter consumes `invoke_agent` or `invoke_workflow` spans but requires
+separate `awe.eval.*` task and grader evidence. Transport/span success is not
+ground truth. Missing or mixed experiment metadata is rejected rather than
+filled with zeroes or inferred values.
+
+## Signed bundles and governed export
+
+Optional signed bundles use Ed25519 over canonical JSON. Verification requires
+an operator-supplied trusted public key and expected signer, repository, and
+commit. An embedded public key proves neither identity nor authorization.
+
+Governed redaction is similarly explicit: an immutable consent record must be
+active, granted for the requested scope, and unexpired at the caller-provided
+UTC evaluation time. The policy can restrict exported top-level fields and add
+sensitive or denied key classes. The summary binds input/output, policy, and
+consent digests without claiming complete data-loss prevention.
+
+## Language boundary
+
+Python/Pydantic remains the only decision engine. `sdk/typescript` is generated
+from the FastAPI OpenAPI document and checked for drift in CI. It provides
+compile-time request/response types; untrusted JSON still crosses the Python
+runtime-validation boundary before it can affect a decision.

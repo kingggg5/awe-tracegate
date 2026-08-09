@@ -5,181 +5,43 @@
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB.svg)](https://www.python.org/)
 
-**Turn repeated agent traces into reviewable workflow candidates—with evidence
-for every admitted dependency and no LLM key required by the verifier.**
+**Prove when repeated agent behavior is reliable enough to review for reuse.**
 
-> **Pre-alpha.** TraceGate compiles, verifies, evaluates, redacts, and records
-> human review. It does not run agents, execute tools, or authorize production
-> actions.
+TraceGate turns typed execution traces into a content-addressed workflow
+candidate, replays the exact evidence, compares frozen evaluations, and records
+a human decision. The verifier is deterministic, offline, and requires no LLM
+credential.
 
-![AWE TraceGate demo](docs/assets/awe-tracegate-demo.png)
+> **Pre-alpha.** TraceGate does not run agents, execute tools, install skills,
+> deploy changes, or authorize production actions.
 
-## Why TraceGate
+![AWE TraceGate Review Workspace](docs/assets/awe-tracegate-demo.jpg)
 
-Agent traces often look repeatable while hiding model decisions, ambiguous data
-flow, unsupported provenance, or unsafe effects. Converting adjacency directly into an
-executable workflow can preserve the wrong behavior and remove the human review
-that made the original run safe.
+The screenshot uses the included synthetic sample. The same workspace accepts
+local JSONL/JSON evidence and calls the real API pipeline.
 
-TraceGate makes the narrow part deterministic: validate typed traces, prove
-explicit bindings, refuse unsupported effects, compare frozen evaluations, and
-emit content-addressed receipts that another machine can replay.
+## Why it exists
 
-## What you get
+Agent traces can look repeatable while hiding model decisions, ambiguous data
+flow, stale evaluations, or unsafe effects. TraceGate refuses to infer around
+those gaps.
 
-- **Fail-closed compilation.** Only repeated `pure` and `read` traces with
-  consistent evidence become a candidate; ambiguity becomes `refused`.
-- **Offline verification.** Recompute candidate, receipt, input-bundle, and
-  exact-trace replay digests without sending code or traces to a model.
-- **Evaluation gates.** Safety violations and quality regressions block;
-  latency or cost regressions require review.
-- **Accountable promotion.** Human decisions locally replay exact traces, then
-  bind the compiled candidate, verification, evaluation, dataset, policy, actor,
-  commit SHA, timestamp, and rationale—without executing the candidate.
-- **Safer sharing.** A conservative JSON redactor removes common secret, PII,
-  and customer-data patterns before evidence leaves its source.
-- **Portable contracts.** Export versioned JSON Schema and use the same typed
-  core through the CLI, FastAPI, or GitHub Action.
+- **Fail closed:** write-like effects, mixed workflow shapes, model-authored
+  bindings, missing evidence, and digest mismatches are refused.
+- **Replay exact evidence:** candidate, input bundle, receipt, and source trace
+  digests are recomputed on every verification.
+- **Compare outcomes:** safety and quality regressions block; latency or cost
+  regressions require review.
+- **Keep provenance:** experiment manifests bind repository, commit, dataset
+  split, harness, strategy, model configuration, grader, tokens, cost, latency,
+  and source traces.
+- **Govern reuse:** redaction, consent, signatures, and a replay-gated human
+  promotion receipt are first-class artifacts.
 
-## Workflow
+`PASS` means the supplied evidence satisfied the configured policy. It does not
+mean the candidate is universally safe or approved to execute.
 
-TraceGate sits between an agent harness and promotion. The harness may use any
-model or runtime; TraceGate only consumes exported evidence and makes a
-deterministic decision.
-
-```mermaid
-flowchart LR
-    H["Agent or evaluation harness"] --> T["Typed traces<br/>JSONL"]
-    T --> C["Compile evidence"]
-    C -->|"Supported read-only pattern"| R["Candidate + compilation receipt"]
-    C -->|"Ambiguous, mismatched, unsupported, or write-like"| F["REFUSED"]
-
-    R --> V["Replay and verify<br/>exact evidence digests"]
-    V -->|"Invalid or mismatched"| F
-
-    B["Frozen baseline trials"] --> E["Evaluation policy"]
-    N["Candidate trials"] --> E
-    E -->|"Safety or quality regression"| X["BLOCK"]
-    E -->|"Cost or latency regression"| Q["REVIEW"]
-    E -->|"All policy gates pass"| P["Evaluation PASS"]
-
-    V -->|"Valid"| K["Promotion eligibility"]
-    P --> K
-    K --> M["Human promotion decision"]
-    M --> A["Replay-gated promotion receipt"]
-
-    R --> D["Redact secrets, PII,<br/>and customer data"]
-    D --> G["Governed evidence export"]
-```
-
-`PASS` means the supplied evidence satisfies the configured policy. It never
-authorizes execution or proves that a workflow is safe in every environment.
-
-## Architecture
-
-The CLI, API, and GitHub Action are thin adapters over one typed deterministic
-core. Every interface produces the same versioned contracts and decision
-semantics.
-
-```mermaid
-flowchart TB
-    subgraph Producers["Evidence producers — outside TraceGate"]
-        Agent["Agent / workflow runtime"]
-        CI["CI and evaluation harness"]
-    end
-
-    subgraph Interfaces["Interfaces"]
-        Action["GitHub Action"]
-        CLI["awe CLI"]
-        API["FastAPI / OpenAPI"]
-    end
-
-    subgraph Core["Deterministic typed core — no model call"]
-        Contracts["Pydantic contracts<br/>and canonical JSON"]
-        Compiler["Evidence compiler"]
-        Verifier["Receipt verifier"]
-        Evaluator["Evaluation policy engine"]
-        Redactor["Evidence redactor"]
-        Promotion["Human promotion recorder"]
-        Schemas["JSON Schema exporter"]
-
-        Contracts --> Compiler
-        Contracts --> Verifier
-        Contracts --> Evaluator
-        Contracts --> Redactor
-        Contracts --> Promotion
-        Contracts --> Schemas
-    end
-
-    subgraph Artifacts["Portable artifacts"]
-        Candidate["Workflow candidate"]
-        CompilationReceipt["Compilation receipt"]
-        VerificationResult["Verification result"]
-        EvaluationReceipt["Evaluation receipt"]
-        PromotionReceipt["Promotion receipt"]
-        SanitizedEvidence["Sanitized evidence"]
-        SchemaFiles["Versioned schemas"]
-    end
-
-    Agent --> Action
-    CI --> Action
-    Agent --> CLI
-    CI --> API
-
-    Action --> Contracts
-    CLI --> Contracts
-    API --> Contracts
-
-    Compiler --> Candidate
-    Compiler --> CompilationReceipt
-    Verifier --> VerificationResult
-    Evaluator --> EvaluationReceipt
-    Redactor --> SanitizedEvidence
-    Promotion --> PromotionReceipt
-    Schemas --> SchemaFiles
-```
-
-The trust boundary is deliberate: agent execution, provider credentials, and
-production side effects stay outside TraceGate. Inputs are validated before
-entering the core; outputs are immutable, versioned JSON artifacts that can be
-stored, reviewed, or replayed by another machine.
-
-On GitHub, each diagram can be opened, panned, zoomed, or copied as Mermaid
-source for a design review or architecture decision record.
-
-## AWE vision: evidence before reuse
-
-TraceGate is the verification and governance layer of a broader AWE direction,
-not an autonomous agent runtime. The intended discovery loop is deliberately
-split across trust boundaries: a runtime or evaluation harness may explore and
-measure alternatives; TraceGate decides only whether the exported evidence is
-sufficient to compile, evaluate, and record a human decision.
-
-```mermaid
-flowchart LR
-    G["User goal"] --> H["Runtime or harness<br/>(future: separate system)"]
-    H --> T["Execution traces<br/>awe.trace.v1"]
-    T --> C["TraceGate<br/>(implemented now)<br/>compile · replay · evaluate · promote"]
-    C -->|"verified + PASS + human approval"| S["Reviewed workflow candidate"]
-    S --> R["Skill registry or runtime<br/>(future: operator-controlled)"]
-    R --> O["Measured outcomes"]
-    O --> D["Discovery loop<br/>(future: external evaluator)"]
-    D --> H
-```
-
-**Current scope:** repeated trace analysis, deterministic evidence checks,
-frozen evaluation policy, redaction, and replay-gated human promotion.
-
-**Future direction:** a separately reviewed runtime may emit traces and consume
-only reviewed candidates; an external evaluator may compare alternatives and
-feed measured outcomes into the next experiment. TraceGate will not add browser
-control, tool execution, model routing, or automatic promotion to reach that
-vision.
-
-> Repeated success is evidence, not permission. Agents may explore; evidence
-> verifies; humans govern; proven behavior can become reusable software.
-
-## Try it in five minutes
+## Try it locally
 
 Requires Python 3.11 or newer.
 
@@ -187,47 +49,101 @@ Requires Python 3.11 or newer.
 git clone https://github.com/kingggg5/awe-tracegate.git
 cd awe-tracegate
 python -m venv .venv
+python -m pip install -e ".[api]"
+awe serve
 ```
 
-Activate `.venv`, then install:
+Open [http://127.0.0.1:8765](http://127.0.0.1:8765). The command bar supports
+real local actions such as `validate evidence`, `/files`, `/export`, `/tools`,
+and `/help`; it is not a simulated AI chat.
 
-```bash
-python -m pip install -e ".[api,dev]"
-```
-
-Compile the included synthetic repository-analysis traces:
+For the CLI-only path:
 
 ```bash
 awe compile \
   --traces examples/repo_analysis/traces.jsonl \
-  --out receipt.json
-```
+  --out compilation.json
 
-Replay the receipt against the exact source evidence:
-
-```bash
 awe verify \
-  --receipt receipt.json \
-  --traces examples/repo_analysis/traces.jsonl
+  --receipt compilation.json \
+  --traces examples/repo_analysis/traces.jsonl \
+  --out verification.json
 ```
 
-Expected verification:
+Exit code `0` means the requested gate passed, `2` means a valid refusal,
+review, block, or invalid receipt, and `1` means malformed input or an execution
+error.
 
-```json
-{
-  "schema_version": "awe.receipt-verification.v2",
-  "status": "valid",
-  "traces_verified": true,
-  "receipt_hash": "sha256:f4bab189f87c108abdd2ae12791391b24288056788865b099d017aaca0fe22ed",
-  "verification_hash": "sha256:ea9d3349e70baeae7796ba1db0ff14ac69ed7e52fc054160558bff56a9a7c767",
-  "reasons": []
-}
+## How the evidence loop works
+
+```mermaid
+flowchart LR
+    H["Agent or evaluation harness"] --> T["Typed traces and frozen trials"]
+    T --> C["Compile explicit read-only bindings"]
+    C -->|"unsupported or ambiguous"| R["REFUSED"]
+    C -->|"candidate"| V["Replay exact evidence"]
+    V -->|"mismatch"| R
+    V --> E["Compare baseline and candidate"]
+    E -->|"safety or quality regression"| B["BLOCK"]
+    E -->|"latency or cost regression"| Q["REVIEW"]
+    E -->|"policy satisfied"| P["PASS"]
+    P --> M["Human decision receipt"]
+    Q --> M
 ```
 
-The examples are synthetic and demonstrate contract behavior, not a production
-performance claim.
+The harness may use any model or runtime. TraceGate consumes exported evidence
+only; model calls and provider credentials remain outside the trusted core.
 
-## Gate a pull request
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Producers["Evidence producers — outside the trust boundary"]
+        Agent["Agent runtime"]
+        Eval["Evaluation harness"]
+        OTel["Pinned OTLP GenAI exporter"]
+    end
+
+    subgraph Interfaces["Interfaces"]
+        UI["Review Workspace"]
+        CLI["awe CLI"]
+        API["FastAPI / OpenAPI"]
+        Action["GitHub Action"]
+        TS["Generated TypeScript client"]
+    end
+
+    subgraph Core["One typed deterministic core"]
+        Contracts["Strict Pydantic contracts"]
+        Compiler["Evidence compiler"]
+        Verifier["Exact replay verifier"]
+        Evaluator["Policy evaluator"]
+        Governance["Redaction · consent · signatures · promotion"]
+    end
+
+    subgraph Artifacts["Portable immutable artifacts"]
+        Candidate["Workflow candidate"]
+        Receipts["Compilation · verification · evaluation receipts"]
+        Manifest["Experiment manifest"]
+        Promotion["Human promotion receipt"]
+    end
+
+    Producers --> Interfaces --> Contracts
+    Contracts --> Compiler --> Candidate
+    Contracts --> Verifier --> Receipts
+    Contracts --> Evaluator --> Receipts
+    Contracts --> Governance --> Manifest
+    Governance --> Promotion
+```
+
+Python/Pydantic remains the reference decision engine. The TypeScript package is
+a generated integration client, not a second implementation. A C#/.NET or Rust
+rewrite must first demonstrate byte-identical golden receipts plus measured
+cold-start, peak-RSS, binary-size, and throughput gains.
+
+## GitHub Action
+
+The latest released Action is `v0.2.0`. Pin a reviewed commit SHA in protected
+repositories.
 
 ```yaml
 name: AWE TraceGate
@@ -250,116 +166,105 @@ jobs:
           evaluation-policy: evidence/policy.json
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
-          name: awe-receipt
+          name: awe-receipts
           path: |
             awe-compilation-receipt.json
             awe-verification-receipt.json
 ```
 
-For protected repositories, pin third-party actions to a reviewed full commit
-SHA. The verifier itself needs no model-provider credential; generating new
-agent trials may still use your existing harness or provider.
+Generating agent trials may still require the credentials of your existing
+harness. The TraceGate verifier itself does not.
 
-## CLI
+## Real repository pilot
 
-| Command | Purpose | Success |
-| --- | --- | --- |
-| `awe compile` | Compile repeated read-only traces or refuse | compiled |
-| `awe verify` | Recompute a receipt and optional source traces | valid |
-| `awe evaluate` | Compare candidate and frozen baseline | pass |
-| `awe redact` | Redact common sensitive JSON fields and values | completed |
-| `awe promote` | Record an actor-bound human verdict | recorded |
-| `awe schema` | Export versioned integration contracts | exported |
+The first maintainer-run compatibility pilot uses
+[`pallets/itsdangerous`](https://github.com/pallets/itsdangerous) at exact commit
+`672971d66a2ef9f85151e53283113f33d642dabd`.
 
-Exit code `0` means the requested gate passed, `2` means a valid refusal,
-review, block, or invalid receipt, and `1` means malformed input or execution
-error.
+- The upstream suite passed: **297 tests**.
+- A clean Windows/Python 3.12 install from the local checkout reached an exact
+  replay result in **14.51 seconds**.
+- TraceGate compiled and replayed two read-only repository-analysis traces:
+  `status=valid`, `traces_verified=true`.
+- Only file paths, sizes, and SHA-256 digests are retained; no upstream source
+  content is redistributed.
 
-Evaluate the included frozen example:
+See the [pilot manifest](examples/external_pilot/itsdangerous/pilot.json),
+[source traces](examples/external_pilot/itsdangerous/traces.jsonl), and
+[verification receipt](examples/external_pilot/itsdangerous/verification.json).
+This is compatibility evidence, not an external-adopter or production-safety
+claim.
 
-```bash
-awe evaluate \
-  --baseline examples/evaluation/baseline.json \
-  --candidate examples/evaluation/candidate.json \
-  --policy examples/evaluation/policy.json
+## Discovery loop direction
+
+TraceGate already implements the governance half of a discovery loop:
+
+```text
+external runtime explores → exports traces and frozen trials
+TraceGate compiles → replays → evaluates → records human review
+approved candidate returns to an operator-controlled registry or runtime
 ```
 
-Export integration schemas:
+A future **AWE Workspace** may provide goals, task sessions, browser/code/file
+tools, and research orchestration behind explicit permissions. That runtime
+should be a separate security boundary. It must never let prompt text or agent
+prose override TraceGate evidence.
+
+This is intentionally different from building another general agent desktop
+inside the verifier. Existing systems already own agent execution; TraceGate's
+useful distinction is the promotion receipt between discovery and reuse.
+
+## Interfaces
+
+| Surface | Purpose |
+| --- | --- |
+| Review Workspace | Command-led local review over the real API chain |
+| `awe` CLI | Compile, verify, evaluate, import, redact, sign, and promote |
+| FastAPI / OpenAPI | Typed private integration surface |
+| GitHub Action | Branch-protection-ready deterministic gate |
+| TypeScript client | Generated API integration with drift checks |
+| Generic and OTLP importers | Normalize external experiment evidence |
+
+Run `awe --help` for all commands. Export versioned schemas with:
 
 ```bash
 awe schema --out-dir schemas
 ```
 
-Record a human decision only after independently replaying the exact trace set:
+## Project status
 
-```bash
-awe promote \
-  --compilation receipt.json \
-  --verification verification.json \
-  --traces examples/repo_analysis/traces.jsonl \
-  --evaluation evaluation.json \
-  --decision approved \
-  --actor maintainer@example.com \
-  --commit-sha <40-or-64-character-commit-sha> \
-  --issued-at 2026-08-08T00:00:00Z \
-  --rationale "Reviewed the replayed evidence chain." \
-  --out promotion.json
-```
+**Implemented now**
 
-Run the optional local API:
+- deterministic compilation and exact replay;
+- frozen baseline/candidate evaluation;
+- generic and pinned OTLP experiment import;
+- governed redaction and consent checks;
+- optional Ed25519 bundles;
+- replay-gated human decisions;
+- local command workspace, Action, API, and TypeScript client.
 
-```bash
-uvicorn awe_tracegate.api:app --reload
-```
+**Before calling v0.3 production-ready**
 
-Typed endpoints are available at `/v1/compile`, `/v1/verify`, `/v1/evaluate`,
-and `/v1/promote`; generated OpenAPI documentation is at `/docs`.
+- one independent external adopter and a repeatable under-10-minute onboarding;
+- reviewed immutable v0.3 tag and Action smoke test from that tag;
+- authenticated actors and an append-only receipt ledger;
+- a production deployment profile with tenancy and rate limiting.
 
-## Decision model
+Signed `.exe` and `.dmg` installers are not shipped yet. The current priority is
+a reliable CLI/web workflow. A Tauri 2 desktop shell is justified only after
+usage proves that native file integration outweighs sidecar, code-signing,
+notarization, updater-key, and multi-platform release complexity.
 
-```text
-typed traces -> evidence compiler -> compiled / refused
-                                      |
-frozen trials -> evaluation policy -> pass / review / block
-                                      |
-exact receipt -> offline verifier  -> valid / invalid
-                                      |
-human actor   -> replay-gated promotion record -> approved / rejected
-```
+## Community
 
-`compiled` means the supplied evidence supports the emitted read-only
-structure. It does not mean the workflow is semantically correct, causally
-proven, authenticated, or safe to execute in production.
+- [Request an external pilot](https://github.com/kingggg5/awe-tracegate/issues/new?template=pilot_request.yml)
+- [Report a bug](https://github.com/kingggg5/awe-tracegate/issues/new?template=bug_report.yml)
+- [Propose a feature](https://github.com/kingggg5/awe-tracegate/issues/new?template=feature_request.yml)
+- Read [Contributing](CONTRIBUTING.md), [Security](SECURITY.md), and the
+  [technical threat model](docs/security.md).
 
-## Good fits
-
-- Reviewing a prompt, skill, or harness change before promotion.
-- Turning repeated read-only support or repository-analysis traces into a
-  candidate for further evaluation.
-- Producing a commit-attached evidence artifact for CI or an audit review.
-- Rejecting mismatched, ambiguous, unsupported, or write-like evidence early.
-- Preparing redacted, typed examples for a governed evaluation corpus.
-
-TraceGate is not a replacement for LangGraph, Temporal, an observability
-backend, or a sandbox. It integrates around runtimes instead of owning agent
-execution.
-
-## Security and project status
-
-- SHA-256 receipts provide content integrity, not signer identity. Release
-  artifacts use GitHub/Sigstore provenance; receipt signing is a later layer.
-- Promotion approval requires an exact trace replay and matching compilation,
-  verification, and evaluation digests. It is still an asserted human identity,
-  not an identity-provider-backed authorization.
-- The redactor covers explicit rules and common patterns; it is not a complete
-  data-loss-prevention system. Review exported evidence before sharing it.
-- The local API has no internet-facing authentication, tenancy, or rate-limit
-  profile.
-- Linear, identical trace shapes are supported today. Sparse branching is
-  intentionally refused rather than guessed.
-
-See the [security model](docs/security.md) and
-[responsible disclosure policy](SECURITY.md) before integrating real evidence.
+The best contributions are new evidence adapters, adversarial fixtures, and
+reproducible public pilots—not additional autonomous execution paths.
 
 ## Documentation
 
@@ -367,7 +272,6 @@ See the [security model](docs/security.md) and
 - [Security model](docs/security.md)
 - [Related work and differentiation](docs/related-work.md)
 - [Roadmap](docs/roadmap.md)
-- [Contributing](CONTRIBUTING.md)
 - [Changelog](CHANGELOG.md)
 
 ## License

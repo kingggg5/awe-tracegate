@@ -1,0 +1,1764 @@
+{
+  "components": {
+    "schemas": {
+      "CompilationCandidate": {
+        "additionalProperties": false,
+        "description": "Declarative candidate; it is safe to evaluate, not auto-promote.",
+        "properties": {
+          "candidate_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Candidate Digest",
+            "type": "string"
+          },
+          "dependencies": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/DependencyEvidence"
+            },
+            "title": "Dependencies",
+            "type": "array"
+          },
+          "effect_scope": {
+            "const": "pure_or_read",
+            "default": "pure_or_read",
+            "title": "Effect Scope",
+            "type": "string"
+          },
+          "intent": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Intent",
+            "type": "string"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/CompiledNode"
+            },
+            "minItems": 1,
+            "title": "Nodes",
+            "type": "array"
+          },
+          "schema_version": {
+            "const": "awe.candidate.v1",
+            "default": "awe.candidate.v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source_trace_ids": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+              "type": "string"
+            },
+            "minItems": 2,
+            "title": "Source Trace Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "candidate_digest",
+          "intent",
+          "source_trace_ids",
+          "nodes"
+        ],
+        "title": "CompilationCandidate",
+        "type": "object"
+      },
+      "CompilationReceipt": {
+        "additionalProperties": false,
+        "description": "Deterministic receipt for either compilation or a safe refusal.",
+        "properties": {
+          "candidate": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompilationCandidate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "compiler_version": {
+            "const": "awe.compiler.v1",
+            "default": "awe.compiler.v1",
+            "title": "Compiler Version",
+            "type": "string"
+          },
+          "input_bundle_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Input Bundle Digest",
+            "type": "string"
+          },
+          "reasons": {
+            "default": [],
+            "items": {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "receipt_hash": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Receipt Hash",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "awe.compilation-receipt.v1",
+            "default": "awe.compilation-receipt.v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "compiled",
+              "refused"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "input_bundle_digest",
+          "status",
+          "receipt_hash"
+        ],
+        "title": "CompilationReceipt",
+        "type": "object"
+      },
+      "CompileRequest": {
+        "additionalProperties": false,
+        "description": "Trace set proposed for compilation.",
+        "properties": {
+          "traces": {
+            "items": {
+              "$ref": "#/components/schemas/ExecutionTrace"
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Traces",
+            "type": "array"
+          }
+        },
+        "required": [
+          "traces"
+        ],
+        "title": "CompileRequest",
+        "type": "object"
+      },
+      "CompiledBinding": {
+        "additionalProperties": false,
+        "description": "Binding retained in a declarative compiled candidate.",
+        "properties": {
+          "input_name": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Input Name",
+            "type": "string"
+          },
+          "source_field": {
+            "maxLength": 256,
+            "minLength": 2,
+            "pattern": "^/(?:[^~\\x00-\\x1f]|~[01])+$",
+            "title": "Source Field",
+            "type": "string"
+          },
+          "source_kind": {
+            "enum": [
+              "workflow_input",
+              "step_output"
+            ],
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "source_node": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "pattern": "^[a-z][a-z0-9_]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Node"
+          }
+        },
+        "required": [
+          "input_name",
+          "source_kind",
+          "source_field"
+        ],
+        "title": "CompiledBinding",
+        "type": "object"
+      },
+      "CompiledNode": {
+        "additionalProperties": false,
+        "description": "Read-only node emitted into a candidate workflow.",
+        "properties": {
+          "effect": {
+            "enum": [
+              "pure",
+              "read"
+            ],
+            "title": "Effect",
+            "type": "string"
+          },
+          "inputs": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CompiledBinding"
+            },
+            "title": "Inputs",
+            "type": "array"
+          },
+          "node_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Node Id",
+            "type": "string"
+          },
+          "output_fields": {
+            "items": {
+              "maxLength": 256,
+              "minLength": 2,
+              "pattern": "^/(?:[^~\\x00-\\x1f]|~[01])+$",
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Output Fields",
+            "type": "array"
+          },
+          "tool": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_.-]*$",
+            "title": "Tool",
+            "type": "string"
+          },
+          "tool_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9.+_-]*$",
+            "title": "Tool Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "node_id",
+          "tool",
+          "tool_version",
+          "effect",
+          "output_fields"
+        ],
+        "title": "CompiledNode",
+        "type": "object"
+      },
+      "DependencyEvidence": {
+        "additionalProperties": false,
+        "description": "Auditable producer-to-consumer dependency observed in every trace.",
+        "properties": {
+          "consumer_input": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Consumer Input",
+            "type": "string"
+          },
+          "consumer_node": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Consumer Node",
+            "type": "string"
+          },
+          "evidence_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Evidence Digest",
+            "type": "string"
+          },
+          "observation_count": {
+            "minimum": 2.0,
+            "title": "Observation Count",
+            "type": "integer"
+          },
+          "producer_field": {
+            "maxLength": 256,
+            "minLength": 2,
+            "pattern": "^/(?:[^~\\x00-\\x1f]|~[01])+$",
+            "title": "Producer Field",
+            "type": "string"
+          },
+          "producer_node": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Producer Node",
+            "type": "string"
+          },
+          "trace_ids": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+              "type": "string"
+            },
+            "minItems": 2,
+            "title": "Trace Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "producer_node",
+          "producer_field",
+          "consumer_node",
+          "consumer_input",
+          "observation_count",
+          "trace_ids",
+          "evidence_digest"
+        ],
+        "title": "DependencyEvidence",
+        "type": "object"
+      },
+      "EvaluateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/EvaluationBundle"
+          },
+          "candidate": {
+            "$ref": "#/components/schemas/EvaluationBundle"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/EvaluationPolicy",
+            "default": {
+              "maximum_cost_increase_bps": 2500,
+              "maximum_latency_increase_bps": 2500,
+              "maximum_success_regression_bps": 200,
+              "minimum_trials": 3,
+              "require_zero_safety_violations": true,
+              "schema_version": "awe.evaluation-policy.v1"
+            }
+          }
+        },
+        "required": [
+          "baseline",
+          "candidate"
+        ],
+        "title": "EvaluateRequest",
+        "type": "object"
+      },
+      "EvaluationBundle": {
+        "additionalProperties": false,
+        "description": "Frozen evaluation results for one exact subject and dataset.",
+        "properties": {
+          "dataset_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Dataset Digest",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "awe.evaluation-bundle.v1",
+            "default": "awe.evaluation-bundle.v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "subject_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Subject Digest",
+            "type": "string"
+          },
+          "trials": {
+            "items": {
+              "$ref": "#/components/schemas/EvaluationTrial"
+            },
+            "maxItems": 100000,
+            "minItems": 1,
+            "title": "Trials",
+            "type": "array"
+          }
+        },
+        "required": [
+          "subject_digest",
+          "dataset_digest",
+          "trials"
+        ],
+        "title": "EvaluationBundle",
+        "type": "object"
+      },
+      "EvaluationMetrics": {
+        "additionalProperties": false,
+        "properties": {
+          "p95_latency_ms": {
+            "minimum": 0.0,
+            "title": "P95 Latency Ms",
+            "type": "integer"
+          },
+          "safety_violations": {
+            "minimum": 0.0,
+            "title": "Safety Violations",
+            "type": "integer"
+          },
+          "success_count": {
+            "minimum": 0.0,
+            "title": "Success Count",
+            "type": "integer"
+          },
+          "success_rate_bps": {
+            "maximum": 10000.0,
+            "minimum": 0.0,
+            "title": "Success Rate Bps",
+            "type": "integer"
+          },
+          "total_cost_microusd": {
+            "minimum": 0.0,
+            "title": "Total Cost Microusd",
+            "type": "integer"
+          },
+          "trial_count": {
+            "minimum": 1.0,
+            "title": "Trial Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "trial_count",
+          "success_count",
+          "success_rate_bps",
+          "safety_violations",
+          "p95_latency_ms",
+          "total_cost_microusd"
+        ],
+        "title": "EvaluationMetrics",
+        "type": "object"
+      },
+      "EvaluationPolicy": {
+        "additionalProperties": false,
+        "description": "Deterministic non-regression and safety policy.",
+        "properties": {
+          "maximum_cost_increase_bps": {
+            "default": 2500,
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Maximum Cost Increase Bps",
+            "type": "integer"
+          },
+          "maximum_latency_increase_bps": {
+            "default": 2500,
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Maximum Latency Increase Bps",
+            "type": "integer"
+          },
+          "maximum_success_regression_bps": {
+            "default": 200,
+            "maximum": 10000.0,
+            "minimum": 0.0,
+            "title": "Maximum Success Regression Bps",
+            "type": "integer"
+          },
+          "minimum_trials": {
+            "default": 3,
+            "maximum": 100000.0,
+            "minimum": 1.0,
+            "title": "Minimum Trials",
+            "type": "integer"
+          },
+          "require_zero_safety_violations": {
+            "default": true,
+            "title": "Require Zero Safety Violations",
+            "type": "boolean"
+          },
+          "schema_version": {
+            "const": "awe.evaluation-policy.v1",
+            "default": "awe.evaluation-policy.v1",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "title": "EvaluationPolicy",
+        "type": "object"
+      },
+      "EvaluationReceipt": {
+        "additionalProperties": false,
+        "description": "Fail-closed comparison of a baseline and candidate on one frozen dataset.",
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/EvaluationMetrics"
+          },
+          "baseline_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Baseline Digest",
+            "type": "string"
+          },
+          "candidate": {
+            "$ref": "#/components/schemas/EvaluationMetrics"
+          },
+          "candidate_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Candidate Digest",
+            "type": "string"
+          },
+          "dataset_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Dataset Digest",
+            "type": "string"
+          },
+          "evaluator_version": {
+            "const": "awe.evaluator.v1",
+            "default": "awe.evaluator.v1",
+            "title": "Evaluator Version",
+            "type": "string"
+          },
+          "policy_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Policy Digest",
+            "type": "string"
+          },
+          "reasons": {
+            "default": [],
+            "items": {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "receipt_hash": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Receipt Hash",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "awe.evaluation-receipt.v1",
+            "default": "awe.evaluation-receipt.v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "review",
+              "block"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "baseline_digest",
+          "candidate_digest",
+          "dataset_digest",
+          "policy_digest",
+          "status",
+          "baseline",
+          "candidate",
+          "receipt_hash"
+        ],
+        "title": "EvaluationReceipt",
+        "type": "object"
+      },
+      "EvaluationTrial": {
+        "additionalProperties": false,
+        "description": "One deterministic outcome record from an external evaluation harness.",
+        "properties": {
+          "case_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "cost_microusd": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Cost Microusd",
+            "type": "integer"
+          },
+          "latency_ms": {
+            "minimum": 0.0,
+            "title": "Latency Ms",
+            "type": "integer"
+          },
+          "safety_violations": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Safety Violations",
+            "type": "integer"
+          },
+          "succeeded": {
+            "title": "Succeeded",
+            "type": "boolean"
+          },
+          "trial_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Trial Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "trial_id",
+          "case_id",
+          "succeeded",
+          "latency_ms"
+        ],
+        "title": "EvaluationTrial",
+        "type": "object"
+      },
+      "ExecutionTrace": {
+        "additionalProperties": false,
+        "description": "Immutable evidence from a single workflow execution.",
+        "properties": {
+          "intent": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Intent",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "awe.trace.v1",
+            "default": "awe.trace.v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/TraceStep"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "title": "Steps",
+            "type": "array"
+          },
+          "succeeded": {
+            "title": "Succeeded",
+            "type": "boolean"
+          },
+          "trace_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Trace Id",
+            "type": "string"
+          },
+          "workflow_inputs": {
+            "items": {
+              "$ref": "#/components/schemas/FieldEvidence"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "title": "Workflow Inputs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "trace_id",
+          "intent",
+          "succeeded",
+          "workflow_inputs",
+          "steps"
+        ],
+        "title": "ExecutionTrace",
+        "type": "object"
+      },
+      "ExperimentManifest": {
+        "additionalProperties": false,
+        "description": "Content-addressed experiment evidence imported from one pinned format.",
+        "properties": {
+          "commit_sha": {
+            "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+            "title": "Commit Sha",
+            "type": "string"
+          },
+          "dataset_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Dataset Digest",
+            "type": "string"
+          },
+          "dataset_split_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Dataset Split Digest",
+            "type": "string"
+          },
+          "environment_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Environment Digest",
+            "type": "string"
+          },
+          "experiment_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Experiment Id",
+            "type": "string"
+          },
+          "grader_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Grader Digest",
+            "type": "string"
+          },
+          "harness_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Harness Digest",
+            "type": "string"
+          },
+          "harness_name": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_.-]*$",
+            "title": "Harness Name",
+            "type": "string"
+          },
+          "harness_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9.+_-]*$",
+            "title": "Harness Version",
+            "type": "string"
+          },
+          "manifest_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Manifest Digest",
+            "type": "string"
+          },
+          "model_config_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Model Config Digest",
+            "type": "string"
+          },
+          "model_name": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Model Name",
+            "type": "string"
+          },
+          "model_provider": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_.-]*$",
+            "title": "Model Provider",
+            "type": "string"
+          },
+          "repository_uri": {
+            "maxLength": 512,
+            "minLength": 12,
+            "pattern": "^https://[A-Za-z0-9.-]+(?::[0-9]{1,5})?/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+$",
+            "title": "Repository Uri",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "awe.experiment-manifest.v1",
+            "default": "awe.experiment-manifest.v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source_format": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_.-]*$",
+            "title": "Source Format",
+            "type": "string"
+          },
+          "source_revision": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9.+_-]*$",
+            "title": "Source Revision",
+            "type": "string"
+          },
+          "strategy_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Strategy Digest",
+            "type": "string"
+          },
+          "strategy_name": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_.-]*$",
+            "title": "Strategy Name",
+            "type": "string"
+          },
+          "subject_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Subject Digest",
+            "type": "string"
+          },
+          "trials": {
+            "items": {
+              "$ref": "#/components/schemas/ExperimentTrial"
+            },
+            "maxItems": 100000,
+            "minItems": 1,
+            "title": "Trials",
+            "type": "array"
+          }
+        },
+        "required": [
+          "experiment_id",
+          "repository_uri",
+          "commit_sha",
+          "subject_digest",
+          "dataset_digest",
+          "dataset_split_digest",
+          "harness_name",
+          "harness_version",
+          "harness_digest",
+          "strategy_name",
+          "strategy_digest",
+          "model_provider",
+          "model_name",
+          "model_config_digest",
+          "environment_digest",
+          "grader_digest",
+          "trials",
+          "source_format",
+          "source_revision",
+          "manifest_digest"
+        ],
+        "title": "ExperimentManifest",
+        "type": "object"
+      },
+      "ExperimentRun": {
+        "additionalProperties": false,
+        "description": "Provider-neutral evidence shared by generic and telemetry importers.",
+        "properties": {
+          "commit_sha": {
+            "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+            "title": "Commit Sha",
+            "type": "string"
+          },
+          "dataset_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Dataset Digest",
+            "type": "string"
+          },
+          "dataset_split_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Dataset Split Digest",
+            "type": "string"
+          },
+          "environment_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Environment Digest",
+            "type": "string"
+          },
+          "experiment_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Experiment Id",
+            "type": "string"
+          },
+          "grader_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Grader Digest",
+            "type": "string"
+          },
+          "harness_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Harness Digest",
+            "type": "string"
+          },
+          "harness_name": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_.-]*$",
+            "title": "Harness Name",
+            "type": "string"
+          },
+          "harness_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9.+_-]*$",
+            "title": "Harness Version",
+            "type": "string"
+          },
+          "model_config_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Model Config Digest",
+            "type": "string"
+          },
+          "model_name": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Model Name",
+            "type": "string"
+          },
+          "model_provider": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_.-]*$",
+            "title": "Model Provider",
+            "type": "string"
+          },
+          "repository_uri": {
+            "maxLength": 512,
+            "minLength": 12,
+            "pattern": "^https://[A-Za-z0-9.-]+(?::[0-9]{1,5})?/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+$",
+            "title": "Repository Uri",
+            "type": "string"
+          },
+          "strategy_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Strategy Digest",
+            "type": "string"
+          },
+          "strategy_name": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_.-]*$",
+            "title": "Strategy Name",
+            "type": "string"
+          },
+          "subject_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Subject Digest",
+            "type": "string"
+          },
+          "trials": {
+            "items": {
+              "$ref": "#/components/schemas/ExperimentTrial"
+            },
+            "maxItems": 100000,
+            "minItems": 1,
+            "title": "Trials",
+            "type": "array"
+          }
+        },
+        "required": [
+          "experiment_id",
+          "repository_uri",
+          "commit_sha",
+          "subject_digest",
+          "dataset_digest",
+          "dataset_split_digest",
+          "harness_name",
+          "harness_version",
+          "harness_digest",
+          "strategy_name",
+          "strategy_digest",
+          "model_provider",
+          "model_name",
+          "model_config_digest",
+          "environment_digest",
+          "grader_digest",
+          "trials"
+        ],
+        "title": "ExperimentRun",
+        "type": "object"
+      },
+      "ExperimentTrial": {
+        "additionalProperties": false,
+        "description": "One frozen trial with quality, safety, token, cost, and trace evidence.",
+        "properties": {
+          "cached_input_tokens": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Cached Input Tokens",
+            "type": "integer"
+          },
+          "case_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "cost_microusd": {
+            "minimum": 0.0,
+            "title": "Cost Microusd",
+            "type": "integer"
+          },
+          "grader_result_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Grader Result Digest",
+            "type": "string"
+          },
+          "input_tokens": {
+            "minimum": 0.0,
+            "title": "Input Tokens",
+            "type": "integer"
+          },
+          "latency_ms": {
+            "minimum": 0.0,
+            "title": "Latency Ms",
+            "type": "integer"
+          },
+          "output_tokens": {
+            "minimum": 0.0,
+            "title": "Output Tokens",
+            "type": "integer"
+          },
+          "safety_violations": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Safety Violations",
+            "type": "integer"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "maximum": 9.223372036854776e+18,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "succeeded": {
+            "title": "Succeeded",
+            "type": "boolean"
+          },
+          "trace_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trace Id"
+          },
+          "trial_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
+            "title": "Trial Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "trial_id",
+          "case_id",
+          "succeeded",
+          "latency_ms",
+          "cost_microusd",
+          "input_tokens",
+          "output_tokens",
+          "grader_result_digest"
+        ],
+        "title": "ExperimentTrial",
+        "type": "object"
+      },
+      "FieldEvidence": {
+        "additionalProperties": false,
+        "description": "Content digest observed at a JSON field boundary.",
+        "properties": {
+          "field": {
+            "maxLength": 256,
+            "minLength": 2,
+            "pattern": "^/(?:[^~\\x00-\\x1f]|~[01])+$",
+            "title": "Field",
+            "type": "string"
+          },
+          "value_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Value Digest",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "value_digest"
+        ],
+        "title": "FieldEvidence",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "const": "offline_keyless",
+            "default": "offline_keyless",
+            "title": "Mode",
+            "type": "string"
+          },
+          "status": {
+            "const": "ok",
+            "default": "ok",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "PromotionReceipt": {
+        "additionalProperties": false,
+        "description": "Human decision bound to a verified compilation and evaluation chain.",
+        "properties": {
+          "actor_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:@+-]*$",
+            "title": "Actor Id",
+            "type": "string"
+          },
+          "candidate_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Candidate Digest",
+            "type": "string"
+          },
+          "commit_sha": {
+            "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+            "title": "Commit Sha",
+            "type": "string"
+          },
+          "compilation_receipt_hash": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Compilation Receipt Hash",
+            "type": "string"
+          },
+          "dataset_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Dataset Digest",
+            "type": "string"
+          },
+          "decision": {
+            "enum": [
+              "approved",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "evaluation_receipt_hash": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Evaluation Receipt Hash",
+            "type": "string"
+          },
+          "evaluation_status": {
+            "enum": [
+              "pass",
+              "review",
+              "block"
+            ],
+            "title": "Evaluation Status",
+            "type": "string"
+          },
+          "input_bundle_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Input Bundle Digest",
+            "type": "string"
+          },
+          "issued_at": {
+            "format": "date-time",
+            "title": "Issued At",
+            "type": "string"
+          },
+          "policy_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Policy Digest",
+            "type": "string"
+          },
+          "rationale": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Rationale",
+            "type": "string"
+          },
+          "receipt_hash": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Receipt Hash",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "awe.promotion-receipt.v2",
+            "default": "awe.promotion-receipt.v2",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "traces_verified": {
+            "title": "Traces Verified",
+            "type": "boolean"
+          },
+          "verification_receipt_hash": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Verification Receipt Hash",
+            "type": "string"
+          },
+          "verification_status": {
+            "enum": [
+              "valid",
+              "invalid"
+            ],
+            "title": "Verification Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "candidate_digest",
+          "compilation_receipt_hash",
+          "input_bundle_digest",
+          "verification_receipt_hash",
+          "verification_status",
+          "traces_verified",
+          "evaluation_receipt_hash",
+          "evaluation_status",
+          "dataset_digest",
+          "policy_digest",
+          "decision",
+          "actor_id",
+          "commit_sha",
+          "issued_at",
+          "rationale",
+          "receipt_hash"
+        ],
+        "title": "PromotionReceipt",
+        "type": "object"
+      },
+      "PromotionRequest": {
+        "additionalProperties": false,
+        "description": "Evidence inputs required to record a human promotion decision.",
+        "properties": {
+          "actor_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:@+-]*$",
+            "title": "Actor Id",
+            "type": "string"
+          },
+          "commit_sha": {
+            "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+            "title": "Commit Sha",
+            "type": "string"
+          },
+          "compilation": {
+            "$ref": "#/components/schemas/CompilationReceipt"
+          },
+          "decision": {
+            "enum": [
+              "approved",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "evaluation": {
+            "$ref": "#/components/schemas/EvaluationReceipt"
+          },
+          "issued_at": {
+            "format": "date-time",
+            "title": "Issued At",
+            "type": "string"
+          },
+          "rationale": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Rationale",
+            "type": "string"
+          },
+          "traces": {
+            "items": {
+              "$ref": "#/components/schemas/ExecutionTrace"
+            },
+            "title": "Traces",
+            "type": "array"
+          },
+          "verification": {
+            "$ref": "#/components/schemas/ReceiptVerification"
+          }
+        },
+        "required": [
+          "compilation",
+          "verification",
+          "traces",
+          "evaluation",
+          "decision",
+          "actor_id",
+          "commit_sha",
+          "issued_at",
+          "rationale"
+        ],
+        "title": "PromotionRequest",
+        "type": "object"
+      },
+      "ReceiptVerification": {
+        "additionalProperties": false,
+        "description": "Result of recomputing a compilation receipt and optional source traces.",
+        "properties": {
+          "reasons": {
+            "default": [],
+            "items": {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "receipt_hash": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Receipt Hash",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "awe.receipt-verification.v2",
+            "default": "awe.receipt-verification.v2",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "valid",
+              "invalid"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "traces_verified": {
+            "title": "Traces Verified",
+            "type": "boolean"
+          },
+          "verification_hash": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Verification Hash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "receipt_hash",
+          "traces_verified",
+          "verification_hash"
+        ],
+        "title": "ReceiptVerification",
+        "type": "object"
+      },
+      "TraceBinding": {
+        "additionalProperties": false,
+        "description": "Observed input binding for one executed step.",
+        "properties": {
+          "input_name": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Input Name",
+            "type": "string"
+          },
+          "observed_value_digest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Observed Value Digest",
+            "type": "string"
+          },
+          "source_field": {
+            "maxLength": 256,
+            "minLength": 2,
+            "pattern": "^/(?:[^~\\x00-\\x1f]|~[01])+$",
+            "title": "Source Field",
+            "type": "string"
+          },
+          "source_kind": {
+            "enum": [
+              "workflow_input",
+              "step_output",
+              "model_decision"
+            ],
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "source_node": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "pattern": "^[a-z][a-z0-9_]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Node"
+          }
+        },
+        "required": [
+          "input_name",
+          "source_kind",
+          "source_field",
+          "observed_value_digest"
+        ],
+        "title": "TraceBinding",
+        "type": "object"
+      },
+      "TraceStep": {
+        "additionalProperties": false,
+        "description": "One typed activity observed in an execution trace.",
+        "properties": {
+          "effect": {
+            "enum": [
+              "pure",
+              "read",
+              "write",
+              "high_impact"
+            ],
+            "title": "Effect",
+            "type": "string"
+          },
+          "inputs": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TraceBinding"
+            },
+            "maxItems": 256,
+            "title": "Inputs",
+            "type": "array"
+          },
+          "node_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Node Id",
+            "type": "string"
+          },
+          "outputs": {
+            "items": {
+              "$ref": "#/components/schemas/FieldEvidence"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "title": "Outputs",
+            "type": "array"
+          },
+          "tool": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_.-]*$",
+            "title": "Tool",
+            "type": "string"
+          },
+          "tool_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9.+_-]*$",
+            "title": "Tool Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "node_id",
+          "tool",
+          "tool_version",
+          "effect",
+          "outputs"
+        ],
+        "title": "TraceStep",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "VerifyRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/CompilationReceipt"
+          },
+          "traces": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ExecutionTrace"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Traces"
+          }
+        },
+        "required": [
+          "receipt"
+        ],
+        "title": "VerifyRequest",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Evidence-gated, read-only trace compiler and verifier",
+    "title": "AWE TraceGate",
+    "version": "0.2.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/healthz": {
+      "get": {
+        "operationId": "health_healthz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/v1/compile": {
+      "post": {
+        "operationId": "compile_workflow_v1_compile_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompilationReceipt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Compile Workflow"
+      }
+    },
+    "/v1/evaluate": {
+      "post": {
+        "operationId": "evaluate_v1_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationReceipt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Evaluate"
+      }
+    },
+    "/v1/experiments/import/generic": {
+      "post": {
+        "operationId": "import_experiment_v1_experiments_import_generic_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentRun"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentManifest"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Import Experiment"
+      }
+    },
+    "/v1/promote": {
+      "post": {
+        "operationId": "promote_v1_promote_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromotionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromotionReceipt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Promote"
+      }
+    },
+    "/v1/verify": {
+      "post": {
+        "operationId": "verify_receipt_v1_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptVerification"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify Receipt"
+      }
+    }
+  }
+}

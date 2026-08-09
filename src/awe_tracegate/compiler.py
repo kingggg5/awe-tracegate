@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from typing import Any
 
 from .contracts import (
+    PENDING_SHA256_DIGEST,
     CompilationCandidate,
     CompilationReceipt,
     CompiledBinding,
@@ -74,7 +75,7 @@ def _refused(input_digest: str, *reasons: str) -> CompilationReceipt:
         input_bundle_digest=input_digest,
         status="refused",
         reasons=tuple(sorted(set(reasons))),
-        receipt_hash="sha256:" + "0" * 64,
+        receipt_hash=PENDING_SHA256_DIGEST,
     )
     return receipt.model_copy(
         update={"receipt_hash": canonical_digest(receipt_payload(receipt))}
@@ -89,7 +90,7 @@ def _compiled(
         input_bundle_digest=input_digest,
         status="compiled",
         candidate=candidate,
-        receipt_hash="sha256:" + "0" * 64,
+        receipt_hash=PENDING_SHA256_DIGEST,
     )
     return receipt.model_copy(
         update={"receipt_hash": canonical_digest(receipt_payload(receipt))}
@@ -196,6 +197,22 @@ def _build_dependencies(
     reference = traces[0]
     trace_ids = tuple(trace.trace_id for trace in traces)
     dependencies: list[DependencyEvidence] = []
+    observations_by_binding: dict[tuple[str, str], list[dict[str, str]]] = {}
+
+    # Shapes are proven equal before candidate construction. Index each observed
+    # binding once instead of rescanning every trace for every reference node.
+    for trace in traces:
+        for step in trace.steps:
+            for binding in step.inputs:
+                if binding.source_kind != "step_output":
+                    continue
+                key = (step.node_id, binding.input_name)
+                observations_by_binding.setdefault(key, []).append(
+                    {
+                        "trace_id": trace.trace_id,
+                        "value_digest": binding.observed_value_digest,
+                    }
+                )
 
     for step in reference.steps:
         for binding in sorted(step.inputs, key=lambda item: item.input_name):
@@ -204,19 +221,7 @@ def _build_dependencies(
             source_node = binding.source_node
             if source_node is None:
                 raise ValueError("validated step_output binding lacks source_node")
-            observations = [
-                {
-                    "trace_id": trace.trace_id,
-                    "value_digest": next(
-                        candidate.observed_value_digest
-                        for trace_step in trace.steps
-                        if trace_step.node_id == step.node_id
-                        for candidate in trace_step.inputs
-                        if candidate.input_name == binding.input_name
-                    ),
-                }
-                for trace in traces
-            ]
+            observations = observations_by_binding[(step.node_id, binding.input_name)]
             dependencies.append(
                 DependencyEvidence(
                     producer_node=source_node,
@@ -308,7 +313,7 @@ def compile_traces(traces: Sequence[ExecutionTrace]) -> CompilationReceipt:
     nodes = _build_nodes(reference)
     dependencies = _build_dependencies(ordered_traces)
     candidate = CompilationCandidate(
-        candidate_digest="sha256:" + "0" * 64,
+        candidate_digest=PENDING_SHA256_DIGEST,
         intent=reference.intent,
         source_trace_ids=tuple(trace_ids),
         nodes=nodes,

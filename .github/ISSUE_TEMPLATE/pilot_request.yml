@@ -1,0 +1,54 @@
+name: External pilot request
+description: Test a real read-only agent or evaluation workflow against TraceGate.
+title: "pilot: "
+labels: ["pilot"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for a reproducible, read-only pilot. Do not attach secrets,
+        customer data, private traces, or provider credentials to a public issue.
+  - type: input
+    id: repository
+    attributes:
+      label: Public repository or harness
+      description: Link to the public source and pin the exact commit or release.
+      placeholder: https://github.com/owner/project @ 40-character SHA
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Workflow to evaluate
+      description: Describe the repeated read-only behavior and the evidence it emits.
+      placeholder: The harness reads... then exports...
+    validations:
+      required: true
+  - type: dropdown
+    id: evidence
+    attributes:
+      label: Evidence format
+      options:
+        - awe.trace.v1 JSONL
+        - Generic experiment JSON
+        - Pinned OTLP GenAI JSON
+        - Needs an adapter
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Include exact install, test, and export commands using public data only.
+      render: shell
+    validations:
+      required: true
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Public-data confirmation
+      options:
+        - label: I confirm that the issue and linked evidence contain no secrets, PII, private source, or customer data.
+          required: true
+        - label: I understand that a pilot is compatibility evidence, not a production-safety certification.
+          required: true
