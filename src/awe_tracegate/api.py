@@ -4,7 +4,7 @@ from functools import cache
 from importlib.resources import files
 
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 
 from . import __version__
 from .adapters import import_generic_evaluation
@@ -39,6 +39,19 @@ def _review_workspace_page() -> str:
     )
 
 
+@cache
+def _review_workspace_font() -> bytes:
+    """Load the bundled accessible UI font once per process."""
+
+    return (
+        files("awe_tracegate")
+        .joinpath("web")
+        .joinpath("fonts")
+        .joinpath("AtkinsonHyperlegibleNext-Variable.ttf")
+        .read_bytes()
+    )
+
+
 def create_app() -> FastAPI:
     application = FastAPI(
         title="AWE TraceGate",
@@ -55,6 +68,20 @@ def create_app() -> FastAPI:
         """Serve the local evidence-review surface without external assets."""
 
         return HTMLResponse(content=_review_workspace_page())
+
+    @application.get(
+        "/assets/atkinson-hyperlegible-next.ttf",
+        response_class=Response,
+        include_in_schema=False,
+    )
+    def review_workspace_font() -> Response:
+        """Serve the locally bundled font without a runtime CDN dependency."""
+
+        return Response(
+            content=_review_workspace_font(),
+            media_type="font/ttf",
+            headers={"Cache-Control": "public, max-age=31536000, immutable"},
+        )
 
     @application.post("/v1/compile", response_model=CompilationReceipt)
     def compile_workflow(request: CompileRequest) -> CompilationReceipt:

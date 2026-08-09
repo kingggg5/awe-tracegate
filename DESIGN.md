@@ -17,60 +17,59 @@ colors:
   disabled-text: "#8b95a3"
 typography:
   display:
-    fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+    fontFamily: "Atkinson Hyperlegible Next, Segoe UI Variable Text, Noto Sans Thai, Leelawadee UI, Segoe UI, Arial, sans-serif"
     fontSize: "clamp(2.25rem, 5vw, 4.6rem)"
     fontWeight: 720
     lineHeight: 0.98
     letterSpacing: "-0.04em"
   body:
-    fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+    fontFamily: "Atkinson Hyperlegible Next, Segoe UI Variable Text, Noto Sans Thai, Leelawadee UI, Segoe UI, Arial, sans-serif"
     fontSize: "15px"
     fontWeight: 400
     lineHeight: 1.55
   intro:
-    fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+    fontFamily: "Atkinson Hyperlegible Next, Segoe UI Variable Text, Noto Sans Thai, Leelawadee UI, Segoe UI, Arial, sans-serif"
     fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.55
   heading:
-    fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+    fontFamily: "Atkinson Hyperlegible Next, Segoe UI Variable Text, Noto Sans Thai, Leelawadee UI, Segoe UI, Arial, sans-serif"
     fontSize: "19px"
     fontWeight: 700
     lineHeight: 1.3
   title:
-    fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+    fontFamily: "Atkinson Hyperlegible Next, Segoe UI Variable Text, Noto Sans Thai, Leelawadee UI, Segoe UI, Arial, sans-serif"
     fontSize: "14px"
     fontWeight: 700
     lineHeight: 1.4
   compact:
-    fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+    fontFamily: "Atkinson Hyperlegible Next, Segoe UI Variable Text, Noto Sans Thai, Leelawadee UI, Segoe UI, Arial, sans-serif"
     fontSize: "13px"
     fontWeight: 400
     lineHeight: 1.45
   metadata:
-    fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
-    fontSize: "12px"
+    fontFamily: "Atkinson Hyperlegible Next, Segoe UI Variable Text, Noto Sans Thai, Leelawadee UI, Segoe UI, Arial, sans-serif"
+    fontSize: "13px"
     fontWeight: 650
     lineHeight: 1.4
   label:
-    fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
-    fontSize: "11px"
+    fontFamily: "Atkinson Hyperlegible Next, Segoe UI Variable Text, Noto Sans Thai, Leelawadee UI, Segoe UI, Arial, sans-serif"
+    fontSize: "13px"
     fontWeight: 650
     lineHeight: 1.4
   mobile-display:
-    fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+    fontFamily: "Atkinson Hyperlegible Next, Segoe UI Variable Text, Noto Sans Thai, Leelawadee UI, Segoe UI, Arial, sans-serif"
     fontSize: "2.55rem"
     fontWeight: 720
     lineHeight: 0.98
   evidence:
     fontFamily: "ui-monospace, SFMono-Regular, Consolas, Liberation Mono, monospace"
-    fontSize: "10px"
+    fontSize: "12px"
     fontWeight: 400
 rounded:
   control: "8px"
   brand: "9px"
   compact-surface: "10px"
-  command: "13px"
   surface: "14px"
   app-shell: "16px"
   status: "999px"
@@ -111,6 +110,14 @@ terminal or filling the screen with dashboard cards.
 - Status color is rare and always paired with explicit text.
 - Digests and structured evidence use monospace; product language does not.
 
+## Surface naming and product boundary
+
+- **AWE TraceGate** is the deterministic evidence gate.
+- **TraceGate Review** is the local review UI shipped by this repository.
+- **AWE Workspace** is a separate companion application for goals, tools, task
+  sessions, and future agent runtimes. Do not use that name for TraceGate
+  Review or imply that the verifier can execute work.
+
 ## Colors
 
 The restrained daylight palette uses Cool Paper as the page field, Graphite for
@@ -124,24 +131,29 @@ all color is removed.
 
 ## Typography
 
-**Display Font:** native UI sans with system fallbacks
+**Display Font:** Atkinson Hyperlegible Next with system fallbacks
 
-**Body Font:** native UI sans with system fallbacks
+**Body Font:** Atkinson Hyperlegible Next with system fallbacks
 
 **Evidence Font:** native monospace with Consolas and Liberation Mono fallbacks
 
-Hierarchy comes from size, weight, and spacing rather than uppercase labels.
-The display headline uses a tight, balanced scale; body copy stays below 68ch.
-Only hashes, node IDs, code, and measured machine values use monospace.
+The variable font is self-hosted from the packaged `/assets` route so the local
+review surface does not depend on a font CDN. Its
+[OFL license](src/awe_tracegate/web/fonts/OFL.txt) travels beside the font
+source. The fallback stack includes Segoe UI Variable Text, Noto Sans Thai, and
+Leelawadee UI for clear Latin and Thai text. Hierarchy comes from size, weight,
+and spacing rather than uppercase labels. The display headline uses a tight,
+balanced scale; body copy stays below 68ch. Only hashes, node IDs, code, and
+measured machine values use monospace.
 
 ## Layout
 
-The desktop app frame uses a 244px pale-blue workspace rail beside a flexible
-evidence surface. The five-stage review path is horizontal so navigation and
-review progress never become nested sidebars. Below 920px the rail becomes a
-compact route bar, while the ordered path remains horizontally scrollable
-without page-level overflow. Section rhythm is 28px; control groups use 8px
-gaps.
+The desktop TraceGate Review frame uses a 244px pale-blue navigation rail beside
+a flexible evidence surface. The five-stage review path is horizontal so
+navigation and review progress never become nested sidebars. Below 920px the
+rail becomes a compact route bar, while the ordered path remains horizontally
+scrollable without page-level overflow. Section rhythm is 28px; control groups
+use 8px gaps.
 
 ## Elevation & Depth
 
@@ -160,7 +172,7 @@ tags are pill-shaped only when their compact form communicates one state.
 
 ### Buttons
 
-- **Primary:** Action Blue, white text, 8px corners, 40px minimum height.
+- **Primary:** Action Blue, white text, 8px corners, 44px minimum height.
 - **Secondary:** white surface, graphite text, one divider-strong border.
 - **Hover / Focus:** one-pixel upward response on hover and a visible blue focus
   outline. Disabled controls remain legible and never respond to hover.
@@ -182,19 +194,29 @@ tags are pill-shaped only when their compact form communicates one state.
 - White background, one strong neutral border, 8px corners, and an explicit
   label. Focus changes the border to Action Blue.
 
+### Human Decision
+
+- Start with no decision selected; approval must always be an explicit action.
+- Align Decision and Reviewer identifier controls at the same vertical origin,
+  with help and validation text kept inside each field group.
+- Label the identity field **Reviewer identifier** and state that it is recorded
+  as an assertion, not authenticated by TraceGate.
+- On failed submission, show an inline error and move focus to the first invalid
+  control.
+
 ### Review Path
 
 - All five stations remain visible in order. The numbered marker carries state
   while the adjacent text explains the decision or reason.
 
-### Command Bar
+### Review Actions
 
-- The bottom command bar accepts a small, documented deterministic command set;
-  it never impersonates a model conversation.
-- Every command maps to an existing review action such as validate, select
-  files, export, reset, open tools, or open API documentation.
-- The helper line always says the commands are local and does not imply general
-  browser, email, shell, or research capabilities.
+- TraceGate Review uses explicit, labeled buttons and forms for loading files,
+  validating evidence, exporting artifacts, and recording a decision.
+- Keep primary actions near the evidence they affect. Do not use a fixed bottom
+  composer that can cover form controls or validation feedback.
+- TraceGate Review never impersonates a model conversation. AWE Workspace owns
+  the separate goal and command composer for agent work.
 
 ## Do's and Don'ts
 
@@ -204,9 +226,11 @@ tags are pill-shaped only when their compact form communicates one state.
 - **Do** label synthetic evidence wherever it could be mistaken for real data.
 - **Do** provide keyboard focus, loading, empty, refusal, and error states.
 - **Do** preserve the full baseline/candidate metric comparison on mobile.
+- **Do** keep approval neutral until the reviewer chooses a decision.
 
 ### Don't:
 
 - **Don't** use decorative gradients, glow, glass, or fake terminal chrome.
 - **Don't** hide refusal reasons behind a generic error message.
 - **Don't** turn every fact into a same-sized card.
+- **Don't** imply that a typed reviewer identifier is an authenticated account.

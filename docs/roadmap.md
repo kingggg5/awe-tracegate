@@ -9,7 +9,8 @@ roadmap only when their acceptance criteria are covered by reproducible tests.
 
 Implemented on the current branch:
 
-- command-led Review Workspace over the real deterministic API path;
+- TraceGate Review UI with explicit buttons and forms over the real
+  deterministic API path;
 - one-command loopback launch with `awe serve`;
 - maintainer-run public-repository pilot with exact commit, upstream test result,
   content digests, compilation receipt, and exact replay verification;
@@ -31,8 +32,9 @@ External release gates that cannot be fabricated in code:
 
 ### P2 — Discovery integration, not verifier expansion
 
-- Specify a separate permissioned AWE Workspace contract for goals, task
-  sessions, research/code/file tools, and agent runtimes.
+- Keep AWE Workspace as a separate permissioned application and process
+  boundary for the goal/command composer, task sessions, research/code/file
+  tools, and future agent runtimes.
 - Accept its typed traces and frozen evaluation outputs at the existing evidence
   boundary.
 - Keep browser, shell, email, deployment, model routing, and automatic skill
@@ -49,7 +51,8 @@ Implemented:
 - Fail-closed compilation of repeated read-only traces.
 - Offline receipt verification with optional exact-trace replay.
 - Frozen baseline/candidate evaluation with safety and non-regression policy.
-- Actor- and commit-bound human promotion records.
+- Human promotion records bound to an asserted reviewer identifier and commit
+  SHA.
 - Conservative secret, PII, and customer-field redaction.
 - JSON Schema export, CLI, typed API, Docker image, and composite GitHub Action.
 - Cross-platform golden receipt, adversarial tests, CodeQL, dependency review,
@@ -78,8 +81,9 @@ Implemented for the next release:
 
 Implemented on the current release branch:
 
-- Command-led local Review Workspace over the real evidence chain, with sample
-  labeling, local JSONL/JSON input support, tools inventory, and `awe serve`.
+- Local TraceGate Review over the real evidence chain, with explicit review
+  controls, sample labeling, local JSONL/JSON input support, tools inventory,
+  and `awe serve`.
 - Two independent import adapters: provider-neutral evaluation JSON and an OTLP
   JSON mapping pinned to OpenTelemetry GenAI revision
   `1d85c963ea51e9c7d24cc330ff67057f6e90e6c5`.
@@ -109,7 +113,8 @@ receipt in ten minutes or less.
 - Append-only PostgreSQL receipt and decision ledger.
 - Transactional outbox with idempotent delivery for review notifications.
 - Authenticated actor identity and revocable promotion policy.
-- A small read-only review UI after CLI/Action demand is demonstrated.
+- Durable read-only history in TraceGate Review after CLI/Action demand is
+  demonstrated.
 
 Exit criteria: every accepted decision has immutable evidence, policy, actor,
 and delivery provenance, tested under a non-owner database role.
