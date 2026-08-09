@@ -1,151 +1,88 @@
 # Roadmap
 
-TraceGate is developed in evidence-sized increments. Features move from this
-roadmap only when their acceptance criteria are covered by reproducible tests.
+TraceGate grows at evidence boundaries, not by becoming another agent runtime.
+An item is implemented only when its contract, negative cases, and reproducible
+tests exist.
 
-## Current P0-P2 priorities
+## v0.3.0 — Portable Agent Skill evidence gate
 
-### P0 — Release truth and first-use path
+Implemented in source:
 
-Implemented on the current branch:
+- one atomic `awe gate` receipt over compilation, exact replay, frozen
+  evaluation, policy, and candidate linkage;
+- optional Skill BOM binding for the exact Agent Skill file tree;
+- provider-neutral evidence envelopes and packages with repository, commit,
+  producer, environment, capture time, provenance, and freshness checks;
+- deterministic adapter conformance receipts and stable JSON Schema exports;
+- machine-readable capabilities and version output;
+- five focused Agent Skills with explicit evidence-touching invocation and 25
+  routing/effect evaluation cases;
+- zero-dependency npm and Python Skill installers with managed hashes, dry-run,
+  check, atomic update, and refusal to overwrite unmanaged content;
+- Git-backed Codex and Claude Code marketplace metadata with deterministic
+  host-adapter parity checks;
+- a GitHub Action that cannot PASS without the complete linked gate chain;
+- reproducible plugin/npm bundle tooling, checksums, and an SPDX release SBOM;
+- existing governed redaction, consent, signing, human decisions, API,
+  TypeScript client, container, and optional local review UI.
 
-- TraceGate Review UI with explicit buttons and forms over the real
-  deterministic API path;
-- one-command loopback launch with `awe serve`;
-- maintainer-run public-repository pilot with exact commit, upstream test result,
-  content digests, compilation receipt, and exact replay verification;
-- clean-install smoke measurement and current desktop/mobile browser QA.
+Release gates that require maintainer or external state:
 
-External release gates that cannot be fabricated in code:
+- merge and review the release commit;
+- publish immutable GitHub, npm, and Python artifacts from a protected tag;
+- attest the released artifacts and gate predicate in the privileged tag-release
+  workflow;
+- smoke-test installation from the immutable tag and registry packages;
+- complete one independent external-adopter pilot with a first valid receipt in
+  ten minutes or less.
 
-- one independent adopter completes a public pilot in under ten minutes;
-- maintainers review, merge, tag v0.3.0, and smoke-test the immutable tag.
+Until these gates are complete, documentation must describe v0.3.0 as source or
+pre-release functionality rather than a published stable release.
 
-### P1 — Durable governance
+## P1 — Ecosystem interoperability
 
-- Append-only PostgreSQL receipt and decision ledger.
-- Transactional outbox with idempotent review notifications.
-- Authenticated actor identity, revocable promotion policy, tenancy, and rate
-  limits for any networked deployment.
-- Trusted publishing after the PyPI project and GitHub environment are owned and
-  configured by maintainers.
+Priorities after the v0.3.0 release:
 
-### P2 — Discovery integration, not verifier expansion
+1. Prove two independent exporters produce the same canonical evidence contract.
+2. Add demand-driven mappings for Promptfoo first, followed by Langfuse,
+   Braintrust, or OpenAI Evals; adapters stay outside the verifier.
+3. Publish compatibility results across Codex and at least one other Agent
+   Skills host, including positive, negative, near-miss, and follow-up triggers.
+4. Contribute the experimental Skill lifecycle vocabulary upstream to the
+   OpenTelemetry GenAI discussion instead of claiming it as a TraceGate standard.
+5. Add a portable read-only receipt viewer only after CLI/Action adoption proves
+   that another UI materially reduces review time.
 
-- Keep AWE Workspace as a separate permissioned application and process
-  boundary for the goal/command composer, task sessions, research/code/file
-  tools, and future agent runtimes.
-- Accept its typed traces and frozen evaluation outputs at the existing evidence
-  boundary.
-- Keep browser, shell, email, deployment, model routing, and automatic skill
-  installation outside TraceGate and unable to override a gate decision.
-- Revisit a signed Tauri desktop shell only after native integration demand is
-  measured; `.exe` and `.dmg` distribution also requires platform signing,
-  notarization, updater keys, and per-target sidecars.
+Exit criteria:
 
-## v0.1 — Release candidate
+- byte-identical receipts for identical inputs on supported operating systems;
+- every seeded digest, revision, freshness, dataset, and candidate mismatch
+  fails closed;
+- no false PASS in the adversarial corpus;
+- two non-maintainer integrations complete the conformance suite.
 
-Implemented:
+## P2 — Durable shared review
 
-- Strict, versioned trace, candidate, receipt, evaluation, and promotion models.
-- Fail-closed compilation of repeated read-only traces.
-- Offline receipt verification with optional exact-trace replay.
-- Frozen baseline/candidate evaluation with safety and non-regression policy.
-- Human promotion records bound to an asserted reviewer identifier and commit
-  SHA.
-- Conservative secret, PII, and customer-field redaction.
-- JSON Schema export, CLI, typed API, Docker image, and composite GitHub Action.
-- Cross-platform golden receipt, adversarial tests, CodeQL, dependency review,
-  release artifacts, and GitHub/Sigstore build provenance.
+Only after local/CI demand is demonstrated:
 
-Release criteria:
+- append-only PostgreSQL receipt and decision ledger;
+- authenticated actor identity and revocable decision policy;
+- tenant isolation, request limits, audit logging, and retention controls for a
+  shared network deployment;
+- transactional outbox for idempotent review notifications;
+- consented, redacted benchmark fixtures with frozen splits and adjudication.
 
-- byte-identical golden receipt on Windows and Linux;
-- no seeded tamper, dataset mismatch, unsafe effect, or safety violation passes;
-- clean install, package build, container health, and Action smoke test;
-- public security boundaries and synthetic-data labels remain accurate.
+These capabilities require a separate production threat model. The current
+loopback API and asserted reviewer identifier are not substitutes.
 
-## v0.2 — Stronger evidence chain
+## Explicit non-goals
 
-Implemented for the next release:
+- agent, browser, shell, email, deployment, or rollback execution;
+- automatic promotion or self-modifying Discovery Loops;
+- a built-in LLM grader, model router, memory service, or prompt compressor;
+- another eval runner, trace store, dashboard, Skill registry, or package manager;
+- vendor SDKs, model credentials, or dynamic adapter code in the trusted core;
+- claims that `PASS` means safe, compliant, certified, or causally correct.
 
-- Content-addressed verification receipts, including exact-trace replay state.
-- Replay-gated promotion that recomputes verification and rejects mismatched
-  compilation, evidence, candidate, or evaluation artifacts.
-- Promotion receipts binding the compilation/input bundle, verification,
-  evaluation, dataset, policy, actor, and commit.
-- Typed promotion API and a GitHub Action that replays the compilation receipt
-  before it can report `PASS`.
-
-## v0.3 — External evidence interoperability
-
-Implemented on the current release branch:
-
-- Local TraceGate Review over the real evidence chain, with explicit review
-  controls, sample labeling, local JSONL/JSON input support, tools inventory,
-  and `awe serve`.
-- Two independent import adapters: provider-neutral evaluation JSON and an OTLP
-  JSON mapping pinned to OpenTelemetry GenAI revision
-  `1d85c963ea51e9c7d24cc330ff67057f6e90e6c5`.
-- A versioned experiment manifest binding the harness, model configuration,
-  dataset split, trial set, strategy digest, token usage, latency, cost, and
-  grader versions.
-- Optional Ed25519 receipt bundles verified against an explicit trusted key,
-  signer, repository, and commit—not an embedded key alone.
-- Pluggable redaction policies with allow/deny reports plus consent scope,
-  expiry, and fail-closed revocation checks.
-- A generated TypeScript client whose types are checked against the committed
-  OpenAPI document in CI.
-- A maintainer-run `pallets/itsdangerous` compatibility pilot at an exact commit,
-  including 297 passing upstream tests and exact TraceGate replay artifacts.
-
-Still required before v0.3 release:
-
-- One independent external adopter and measured time-to-first receipt.
-- A reviewed v0.3 release tag and full Action smoke test from that immutable tag.
-
-Exit criteria: two exporters produce the same canonical contract; tampered or
-commit-mismatched evidence never passes; a new adopter reaches a verified
-receipt in ten minutes or less.
-
-## v0.4 — Durable review history
-
-- Append-only PostgreSQL receipt and decision ledger.
-- Transactional outbox with idempotent delivery for review notifications.
-- Authenticated actor identity and revocable promotion policy.
-- Durable read-only history in TraceGate Review after CLI/Action demand is
-  demonstrated.
-
-Exit criteria: every accepted decision has immutable evidence, policy, actor,
-and delivery provenance, tested under a non-owner database role.
-
-## Runtime and SDK strategy
-
-The Python/Pydantic implementation remains the reference decision engine until
-a replacement demonstrates byte-identical golden receipts and a measured
-operational benefit. Rewriting a security boundary to follow language adoption
-would add parity risk without improving the product contract.
-
-- Keep the generated TypeScript SDK as an integration surface, not an alternate
-  decision engine; all external JSON still requires server-side runtime
-  validation.
-- Consider a read-only .NET 10 Native AOT CLI spike only after v0.3. It must
-  achieve 100% golden/property-test parity and report cold start, peak RSS,
-  binary size, and p95 throughput against the Python reference before any
-  migration decision.
-- Keep discovery and prompt/context compression outside the trusted core.
-  Headroom, LLMLingua, or a future AWE strategy may produce experiment
-  evidence; TraceGate compares that evidence and governs promotion. Token
-  savings alone can never produce `PASS`.
-
-## Explicitly deferred
-
-- General agent runtime, planner, or scheduler.
-- Browser, shell, deployment, rollback, or autonomous write execution.
-- Heuristic branching inferred from sparse traces.
-- Adaptive model routing, vector memory, or self-modification.
-- A built-in prompt compressor or provider proxy.
-
-Existing runtimes already own execution and recovery. TraceGate will integrate
-at evidence boundaries instead of expanding its trusted surface without user
-demand and a separately reviewed threat model.
+External runtimes may generate evidence. TraceGate verifies the supplied chain
+and records a separate human decision; it never grants itself permission to act.

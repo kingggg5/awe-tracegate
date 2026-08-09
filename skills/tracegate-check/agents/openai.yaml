@@ -1,0 +1,7 @@
+interface:
+  display_name: "TraceGate Check"
+  short_description: "Inspect local TraceGate readiness safely"
+  default_prompt: "Use $tracegate-check to inspect whether this repository is ready for TraceGate."
+
+policy:
+  allow_implicit_invocation: true

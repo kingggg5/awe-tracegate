@@ -84,6 +84,22 @@ SignerIdentity = Annotated[
         pattern=r"^[A-Za-z0-9][A-Za-z0-9._:/@+-]*$",
     ),
 ]
+RelativeArtifactPath = Annotated[
+    str,
+    StringConstraints(
+        min_length=1,
+        max_length=512,
+        pattern=r"^[^/\\\x00-\x1f][^\\\x00-\x1f]*$",
+    ),
+]
+ExternalUrl = Annotated[
+    str,
+    StringConstraints(
+        min_length=8,
+        max_length=2_048,
+        pattern=r"^https?://[^\s\x00-\x1f]+$",
+    ),
+]
 
 
 def _parse_rfc3339_utc(value: object) -> object:
@@ -103,6 +119,15 @@ EffectClass = Literal["pure", "read", "write", "high_impact"]
 BindingSource = Literal["workflow_input", "step_output", "model_decision"]
 DatasetScope = Literal["evaluation", "research", "training"]
 RedactionCategory = Literal["secret", "pii", "customer_data", "policy_denied"]
+GateStatus = Literal["PASS", "REVIEW", "BLOCK", "ERROR"]
+ProvenanceLevel = Literal["asserted", "signature_verified", "attested"]
+EvidenceArtifactKind = Literal[
+    "execution_traces",
+    "evaluation_bundle",
+    "evaluation_policy",
+    "gate_receipt",
+    "skill_bom",
+]
 
 
 class ContractModel(BaseModel):
@@ -402,6 +427,337 @@ class EvaluationReceipt(ContractModel):
         return self
 
 
+class GateReceipt(ContractModel):
+    """Atomic, content-addressed decision over one complete evidence chain."""
+
+    schema_version: Literal["awe.gate-receipt.v1"] = "awe.gate-receipt.v1"
+    gate_version: Literal["awe.gate.v1"] = "awe.gate.v1"
+    status: GateStatus
+    reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()
+    traces_digest: Sha256Digest
+    baseline_bundle_digest: Sha256Digest
+    candidate_bundle_digest: Sha256Digest
+    policy_digest: Sha256Digest
+    skill_bom_digest: Sha256Digest | None = None
+    evidence_package_digest: Sha256Digest | None = None
+    evidence_provenance_level: ProvenanceLevel | None = None
+    minimum_provenance_level: ProvenanceLevel | None = None
+    repository_uri: RepositoryUri | None = None
+    commit_sha: GitCommitSha | None = None
+    evidence_evaluated_at: UtcDateTime | None = None
+    maximum_evidence_age_seconds: (
+        Annotated[int, Field(ge=0, le=31_556_952_000)] | None
+    ) = None
+    candidate_digest: Sha256Digest | None = None
+    compilation: CompilationReceipt
+    verification: ReceiptVerification
+    evaluation: EvaluationReceipt
+    receipt_hash: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_chain(self) -> Self:
+        if self.status == "PASS" and self.reasons:
+            raise ValueError("passing gate receipt cannot contain reasons")
+        if self.status != "PASS" and not self.reasons:
+            raise ValueError("non-passing gate receipt requires reasons")
+        if self.compilation.input_bundle_digest != self.traces_digest:
+            raise ValueError("gate traces digest does not match compilation")
+        provenance_values = (
+            self.evidence_package_digest,
+            self.evidence_provenance_level,
+            self.repository_uri,
+            self.commit_sha,
+        )
+        if any(value is not None for value in provenance_values) and not all(
+            value is not None for value in provenance_values
+        ):
+            raise ValueError("gate package provenance must be complete")
+        if self.maximum_evidence_age_seconds is not None:
+            if self.evidence_package_digest is None:
+                raise ValueError("evidence age policy requires a package")
+            if self.evidence_evaluated_at is None:
+                raise ValueError("evidence age policy requires evaluation time")
+        if (
+            self.minimum_provenance_level is not None
+            and self.evidence_package_digest is None
+        ):
+            raise ValueError("minimum provenance policy requires a package")
+        if self.minimum_provenance_level is not None:
+            provenance_rank = {
+                "asserted": 0,
+                "signature_verified": 1,
+                "attested": 2,
+            }
+            if self.evidence_provenance_level is None:
+                raise ValueError("gate package provenance level is missing")
+            below_minimum = (
+                provenance_rank[self.evidence_provenance_level]
+                < provenance_rank[self.minimum_provenance_level]
+            )
+            if below_minimum and not (
+                self.status == "BLOCK"
+                and "evidence_package_provenance_below_minimum" in self.reasons
+            ):
+                raise ValueError("gate package provenance is below policy")
+        if (
+            self.evidence_evaluated_at is not None
+            and self.evidence_evaluated_at.utcoffset() != timedelta(0)
+        ):
+            raise ValueError("evidence evaluation time must include the UTC timezone")
+        expected_compilation_hash = canonical_digest(
+            self.compilation.model_dump(mode="json", exclude={"receipt_hash"})
+        )
+        if self.compilation.receipt_hash != expected_compilation_hash:
+            raise ValueError("gate compilation receipt hash is invalid")
+        if self.verification.receipt_hash != self.compilation.receipt_hash:
+            raise ValueError("gate verification does not bind the compilation")
+        expected_evaluation_hash = canonical_digest(
+            self.evaluation.model_dump(mode="json", exclude={"receipt_hash"})
+        )
+        if self.evaluation.receipt_hash != expected_evaluation_hash:
+            raise ValueError("gate evaluation receipt hash is invalid")
+        if self.evaluation.policy_digest != self.policy_digest:
+            raise ValueError("gate policy digest does not match evaluation")
+        compiled_candidate = self.compilation.candidate
+        if compiled_candidate is None:
+            if self.candidate_digest is not None:
+                raise ValueError("refused compilation cannot bind a candidate")
+        else:
+            expected_candidate_digest = canonical_digest(
+                compiled_candidate.model_dump(mode="json", exclude={"candidate_digest"})
+            )
+            if compiled_candidate.candidate_digest != expected_candidate_digest:
+                raise ValueError("gate candidate digest is invalid")
+            if self.candidate_digest != compiled_candidate.candidate_digest:
+                raise ValueError("gate candidate digest does not match compilation")
+            if self.evaluation.candidate_digest != self.candidate_digest and not (
+                self.status == "BLOCK"
+                and "evaluation:candidate_digest_mismatch" in self.reasons
+            ):
+                raise ValueError("gate evaluation targets another candidate")
+        if self.status == "PASS":
+            if self.minimum_provenance_level not in (None, "asserted"):
+                raise ValueError(
+                    "passing gate cannot rely on unverified external provenance"
+                )
+            if self.compilation.status != "compiled":
+                raise ValueError("passing gate requires a compiled candidate")
+            if self.verification.status != "valid":
+                raise ValueError("passing gate requires valid receipt verification")
+            if not self.verification.traces_verified:
+                raise ValueError("passing gate requires exact trace replay")
+            if self.evaluation.status != "pass":
+                raise ValueError("passing gate requires a passing evaluation")
+        expected_receipt_hash = canonical_digest(
+            self.model_dump(mode="json", exclude={"receipt_hash"})
+        )
+        if self.receipt_hash != expected_receipt_hash:
+            raise ValueError("gate receipt hash is invalid")
+        return self
+
+
+class SkillFile(ContractModel):
+    """One byte-addressed file in a portable Agent Skill folder."""
+
+    path: RelativeArtifactPath
+    digest: Sha256Digest
+    size_bytes: Annotated[int, Field(ge=0, le=100_000_000)]
+    role: Literal["instructions", "metadata", "script", "reference", "asset", "other"]
+
+    @model_validator(mode="after")
+    def validate_portable_path(self) -> Self:
+        if any(segment in ("", ".", "..") for segment in self.path.split("/")):
+            raise ValueError("skill file path must be normalized and relative")
+        return self
+
+
+class SkillBom(ContractModel):
+    """A non-executing inventory that binds the exact contents of one skill."""
+
+    schema_version: Literal["awe.skill-bom.v1"] = "awe.skill-bom.v1"
+    skill_name: Annotated[
+        str,
+        StringConstraints(
+            min_length=1, max_length=64, pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        ),
+    ]
+    files: Annotated[
+        tuple[SkillFile, ...], Field(min_length=1, max_length=10_000, strict=False)
+    ]
+    external_urls: Annotated[
+        tuple[ExternalUrl, ...], Field(max_length=10_000, strict=False)
+    ] = ()
+    skill_digest: Sha256Digest
+    bom_digest: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_bom(self) -> Self:
+        paths = tuple(item.path for item in self.files)
+        if paths != tuple(sorted(paths)) or len(paths) != len(set(paths)):
+            raise ValueError("skill BOM file paths must be unique and sorted")
+        if not any(item.path == "SKILL.md" for item in self.files):
+            raise ValueError("skill BOM requires SKILL.md")
+        if self.external_urls != tuple(sorted(set(self.external_urls))):
+            raise ValueError("skill BOM URLs must be unique and sorted")
+        expected_skill_digest = canonical_digest(
+            [item.model_dump(mode="json") for item in self.files]
+        )
+        if self.skill_digest != expected_skill_digest:
+            raise ValueError("skill tree digest is invalid")
+        expected_bom_digest = canonical_digest(
+            self.model_dump(mode="json", exclude={"bom_digest"})
+        )
+        if self.bom_digest != expected_bom_digest:
+            raise ValueError("skill BOM digest is invalid")
+        return self
+
+
+class EvidenceEnvelope(ContractModel):
+    """Provider-neutral, provenance-bound envelope for one evidence artifact.
+
+    A non-asserted level binds an external verification receipt by digest; the
+    level is not itself a trust root. Consumers must separately trust or replay
+    that verifier before treating the external receipt as authoritative.
+    """
+
+    schema_version: Literal["awe.evidence-envelope.v1"] = "awe.evidence-envelope.v1"
+    evidence_id: TraceIdentifier
+    artifact_kind: EvidenceArtifactKind
+    producer: ToolName
+    producer_version: ToolVersion
+    producer_digest: Sha256Digest
+    environment_digest: Sha256Digest
+    provenance_level: ProvenanceLevel
+    provenance_verification_digest: Sha256Digest | None = None
+    repository_uri: RepositoryUri
+    commit_sha: GitCommitSha
+    captured_at: UtcDateTime
+    payload: dict[str, Any]
+    payload_digest: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_envelope(self) -> Self:
+        if self.captured_at.utcoffset() != timedelta(0):
+            raise ValueError("evidence capture time must include the UTC timezone")
+        if canonical_digest(self.payload) != self.payload_digest:
+            raise ValueError("evidence payload digest is invalid")
+        if self.provenance_level == "asserted":
+            if self.provenance_verification_digest is not None:
+                raise ValueError("asserted provenance cannot claim verification")
+        elif self.provenance_verification_digest is None:
+            raise ValueError(
+                "verified or attested provenance requires an external receipt digest"
+            )
+        if self.artifact_kind == "execution_traces":
+            traces = self.payload.get("traces")
+            if not isinstance(traces, list):
+                raise ValueError("execution trace envelope requires a traces array")
+            CompileRequest.model_validate({"traces": traces})
+        elif self.artifact_kind == "evaluation_bundle":
+            EvaluationBundle.model_validate(self.payload)
+        elif self.artifact_kind == "evaluation_policy":
+            EvaluationPolicy.model_validate(self.payload)
+        elif self.artifact_kind == "gate_receipt":
+            GateReceipt.model_validate(self.payload)
+        elif self.artifact_kind == "skill_bom":
+            SkillBom.model_validate(self.payload)
+        return self
+
+
+class EvidencePackage(ContractModel):
+    """Content-addressed collection of envelopes from one repository revision."""
+
+    schema_version: Literal["awe.evidence-package.v1"] = "awe.evidence-package.v1"
+    package_id: TraceIdentifier
+    repository_uri: RepositoryUri
+    commit_sha: GitCommitSha
+    created_at: UtcDateTime
+    envelopes: Annotated[
+        tuple[EvidenceEnvelope, ...],
+        Field(min_length=1, max_length=1_000, strict=False),
+    ]
+    package_digest: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_package(self) -> Self:
+        if self.created_at.utcoffset() != timedelta(0):
+            raise ValueError("evidence package time must include the UTC timezone")
+        evidence_ids = tuple(envelope.evidence_id for envelope in self.envelopes)
+        if len(evidence_ids) != len(set(evidence_ids)):
+            raise ValueError("evidence package ids must be unique")
+        if self.envelopes != tuple(
+            sorted(self.envelopes, key=lambda item: item.evidence_id)
+        ):
+            raise ValueError("evidence package envelopes must be sorted by id")
+        for envelope in self.envelopes:
+            if envelope.repository_uri != self.repository_uri:
+                raise ValueError("evidence envelope repository does not match package")
+            if envelope.commit_sha != self.commit_sha:
+                raise ValueError("evidence envelope commit does not match package")
+            if envelope.captured_at > self.created_at:
+                raise ValueError("evidence capture cannot follow package creation")
+        expected = canonical_digest(
+            self.model_dump(mode="json", exclude={"package_digest"})
+        )
+        if self.package_digest != expected:
+            raise ValueError("evidence package digest is invalid")
+        return self
+
+
+class AdapterConformanceReceipt(ContractModel):
+    """Deterministic result of validating a provider-neutral evidence envelope."""
+
+    schema_version: Literal["awe.adapter-conformance.v1"] = "awe.adapter-conformance.v1"
+    status: Literal["valid", "invalid"]
+    envelope_digest: Sha256Digest
+    artifact_kind: EvidenceArtifactKind | None = None
+    reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()
+    receipt_hash: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_conformance(self) -> Self:
+        if self.status == "valid" and self.reasons:
+            raise ValueError("valid conformance receipt cannot contain reasons")
+        if self.status == "valid" and self.artifact_kind is None:
+            raise ValueError("valid conformance receipt requires artifact kind")
+        if self.status == "invalid" and not self.reasons:
+            raise ValueError("invalid conformance receipt requires reasons")
+        expected = canonical_digest(
+            self.model_dump(mode="json", exclude={"receipt_hash"})
+        )
+        if self.receipt_hash != expected:
+            raise ValueError("adapter conformance receipt hash is invalid")
+        return self
+
+
+class CapabilitiesDocument(ContractModel):
+    """Machine-readable statement of the installed offline core surface."""
+
+    schema_version: Literal["awe.capabilities.v1"] = "awe.capabilities.v1"
+    package_version: ToolVersion
+    mode: Literal["offline_keyless"] = "offline_keyless"
+    commands: Annotated[tuple[ToolName, ...], Field(min_length=1, strict=False)]
+    gate_decisions: tuple[Literal["PASS", "REVIEW", "BLOCK", "ERROR"], ...] = (
+        "PASS",
+        "REVIEW",
+        "BLOCK",
+        "ERROR",
+    )
+    guarantees: Annotated[tuple[Identifier, ...], Field(strict=False)]
+    exclusions: Annotated[tuple[Identifier, ...], Field(strict=False)]
+
+    @model_validator(mode="after")
+    def validate_sorted_sets(self) -> Self:
+        for name, values in (
+            ("commands", self.commands),
+            ("guarantees", self.guarantees),
+            ("exclusions", self.exclusions),
+        ):
+            if values != tuple(sorted(set(values))):
+                raise ValueError(f"capability {name} must be unique and sorted")
+        return self
+
+
 class ExperimentTrial(ContractModel):
     """One frozen trial with quality, safety, token, cost, and trace evidence."""
 
@@ -487,7 +843,10 @@ class SignedReceiptBundle(ContractModel):
         "verification",
         "evaluation",
         "experiment",
+        "gate",
+        "evidence_package",
         "promotion",
+        "skill_bom",
     ]
     artifact_digest: Sha256Digest
     artifact: dict[str, Any]

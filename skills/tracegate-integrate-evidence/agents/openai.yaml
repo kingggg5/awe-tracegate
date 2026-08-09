@@ -1,0 +1,7 @@
+interface:
+  display_name: "TraceGate Integrate Evidence"
+  short_description: "Map evaluation exports into strict evidence"
+  default_prompt: "Use $tracegate-integrate-evidence to design a deterministic adapter for this evaluation export."
+
+policy:
+  allow_implicit_invocation: false

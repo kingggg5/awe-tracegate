@@ -1,0 +1,19 @@
+{
+  "name": "awe-tracegate",
+  "version": "0.3.0",
+  "description": "Offline, keyless skills for comparing agent changes and verifying replayable evidence without trusting model output.",
+  "author": {
+    "name": "kingggg5",
+    "url": "https://github.com/kingggg5"
+  },
+  "homepage": "https://github.com/kingggg5/awe-tracegate#readme",
+  "repository": "https://github.com/kingggg5/awe-tracegate",
+  "license": "Apache-2.0",
+  "keywords": [
+    "agent-skills",
+    "agent-evaluation",
+    "claude-code",
+    "evidence",
+    "provenance"
+  ]
+}

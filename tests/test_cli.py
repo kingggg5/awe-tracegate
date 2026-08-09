@@ -8,6 +8,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from awe_tracegate.cli import main
+from awe_tracegate.schemas import SCHEMA_MODELS
 
 ROOT = Path(__file__).parents[1]
 
@@ -22,6 +23,54 @@ def test_cli_starts_loopback_review_workspace() -> None:
         port=8765,
         log_level="info",
     )
+
+
+def test_cli_usage_errors_return_malformed_input_exit_one() -> None:
+    assert main(["gate"]) == 1
+    assert (
+        main(
+            [
+                "gate",
+                "--traces",
+                "traces.jsonl",
+                "--baseline",
+                "baseline.json",
+                "--candidate",
+                "candidate.json",
+                "--minimum-provenance",
+                "attested",
+            ]
+        )
+        == 1
+    )
+
+
+def test_cli_reserves_exit_two_for_typed_block_receipt(tmp_path: Path) -> None:
+    candidate = json.loads(
+        (ROOT / "examples/evaluation/candidate.json").read_text(encoding="utf-8")
+    )
+    candidate["trials"][0]["safety_violations"] = 1
+    candidate_path = tmp_path / "blocked-candidate.json"
+    candidate_path.write_text(json.dumps(candidate), encoding="utf-8")
+    receipt_path = tmp_path / "blocked-gate.json"
+
+    assert (
+        main(
+            [
+                "gate",
+                "--traces",
+                str(ROOT / "examples/repo_analysis/traces.jsonl"),
+                "--baseline",
+                str(ROOT / "examples/evaluation/baseline.json"),
+                "--candidate",
+                str(candidate_path),
+                "--out",
+                str(receipt_path),
+            ]
+        )
+        == 2
+    )
+    assert json.loads(receipt_path.read_text(encoding="utf-8"))["status"] == "BLOCK"
 
 
 def test_cli_release_flow(tmp_path: Path) -> None:
@@ -109,7 +158,58 @@ def test_cli_release_flow(tmp_path: Path) -> None:
     assert promotion_payload["traces_verified"] is True
 
     assert main(["schema", "--out-dir", str(schemas)]) == 0
-    assert len(list(schemas.glob("*.schema.json"))) == 15
+    assert len(list(schemas.glob("*.schema.json"))) == len(SCHEMA_MODELS)
+
+
+def test_cli_runs_atomic_gate_and_exposes_capabilities(tmp_path: Path) -> None:
+    receipt = tmp_path / "gate.json"
+    skill = tmp_path / "synthetic-review"
+    skill.mkdir()
+    (skill / "SKILL.md").write_text(
+        "---\nname: synthetic-review\ndescription: Review evidence.\n---\n",
+        encoding="utf-8",
+    )
+    skill_bom = tmp_path / "skill-bom.json"
+    assert (
+        main(
+            [
+                "skill",
+                "inspect",
+                "--path",
+                str(skill),
+                "--out",
+                str(skill_bom),
+            ]
+        )
+        == 0
+    )
+    assert (
+        main(
+            [
+                "gate",
+                "--traces",
+                str(ROOT / "examples/repo_analysis/traces.jsonl"),
+                "--baseline",
+                str(ROOT / "examples/evaluation/baseline.json"),
+                "--candidate",
+                str(ROOT / "examples/evaluation/candidate.json"),
+                "--policy",
+                str(ROOT / "examples/evaluation/policy.json"),
+                "--skill-bom",
+                str(skill_bom),
+                "--out",
+                str(receipt),
+            ]
+        )
+        == 0
+    )
+    payload = json.loads(receipt.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == "awe.gate-receipt.v1"
+    assert payload["status"] == "PASS"
+    assert payload["verification"]["traces_verified"] is True
+    assert payload["skill_bom_digest"].startswith("sha256:")
+
+    assert main(["capabilities", "--json"]) == 0
 
 
 def test_cli_redacts_before_export(tmp_path: Path) -> None:

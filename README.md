@@ -5,287 +5,312 @@
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB.svg)](https://www.python.org/)
 
-**Put an AI agent into evidence-governed discovery mode—then verify its claims offline.**
+**Turn a prompt, Skill, or agent-workflow change into a replayable evidence
+receipt—without giving the verifier an LLM key.**
 
-AWE TraceGate is a portable Skill/Plugin suite backed by a deterministic evidence
-engine. Ask your existing coding agent to compare a prompt, skill, model, or
-workflow; TraceGate compiles repeated read-only traces, replays the exact
-evidence, evaluates frozen trials, and records a separate human decision.
+AWE TraceGate is a portable Agent Skills plugin for Codex and Claude Code, plus
+a deterministic change gate.
+Use your existing agent or evaluation harness to run trials; TraceGate binds the
+exact Skill tree, traces, frozen evaluation, policy, repository revision, and
+human decision into content-addressed artifacts that another reviewer can replay.
 
-The verifier is offline, keyless, and model-independent. Your agent or evaluation
-harness may still use its existing subscription or provider credentials.
+> **Pre-alpha.** TraceGate does not run agents, execute artifact content, deploy
+> changes, or certify that a candidate is universally safe. `PASS` means the
+> supplied and linked evidence satisfied the declared gate policy.
 
-> **Pre-alpha.** TraceGate does not run agents, execute tools, install itself,
-> deploy changes, or authorize production actions. A `pass` means the supplied
-> evidence satisfied the declared policy—not that a candidate is universally safe.
+## What developers get
 
-## Start with a Skill
+| Need | TraceGate provides |
+| --- | --- |
+| Compare an agent change | A falsifiable baseline/candidate Discovery Loop |
+| Protect a pull request | One atomic `PASS`, `REVIEW`, or `BLOCK` receipt |
+| Review an Agent Skill | A deterministic Skill BOM for the exact file tree |
+| Connect an eval harness | Strict evidence envelopes and conformance checks |
+| Share results | Consent-aware redaction, signing, and a local disclosure workflow |
 
-Clone the repository and copy the complete Skill suite into any project:
+The trusted path is offline, keyless, model-independent, and fail-closed. Skills
+or chat output may orchestrate it, but they can never issue or override a gate
+decision.
+
+## Install the Skills
+
+### npm from GitHub
+
+The npm package is zero-dependency and has no lifecycle scripts. Until the first
+npm registry release is published, install directly from the public Git repo:
+
+```bash
+npm exec --yes --package=github:kingggg5/awe-tracegate -- \
+  awe-tracegate install --target .
+```
+
+Verify the managed file hashes later with:
+
+```bash
+npx awe-tracegate check --target .
+```
+
+The second command works after adding the package to the project or after the
+registry release. The installer refuses unmanaged or locally modified Skill
+directories; `--dry-run` previews a change without writing files.
+
+### Git and Python
 
 ```bash
 git clone https://github.com/kingggg5/awe-tracegate.git
-cd awe-tracegate
-python scripts/install_skills.py --target ../your-project
+python awe-tracegate/scripts/install_skills.py --target ./your-project
+python awe-tracegate/scripts/install_skills.py --target ./your-project --check
 ```
 
-Then invoke Discovery explicitly from Codex:
-
-```text
-$awe-discovery-loop compare our current retry skill with the candidate.
-Use the frozen evaluation set, preserve failed trials, and do not promote it.
-```
-
-The agent follows this contract:
-
-```text
-Observe baseline → propose one change → freeze success criteria
-→ run equivalent external trials → compile traces → replay exact evidence
-→ evaluate candidate → show counter-evidence → request human review
-```
-
-Safety-sensitive workflows require explicit `$skill` invocation. Read-only
-regression diagnosis may be selected automatically; it still cannot issue or
-override a TraceGate decision.
-
-### Included skills
-
-| Skill | Purpose |
-| --- | --- |
-| [`$awe`](skills/awe/SKILL.md) | Select the smallest applicable TraceGate workflow |
-| [`$awe-setup`](skills/awe-setup/SKILL.md) | Inspect CLI, loopback API, and evidence readiness without changing state |
-| [`$awe-discovery-loop`](skills/awe-discovery-loop/SKILL.md) | Compare one candidate with a declared baseline and frozen success rule |
-| [`$awe-review-evidence`](skills/awe-review-evidence/SKILL.md) | Compile, replay, and evaluate supplied artifacts with the real CLI |
-| [`$awe-diagnose-regression`](skills/awe-diagnose-regression/SKILL.md) | Find the earliest evidence-supported baseline/candidate divergence |
-
-The repository is also a Codex plugin package through
-[`.codex-plugin/plugin.json`](.codex-plugin/plugin.json). Until a reviewed
-marketplace release exists, the installer above is the supported portable path.
-It copies only versioned Skill files to `.agents/skills/`; it does not install
-dependencies, start services, read credentials, or edit application code.
-
-Install one Skill or deliberately update an existing copy:
+### Codex Git marketplace
 
 ```bash
-python scripts/install_skills.py --target ../your-project --skill awe-discovery-loop
-python scripts/install_skills.py --target ../your-project --skill awe-discovery-loop --force
+codex plugin marketplace add kingggg5/awe-tracegate --ref main
+```
+
+Restart the desktop app, open Plugins, choose **AWE TraceGate**, and install it.
+For protected environments, replace `main` with a reviewed immutable release tag.
+
+### Claude Code marketplace
+
+Run these inside Claude Code:
+
+```text
+/plugin marketplace add kingggg5/awe-tracegate
+/plugin install awe-tracegate@awe-tracegate
+```
+
+[Claude Code](https://code.claude.com/docs/en/plugins) namespaces plugin Skills.
+Invoke the evidence gate explicitly, for example:
+
+```text
+/awe-tracegate:tracegate-verify-evidence verify the evidence in ./evidence.
+```
+
+The four evidence-changing workflows are user-invoked only in Claude Code. The
+read-only readiness check may be selected automatically. No Skill grants tools,
+installs the Python engine, or weakens Claude Code permission prompts.
+
+The npm and Python installers copy only versioned Skill files into
+`.agents/skills/`; the Claude marketplace uses its generated, namespaced adapter.
+They do
+not install Python, fetch model dependencies, read credentials, start a service,
+or execute project code.
+
+## Included Skills
+
+| Skill | Use it when |
+| --- | --- |
+| [`$tracegate-check`](skills/tracegate-check/SKILL.md) | Checking local CLI and evidence readiness |
+| [`$tracegate-compare-change`](skills/tracegate-compare-change/SKILL.md) | Comparing one prompt, Skill, model, or workflow change |
+| [`$tracegate-verify-evidence`](skills/tracegate-verify-evidence/SKILL.md) | Running the atomic gate over existing local artifacts |
+| [`$tracegate-integrate-evidence`](skills/tracegate-integrate-evidence/SKILL.md) | Mapping an eval or telemetry export into strict evidence |
+| [`$tracegate-share-evidence`](skills/tracegate-share-evidence/SKILL.md) | Preparing a redacted, consented bundle for review |
+
+Evidence-touching Skills require explicit invocation. For example:
+
+```text
+$tracegate-compare-change compare the candidate retry Skill with the baseline.
+Freeze the cases and success rule, preserve failed trials, and stop before promotion.
 ```
 
 ## Install the evidence engine
 
-Requires Python 3.11 or newer.
+Requires Python 3.11 or newer:
 
 ```bash
+git clone https://github.com/kingggg5/awe-tracegate.git
+cd awe-tracegate
 python -m venv .venv
-```
-
-Activate the environment for your shell, then install TraceGate:
-
-```bash
 python -m pip install -e ".[api]"
-awe --help
+awe --version
+awe capabilities --json
 ```
 
-The core evidence path is CLI-first:
+## Create an atomic gate receipt
+
+Optionally inventory the exact source Skill first:
 
 ```bash
-awe compile \
-  --traces examples/repo_analysis/traces.jsonl \
-  --out compilation.json
+awe skill inspect \
+  --path skills/tracegate-compare-change \
+  --out skill-bom.json
+```
 
-awe verify \
-  --receipt compilation.json \
-  --traces examples/repo_analysis/traces.jsonl \
-  --out verification.json
+Then compile, replay, link, and evaluate the complete chain with one command:
 
-awe evaluate \
+```bash
+awe gate \
+  --traces examples/repo_analysis/traces.jsonl \
   --baseline examples/evaluation/baseline.json \
   --candidate examples/evaluation/candidate.json \
   --policy examples/evaluation/policy.json \
-  --out evaluation.json
+  --skill-bom skill-bom.json \
+  --out gate.json
 ```
 
-Exit code `0` means the requested gate passed. Exit `2` is a valid refusal,
-invalid receipt, review, or block. Exit `1` means malformed input or an execution
-error.
+| Decision | Exit | Meaning |
+| --- | ---: | --- |
+| `PASS` | `0` | Exact replay and the linked frozen evaluation passed |
+| `REVIEW` | `2` | Evidence is valid but uncertainty or efficiency regression needs review |
+| `BLOCK` | `2` | Integrity, linkage, safety, quality, or policy failed |
+| `ERROR` | `1` | Input or invocation was malformed |
 
-## Why TraceGate exists
+No evaluation, mismatched candidate digest, or replay without source traces can
+produce `PASS`.
 
-Repeated agent traces can look reliable while hiding model decisions, ambiguous
-data flow, stale evaluations, or unsafe effects. TraceGate refuses to infer around
-those gaps.
-
-- **Fail closed:** write-like effects, mixed shapes, ambiguous bindings, missing
-  evidence, and digest mismatches are refused.
-- **Replay exact evidence:** candidate, input bundle, receipt, source trace, and
-  evaluation digests are recomputed instead of trusted from agent prose.
-- **Compare outcomes:** safety and quality regressions block; latency or cost
-  regressions require review.
-- **Preserve provenance:** experiment manifests bind repository, commit, dataset,
-  harness, strategy, model configuration, grader, tokens, cost, latency, and traces.
-- **Keep humans accountable:** promotion is a separate receipt bound to replayed
-  evidence, actor assertion, commit SHA, timestamp, and rationale.
-
-## Evidence and trust boundaries
+## Discovery Loop
 
 ```mermaid
 flowchart LR
-    User["Developer invokes $awe-discovery-loop"] --> Agent["Existing agent or harness"]
-    Agent --> Trials["Frozen trials and typed traces"]
-    Trials --> Compile["Compile explicit read-only bindings"]
-    Compile -->|"unsupported or ambiguous"| Refused["REFUSED"]
-    Compile --> Replay["Replay exact receipt and traces"]
-    Replay -->|"digest mismatch"| Invalid["INVALID"]
-    Replay --> Evaluate["Compare baseline and candidate"]
-    Evaluate --> Decision{"Policy result"}
-    Decision --> Block["BLOCK"]
-    Decision --> Review["REVIEW"]
-    Decision --> Pass["PASS"]
-    Pass --> Human["Separate human decision receipt"]
+    Goal["One measurable change"] --> Baseline["Freeze baseline and cases"]
+    Baseline --> Trials["Run equivalent external trials"]
+    Trials --> Evidence["Traces + outcomes + counter-evidence"]
+    Evidence --> Gate["TraceGate atomic gate"]
+    Gate -->|"BLOCK / REVIEW"| Learn["Diagnose and change one variable"]
+    Learn --> Trials
+    Gate -->|"PASS"| Human["Separate human decision"]
+    Human -->|"Approved"| Reuse["Eligible for controlled reuse"]
 ```
 
-Skills orchestrate the workflow but remain outside the evidence boundary. Skill
-text, chat output, and model confidence cannot count as evidence or weaken a
-refusal. Trace content is untrusted data and is never executed.
+The loop proposes and measures changes; it never promotes itself. Failed,
+refused, timed-out, and missing trials remain visible.
 
-## Architecture
+## Architecture and trust boundary
 
 ```mermaid
 flowchart TB
-    subgraph Producers["Outside the trust boundary"]
-        Skills["AWE Skills / Codex plugin"]
-        Harness["Agent or evaluation harness"]
-        OTel["Pinned OTLP GenAI exporter"]
+    subgraph Outside["Outside the trusted decision boundary"]
+        Plugin["Shared Skills / Codex + Claude Code plugins"]
+        Harness["Promptfoo, Langfuse, Braintrust, OpenAI Evals, custom harness"]
+        OTel["Pinned OTel / OpenInference exporters"]
     end
 
-    subgraph Interfaces["Interfaces"]
-        CLI["awe CLI"]
-        Action["GitHub Action"]
-        API["FastAPI / OpenAPI"]
-        UI["Optional TraceGate Review"]
-        TS["Generated TypeScript client"]
-    end
-
-    subgraph Core["One typed deterministic core"]
-        Contracts["Strict Pydantic contracts"]
-        Compiler["Evidence compiler"]
-        Verifier["Exact replay verifier"]
+    subgraph Core["Offline deterministic core"]
+        Contracts["Strict versioned contracts"]
+        BOM["Skill BOM + evidence package"]
+        Compiler["Read-only trace compiler"]
+        Replay["Exact replay verifier"]
         Evaluator["Frozen policy evaluator"]
-        Governance["Redaction · consent · signatures · promotion"]
+        Gate["Atomic gate receipt"]
     end
 
-    subgraph Artifacts["Portable content-addressed artifacts"]
-        Candidate["Workflow candidate"]
-        Receipts["Compilation · verification · evaluation receipts"]
-        Promotion["Human promotion receipt"]
+    subgraph Outputs["Portable review artifacts"]
+        Receipt["PASS / REVIEW / BLOCK + hashes"]
+        Share["Redaction / consent / signature"]
+        Human["Separate human decision receipt"]
     end
 
-    Skills --> Harness --> Interfaces
-    OTel --> Interfaces --> Contracts
-    Contracts --> Compiler --> Candidate
-    Contracts --> Verifier --> Receipts
-    Contracts --> Evaluator --> Receipts
-    Contracts --> Governance --> Promotion
+    Plugin --> Harness
+    Harness --> Contracts
+    OTel --> Contracts
+    Contracts --> BOM --> Gate
+    Contracts --> Compiler --> Replay --> Evaluator --> Gate
+    Gate --> Receipt --> Share --> Human
 ```
 
-Python/Pydantic is the reference decision engine. The TypeScript package is a
-generated integration client, not a second implementation.
+Trace, log, prompt, and Skill content is always untrusted data. TraceGate never
+executes embedded commands, follows embedded URLs, dynamically loads adapters,
+or treats model confidence as evidence.
+
+## Evidence interoperability
+
+Adapters run outside the verifier and emit `awe.evidence-envelope.v1`. Validate
+an envelope without executing it:
+
+```bash
+awe conformance --envelope adapter-envelope.json --out conformance.json
+```
+
+The current engine includes provider-neutral evaluation JSON and a revision-
+pinned OpenTelemetry GenAI importer. Promptfoo, Langfuse, Braintrust, OpenAI
+Evals, and other systems should integrate through the same envelope rather than
+adding their SDKs or credentials to the trusted core.
+
+Evidence packages can additionally bind repository URI, exact commit, producer
+and environment digests, capture time, maximum age, provenance level, and the
+external verification artifact supporting a signed or attested claim.
+Version 0.3 enforces only an `asserted` minimum provenance level. Signed and
+attested labels remain recorded metadata until a future trusted verifier can
+replay the external verification artifact; they cannot satisfy a gate floor.
 
 ## GitHub Action
 
-The latest released Action is `v0.2.0`. Pin a reviewed commit SHA in protected
-repositories.
+Pin a reviewed commit SHA or immutable release tag in protected repositories:
 
 ```yaml
-name: AWE TraceGate
+name: TraceGate
 on: [pull_request]
 
 permissions:
   contents: read
 
 jobs:
-  tracegate:
+  gate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - id: gate
-        uses: kingggg5/awe-tracegate@v0.2.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - id: tracegate
+        uses: kingggg5/awe-tracegate@<PINNED_COMMIT_SHA>
         with:
           traces: evidence/traces.jsonl
           baseline-evaluation: evidence/baseline.json
           candidate-evaluation: evidence/candidate.json
           evaluation-policy: evidence/policy.json
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        with:
-          name: awe-receipts
-          path: |
-            awe-compilation-receipt.json
-            awe-verification-receipt.json
+          skill-bom: evidence/skill-bom.json
+      - run: test "${{ steps.tracegate.outputs.decision }}" = "PASS"
 ```
+
+The Action publishes one `awe.gate-receipt.v1` output. It cannot report `PASS`
+from compilation integrity alone or from an evaluation belonging to another
+candidate.
 
 ## Optional local review UI
 
 Run `awe serve`, then open [http://127.0.0.1:8765](http://127.0.0.1:8765).
-TraceGate Review loads local JSONL/JSON evidence and drives the same compile,
-replay, evaluation, and human-decision API path. It is not an AI chat, agent
-runtime, or goal composer. Human approval is never preselected, and the local
-reviewer identifier is an assertion rather than an authenticated identity.
+TraceGate Review loads local JSON/JSONL evidence and uses the same typed engine.
+It is a review surface—not an AI chat, agent runtime, identity provider, or
+production control plane.
 
 ![TraceGate Review using the included synthetic sample](docs/assets/awe-tracegate-demo.png)
 
-## Reproducible public pilot
-
-The maintainer-run compatibility pilot uses
-[`pallets/itsdangerous`](https://github.com/pallets/itsdangerous) at commit
-`672971d66a2ef9f85151e53283113f33d642dabd`.
-
-- The upstream suite passed **297 tests**.
-- A clean Windows/Python 3.12 checkout reached exact replay in **14.51 seconds**.
-- TraceGate returned `status=valid` and `traces_verified=true` for two read-only
-  repository-analysis traces.
-- Only paths, sizes, and SHA-256 digests are retained; no upstream source is
-  redistributed.
-
-See the [pilot manifest](examples/external_pilot/itsdangerous/pilot.json),
-[source traces](examples/external_pilot/itsdangerous/traces.jsonl), and
-[verification receipt](examples/external_pilot/itsdangerous/verification.json).
-This is compatibility evidence, not an external-adopter or production-safety
-claim.
-
 ## Project status
 
-Implemented today:
+The current source prepares v0.3.0. The latest immutable tag remains v0.2.0
+until maintainers merge, review, and tag this release.
 
-- deterministic compilation and exact replay;
-- frozen baseline/candidate evaluation;
-- generic and pinned OTLP experiment import;
-- governed redaction and consent checks;
-- optional Ed25519 receipt bundles;
-- replay-gated human decisions with a neutral default;
-- Skill/Plugin suite, CLI, Action, API, TypeScript client, and local Review UI.
+Implemented:
 
-Before a production-ready claim:
+- atomic exact-evidence gate and Skill BOM;
+- evidence package, provenance/freshness checks, and adapter conformance;
+- five portable Skills with 25 routing/effect eval cases;
+- safe zero-dependency npm and Python installers plus Codex and Claude Code
+  marketplace metadata;
+- deterministic compiler, evaluator, redaction, signing, Action, API, generated
+  TypeScript client, and optional local UI.
 
-- publish a reviewed Skill/Plugin release and repeatable under-10-minute onboarding;
-- validate with an independent external adopter;
-- add authenticated actors and an append-only receipt ledger;
-- define a production deployment profile with tenancy and rate limiting.
+Still required before a production-ready claim:
 
-Signed desktop installers, autonomous execution, browser control, and automatic
-skill promotion are intentionally out of scope.
+- publish and smoke-test immutable npm/Python/plugin releases;
+- complete an independent external-adopter pilot;
+- add authenticated actors and an append-only decision ledger before exposing a
+  shared network service.
 
-## Community and documentation
+Autonomous execution, browser control, deployment, model routing, memory, hidden
+telemetry, and automatic promotion are intentionally out of scope.
 
+## Community
+
+- [Contributing](CONTRIBUTING.md)
+- [Security policy](SECURITY.md) and [threat model](docs/security.md)
+- [Architecture](docs/architecture.md)
+- [Related work](docs/related-work.md)
+- [Roadmap](docs/roadmap.md)
+- [Changelog](CHANGELOG.md)
 - [Request an external pilot](https://github.com/kingggg5/awe-tracegate/issues/new?template=pilot_request.yml)
-- [Report a bug](https://github.com/kingggg5/awe-tracegate/issues/new?template=bug_report.yml)
-- [Propose a feature](https://github.com/kingggg5/awe-tracegate/issues/new?template=feature_request.yml)
-- [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) ·
-  [Architecture](docs/architecture.md) · [Threat model](docs/security.md) ·
-  [Related work](docs/related-work.md) · [Roadmap](docs/roadmap.md) ·
-  [Changelog](CHANGELOG.md)
 
-The most valuable contributions are evidence adapters, adversarial fixtures,
-portable Skills, and reproducible public pilots—not autonomous execution paths.
+The most valuable contributions are independent adapters, adversarial fixtures,
+reproducible public pilots, and cross-host Skill compatibility results.
 
 ## License
 

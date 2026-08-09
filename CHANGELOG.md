@@ -9,10 +9,22 @@ stable contract release.
 
 ### Added
 
-- A repository-local Codex plugin with focused setup, Discovery, evidence-review,
-  and regression-diagnosis Skills.
-- A cross-platform, dependency-free Skill installer that refuses implicit
-  overwrites and accepts only known Skill names.
+- An atomic `awe gate` contract that requires compilation, exact trace replay,
+  frozen evaluation, policy, and identical candidate linkage before PASS.
+- Evidence Envelope/Package v1 contracts with repository, commit, producer,
+  environment, capture time, provenance, freshness, and conformance checks.
+- A non-executing Agent Skill BOM that can be bound directly into a gate receipt.
+- Five job-oriented Agent Skills for readiness, comparison, evidence verification,
+  adapter integration, and controlled evidence sharing, plus 25 routing/effect
+  eval cases.
+- Publishable zero-dependency npm and Python installers with managed file hashes,
+  dry-run/check modes, atomic updates, and refusal to overwrite unmanaged or
+  locally modified content.
+- Git-backed Codex marketplace metadata and machine-readable capabilities.
+- A Claude Code marketplace and deterministic, namespaced Skill adapter that
+  preserves explicit invocation for all evidence-changing workflows.
+- Deterministic plugin/npm release bundles, SPDX SBOM generation, checksums, and
+  a typed gate-attestation predicate builder.
 - A local TraceGate Review UI that drives the real compile, exact replay, frozen
   evaluation, and human-decision API path, with local evidence-file loading.
 - A content-addressed experiment manifest with frozen split, harness, strategy,
@@ -33,8 +45,15 @@ stable contract release.
 
 ### Changed
 
+- Reserved CLI exit code 2 for typed REVIEW/BLOCK receipts; malformed command
+  usage now exits 1. Non-asserted provenance labels are recorded but cannot
+  satisfy a gate minimum until a trusted external verifier exists.
 - Reframed the README around explicit Skill invocation and the CLI-first evidence
   engine, with TraceGate Review documented as an optional surface.
+- Replaced independent Action compile/verify/evaluate reporting with the atomic
+  gate receipt so integrity-only or unrelated evaluation evidence cannot PASS.
+- Removed the broad `$awe` router and four overlapping legacy workflows in favor
+  of a smaller namespaced Skill inventory.
 - Indexed dependency observations in one pass, removing repeated cross-trace
   scans for large candidates while preserving canonical receipts.
 - Cached the packaged TraceGate Review document per process and sourced the

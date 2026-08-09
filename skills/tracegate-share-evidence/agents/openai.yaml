@@ -1,0 +1,7 @@
+interface:
+  display_name: "TraceGate Share Evidence"
+  short_description: "Redact and package evidence for review"
+  default_prompt: "Use $tracegate-share-evidence to prepare this evidence bundle for controlled review."
+
+policy:
+  allow_implicit_invocation: false

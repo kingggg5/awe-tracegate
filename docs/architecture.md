@@ -1,29 +1,19 @@
 # Architecture
 
 AWE TraceGate is deliberately smaller than a general agent platform. Its
-v0 contract is a pure, read-only transformation:
+trusted contract is an offline, read-only evidence transformation:
 
 ```text
-ExecutionTrace JSONL
-        |
-        v
-typed validation and normalization
-        |
-        v
-cross-trace structure and binding analysis
-        |
-        v
-effect and evidence gate
-       / \
-      v   v
-compiled  refused
-      \   /
-       v v
-canonical SHA-256 receipt -> replay verifier
-                               |
-frozen evaluation bundles -> policy gate -> pass / review / block
-                               |
-exact-trace replay + human actor + commit SHA -> promotion receipt
+Agent Skill folder -> non-executing Skill BOM -----------+
+                                                          |
+ExecutionTrace JSONL -> compile -> exact replay ----------+--> atomic gate
+                                                          |    PASS/REVIEW/BLOCK
+frozen baseline + candidate + policy -> evaluation -------+
+                                                          |
+optional provenance-bound evidence package --------------+
+                                                               |
+                                                               v
+                                            separate human decision receipt
 ```
 
 The compiler, verifier, evaluator, redactor, and promotion recorder have no
@@ -70,7 +60,7 @@ The first compiler supports two binding origins:
 A proven `step_output` binding may introduce a dependency edge. Frequency,
 adjacency, or an LLM explanation cannot create a hard edge in v0.
 
-### `CompileReceipt`
+### `CompilationReceipt`
 
 The public result is a typed receipt with a `compiled` or `refused` decision,
 `compiler_version`, `input_bundle_digest`, refusal `reasons`, an optional
@@ -82,12 +72,31 @@ ordering does not change the receipt. The receipt hash detects modification
 after creation. It is not a digital signature and does not establish who
 produced the receipt.
 
-### Evaluation and promotion receipts
+### Evaluation, gate, and promotion receipts
 
 An `EvaluationBundle` binds external trial outcomes to one subject and frozen
 dataset digest. The evaluator first enforces dataset/case parity and hard safety
 and success gates, then marks excessive latency or cost regression for review.
 It does not run the trials or grade model output itself.
+
+`GateReceipt` is the only atomic PASS contract. It embeds and revalidates the
+compilation, exact replay verification, and frozen evaluation, and requires the
+evaluation candidate digest to match the compiled candidate. It can also bind a
+Skill BOM and an evidence package containing repository, commit, producer,
+environment, capture-time, and provenance metadata. Compilation or integrity
+verification alone is never reported as PASS.
+
+`EvidenceEnvelope` and `EvidencePackage` are provider-neutral adapter boundaries.
+They bind payload digests and provenance without loading adapter code into the
+verifier. The `asserted`, `signature_verified`, and `attested` labels describe
+the supplied provenance level; non-asserted labels also require an external
+verification-artifact digest. An operator must still validate that external
+artifact against its own trust policy. Version 0.3 records non-asserted labels
+but does not let them satisfy a gate minimum without a trusted verifier.
+
+`SkillBom` inventories the exact regular files, roles, sizes, external URLs, and
+SHA-256 digests in an Agent Skill folder without importing or executing it. It
+establishes content identity, not semantic safety.
 
 A promotion receipt recomputes the compilation verification from the supplied
 source traces rather than trusting a caller's assertion. Approval requires a
@@ -118,12 +127,34 @@ support controlled branching, but must not infer it from sparse observations.
 ### CLI
 
 ```bash
-awe compile --traces examples/repo_analysis/traces.jsonl
+awe gate \
+  --traces examples/repo_analysis/traces.jsonl \
+  --baseline examples/evaluation/baseline.json \
+  --candidate examples/evaluation/candidate.json \
+  --policy examples/evaluation/policy.json \
+  --out gate.json
 ```
 
-The receipt is emitted to standard output so callers can redirect it, hash it,
-or attach it to a review. Exit `0` means compiled, `2` means refused, and `1`
-means malformed input or invocation.
+The receipt is emitted to standard output or an explicit output path. For the
+atomic gate, exit `0` means PASS, `2` means REVIEW or BLOCK, and `1` means a
+malformed input or invocation. Diagnostic `compile`, `verify`, and `evaluate`
+commands remain available, but their individual outputs are not an atomic pass.
+
+`awe skill inspect`, `awe conformance`, and `awe capabilities --json` provide
+non-executing integration surfaces for Skill authors, adapters, and installers.
+
+### Agent host adapters
+
+`skills/` is the canonical Codex/Agent Skills source. The Codex plugin consumes
+it directly. Claude Code requires host-specific invocation metadata, so
+`scripts/sync_claude_plugin.py` deterministically renders a namespaced adapter
+under `integrations/claude-code/`. CI requires byte parity after the documented
+frontmatter and invocation-name transformation. The adapter adds no hooks, MCP
+servers, tool grants, agent runtime, or alternate decision path.
+
+Evidence-changing Claude Skills set `disable-model-invocation: true`; only the
+read-only readiness check remains eligible for host selection. Both hosts call
+the same installed `awe` CLI, whose receipt remains authoritative.
 
 ### HTTP API
 
@@ -164,6 +195,9 @@ Canonical serialization sorts object keys and excludes presentation-only
 variation before hashing. Any intentional change to validation, normalization,
 edge admission, effect classification, or receipt serialization requires a
 contract/compiler version change and reviewed golden-receipt updates.
+Exported schemas use JSON Schema 2020-12 and stable
+`urn:awe-tracegate:schema:*` identifiers; a new semantic contract requires a new
+identifier rather than changing an existing version in place.
 
 Determinism here applies to the offline compiler and verifier only. It is not a
 claim that external agents or model-backed workflows are deterministic.
@@ -213,6 +247,11 @@ The OTLP adapter consumes `invoke_agent` or `invoke_workflow` spans but requires
 separate `awe.eval.*` task and grader evidence. Transport/span success is not
 ground truth. Missing or mixed experiment metadata is rejected rather than
 filled with zeroes or inferred values.
+
+Third-party exporters should produce `awe.evidence-envelope.v1` outside the
+trusted process and run `awe conformance` over it. Promptfoo, Langfuse,
+Braintrust, OpenAI Evals, or any future adapter remains a producer—not a plugin
+loaded into the deterministic core.
 
 ## Signed bundles and governed export
 

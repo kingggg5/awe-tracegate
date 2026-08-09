@@ -1,0 +1,21 @@
+{
+  "name": "awe-tracegate",
+  "interface": {
+    "displayName": "AWE TraceGate"
+  },
+  "plugins": [
+    {
+      "name": "awe-tracegate",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/kingggg5/awe-tracegate.git",
+        "ref": "main"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

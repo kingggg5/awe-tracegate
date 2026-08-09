@@ -1,7 +1,7 @@
 {
   "name": "awe-tracegate",
-  "version": "0.1.0",
-  "description": "Offline, keyless skills for governed agent discovery, exact evidence replay, and regression diagnosis.",
+  "version": "0.3.0",
+  "description": "Offline, keyless skills for comparing agent changes and verifying evidence without trusting model output.",
   "author": {
     "name": "kingggg5",
     "url": "https://github.com/kingggg5"
@@ -11,6 +11,7 @@
   "license": "Apache-2.0",
   "keywords": [
     "agent-skills",
+    "codex-plugin",
     "evaluation",
     "evidence",
     "discovery-loop",
@@ -19,20 +20,22 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "AWE TraceGate",
-    "shortDescription": "Gate agent workflow reuse with exact evidence.",
-    "longDescription": "A focused Codex skill suite for TraceGate setup, measurable discovery loops, deterministic evidence replay, and regression diagnosis. Skills guide the workflow while the offline TraceGate engine owns every receipt and decision.",
+    "shortDescription": "Verify agent changes with replayable evidence.",
+    "longDescription": "Five focused skills for checking TraceGate readiness, comparing one measurable change, verifying exact evidence, integrating evaluation exports, and preparing redacted evidence for human review. The skills only orchestrate the offline TraceGate CLI; model or skill output is never verification evidence.",
     "developerName": "kingggg5",
     "category": "Developer Tools",
     "capabilities": [
-      "Workflow guidance",
+      "Readiness checks",
+      "Change comparison",
       "Evidence replay",
-      "Regression diagnosis"
+      "Adapter integration",
+      "Redacted sharing"
     ],
     "websiteURL": "https://github.com/kingggg5/awe-tracegate",
     "defaultPrompt": [
-      "Choose the right TraceGate workflow.",
-      "Compare this candidate with its baseline.",
-      "Replay and review these artifacts."
+      "Check whether this repository is ready for TraceGate.",
+      "Compare this agent change with its frozen baseline.",
+      "Verify these evidence artifacts without executing them."
     ],
     "brandColor": "#2563EB"
   }
