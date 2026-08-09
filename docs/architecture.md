@@ -108,7 +108,8 @@ The preview intentionally admits a narrow corpus:
 - no forward, missing, or conflicting `step_output` references;
 - no unsupported operation or incomplete required evidence.
 
-If every gate passes, AWE emits a candidate preserving the proven structure.
+If every gate passes, TraceGate emits a candidate preserving the proven
+structure.
 Otherwise it emits a refusal with machine-readable reasons. Future versions may
 support controlled branching, but must not infer it from sparse observations.
 
@@ -138,19 +139,24 @@ The optional API is a thin adapter over the same compiler:
 It introduces no alternate decision path and should return the same typed
 receipt for the same request.
 
-### Command-led local Review Workspace
+### Local TraceGate Review
 
-`GET /` serves a dependency-free review workspace packaged with the Python
-distribution. It sends typed requests to the same local endpoints used by API
-integrators and presents candidate structure, evaluation metrics, chained
-digests, an optional experiment manifest, and the human-decision form. The
-bundled inputs are labeled as sample data; selected files are parsed in the
-browser, size-limited, and sent only to the same-origin API. Its command bar is
-a deterministic dispatcher for existing actions (`validate`, `files`,
-`export`, `tools`, `sample`, `new`, and `docs`), not a model conversation. The
-tools view reports implemented integration surfaces without claiming provider
-accounts are connected. The page does not add a planner, runtime, persistence
-layer, or alternate decision rule.
+`GET /` serves **TraceGate Review**, a dependency-free review UI packaged with
+the Python distribution. It sends typed requests to the same local endpoints
+used by API integrators and presents candidate structure, evaluation metrics,
+chained digests, an optional experiment manifest, and the human-decision form.
+The form starts with no decision selected. Its Reviewer identifier is an
+asserted receipt field, not an authenticated identity.
+
+Bundled inputs are labeled as sample data; selected files are parsed in the
+browser, size-limited, and sent only to the same-origin API. Explicit buttons
+and forms select evidence, run validation, export artifacts, and record the
+human decision. There is no natural-language command composer or model
+conversation in this process. The tools view reports implemented integration
+surfaces without claiming provider accounts are connected. The packaged
+Atkinson Hyperlegible Next font is served locally; the UI has no font-CDN
+dependency. The page does not add a planner, runtime, persistence layer, or
+alternate decision rule.
 
 ## Determinism and versioning
 
@@ -172,18 +178,22 @@ let a model approve its own change.
 
 ## AWE ecosystem boundary
 
-TraceGate is the evidence and promotion gate in a broader future AWE ecosystem;
-it is not the agent runtime. A separate runtime may later emit `awe.trace.v1`
-evidence, but execution permissions, model keys, and tool capabilities must
-remain outside this repository's trusted core. Repeated success is evidence,
-not permission: a candidate still needs verification, evaluation, and a human
-decision before a downstream registry could treat it as reusable software.
+TraceGate is the evidence and promotion gate in the broader AWE ecosystem; it
+is not the agent runtime. **AWE Workspace** is a separate companion application
+and process boundary for the goal/command composer, sessions, tools, and future
+agent runtimes. It is not part of the `awe-tracegate` package. Workspace
+execution permissions,
+model keys, persistence, and tool capabilities must remain outside this
+repository's trusted core.
 
-A future AWE Workspace may own goals, sessions, research/code/file tools, and
-explicit user approvals. Its process boundary must prevent agent prose, tool
-output, or workspace state from mutating TraceGate policy or converting a
-refusal into approval. Native desktop packaging is an interface decision for
-that runtime, not a reason to rewrite this canonical decision engine.
+Workspace evidence may cross the boundary only through the same versioned,
+typed contracts as any other producer. Agent prose, tool output, and workspace
+state cannot mutate TraceGate policy or convert a refusal into approval.
+Repeated success is evidence, not permission: a candidate still needs exact
+verification, evaluation, and an explicit human decision before a downstream
+registry could treat it as reusable software. Native desktop packaging is an
+interface decision for Workspace, not a reason to rewrite this canonical
+decision engine.
 
 ## Experiment interoperability
 

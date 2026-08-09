@@ -5,7 +5,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from awe_tracegate import __version__
-from awe_tracegate.api import _review_workspace_page, app
+from awe_tracegate.api import _review_workspace_font, _review_workspace_page, app
 from awe_tracegate.contracts import ExecutionTrace
 
 EXAMPLE_TRACES = (
@@ -76,7 +76,7 @@ def test_review_workspace_uses_the_real_api_pipeline() -> None:
     assert response.status_code == 200
     assert cached_response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
-    assert "AWE TraceGate Review Workspace" in response.text
+    assert "AWE TraceGate Review" in response.text
     assert "Review a workflow candidate" in response.text
     assert 'fetchJson("/v1/compile"' in response.text
     assert 'fetchJson("/v1/verify"' in response.text
@@ -87,8 +87,12 @@ def test_review_workspace_uses_the_real_api_pipeline() -> None:
     assert 'id="experimentFile"' in response.text
     assert "REQUEST_TIMEOUT_MS = 30000" in response.text
     assert "MAX_FILE_BYTES = 10 * 1024 * 1024" in response.text
-    assert 'id="commandInput"' in response.text
-    assert '"validate evidence": "validate"' in response.text
+    assert 'id="commandInput"' not in response.text
+    assert "TraceGate Review" in response.text
+    assert 'id="reviewSurface"' in response.text
+    assert "Atkinson Hyperlegible Next" in response.text
+    assert "Select a decision" in response.text
+    assert "TraceGate does not authenticate this identity" in response.text
     assert 'id="toolsSurface"' in response.text
     assert (
         "Browser, email, shell, and deployment connectors are intentionally outside"
@@ -97,6 +101,17 @@ def test_review_workspace_uses_the_real_api_pipeline() -> None:
     assert 'value="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"' not in response.text
     assert 'value="local-reviewer"' not in response.text
     assert _review_workspace_page.cache_info().hits == 1
+
+
+def test_review_workspace_serves_the_bundled_accessible_font() -> None:
+    _review_workspace_font.cache_clear()
+
+    response = CLIENT.get("/assets/atkinson-hyperlegible-next.ttf")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("font/ttf")
+    assert response.headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert response.content[:4] == b"\x00\x01\x00\x00"
 
 
 def test_verify_endpoint_replays_source_traces() -> None:

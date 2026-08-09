@@ -15,9 +15,9 @@ credential.
 > **Pre-alpha.** TraceGate does not run agents, execute tools, install skills,
 > deploy changes, or authorize production actions.
 
-![AWE TraceGate Review Workspace](docs/assets/awe-tracegate-demo.jpg)
+![AWE TraceGate — TraceGate Review](docs/assets/awe-tracegate-demo.png)
 
-The screenshot uses the included synthetic sample. The same workspace accepts
+The screenshot uses the included synthetic sample. TraceGate Review also accepts
 local JSONL/JSON evidence and calls the real API pipeline.
 
 ## Why it exists
@@ -53,9 +53,12 @@ python -m pip install -e ".[api]"
 awe serve
 ```
 
-Open [http://127.0.0.1:8765](http://127.0.0.1:8765). The command bar supports
-real local actions such as `validate evidence`, `/files`, `/export`, `/tools`,
-and `/help`; it is not a simulated AI chat.
+Open [http://127.0.0.1:8765](http://127.0.0.1:8765) to use **TraceGate Review**.
+Explicit buttons and forms load evidence, run the deterministic gate, inspect
+artifacts, and record a decision; this surface is not an AI chat or goal
+composer. Human approval is never preselected. The reviewer identifier is
+recorded as an assertion in the receipt and is not authenticated by the local
+app.
 
 For the CLI-only path:
 
@@ -105,7 +108,7 @@ flowchart TB
     end
 
     subgraph Interfaces["Interfaces"]
-        UI["Review Workspace"]
+        UI["TraceGate Review"]
         CLI["awe CLI"]
         API["FastAPI / OpenAPI"]
         Action["GitHub Action"]
@@ -205,10 +208,11 @@ TraceGate compiles → replays → evaluates → records human review
 approved candidate returns to an operator-controlled registry or runtime
 ```
 
-A future **AWE Workspace** may provide goals, task sessions, browser/code/file
-tools, and research orchestration behind explicit permissions. That runtime
-should be a separate security boundary. It must never let prompt text or agent
-prose override TraceGate evidence.
+**AWE Workspace** is a separate companion application and process boundary. It
+owns the goal/command composer, task sessions, tools, and future agent runtimes;
+it is not installed by this package and does not run inside TraceGate. Workspace
+output can enter the gate only as typed evidence; prompt text and agent prose
+cannot override a TraceGate decision.
 
 This is intentionally different from building another general agent desktop
 inside the verifier. Existing systems already own agent execution; TraceGate's
@@ -218,7 +222,7 @@ useful distinction is the promotion receipt between discovery and reuse.
 
 | Surface | Purpose |
 | --- | --- |
-| Review Workspace | Command-led local review over the real API chain |
+| TraceGate Review | Explicit local evidence controls over the real API chain |
 | `awe` CLI | Compile, verify, evaluate, import, redact, sign, and promote |
 | FastAPI / OpenAPI | Typed private integration surface |
 | GitHub Action | Branch-protection-ready deterministic gate |
@@ -240,8 +244,8 @@ awe schema --out-dir schemas
 - generic and pinned OTLP experiment import;
 - governed redaction and consent checks;
 - optional Ed25519 bundles;
-- replay-gated human decisions;
-- local command workspace, Action, API, and TypeScript client.
+- replay-gated human decisions with a neutral default;
+- local TraceGate Review, Action, API, and TypeScript client.
 
 **Before calling v0.3 production-ready**
 

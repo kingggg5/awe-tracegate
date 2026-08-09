@@ -4,15 +4,23 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light" />
-    <title>AWE TraceGate Review Workspace</title>
+    <title>AWE TraceGate Review</title>
     <!--
-      THESIS: A command-led local workspace for reviewing one evidence chain.
+      THESIS: A local review surface for one deterministic evidence chain.
       OWN-WORLD: Pale-blue navigation, cool paper, graphite type, measured blue.
       STORY: Open evidence, run the deterministic gate, inspect it, record review.
-      FIRST VIEWPORT: Review session, five-stage evidence path, and command bar.
-      FORM: Agent command center around a calibration bench, established world.
+      FIRST VIEWPORT: Review session, five-stage evidence path, and primary action.
+      FORM: Evidence workbench with clear provenance and human accountability.
     -->
     <style>
+      @font-face {
+        font-family: "Atkinson Hyperlegible Next";
+        font-style: normal;
+        font-weight: 200 800;
+        font-display: swap;
+        src: url("/assets/atkinson-hyperlegible-next.ttf") format("truetype");
+      }
+
       :root {
         --paper: #f7f8fa;
         --surface: #ffffff;
@@ -36,13 +44,11 @@
         --disabled-text: #8b95a3;
         --shadow: 0 8px 24px rgba(31, 35, 40, 0.08);
         --app-shadow: 0 18px 48px rgba(42, 55, 73, 0.14);
-        --command-shadow: 0 12px 32px rgba(31, 35, 40, 0.15);
         --radius-sm: 8px;
         --radius-md: 14px;
         --radius-app: 16px;
-        --radius-command: 13px;
-        --font-ui: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
+        --font-ui: "Atkinson Hyperlegible Next", "Segoe UI Variable Text",
+          "Noto Sans Thai", "Leelawadee UI", "Segoe UI", Arial, sans-serif;
         --font-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono",
           monospace;
       }
@@ -72,7 +78,7 @@
         color: var(--ink);
         background: #eaf0f7;
         font-family: var(--font-ui);
-        font-size: 14px;
+        font-size: 15px;
         line-height: 1.55;
       }
 
@@ -123,7 +129,7 @@
       .nav-item {
         display: flex;
         width: 100%;
-        min-height: 38px;
+        min-height: 44px;
         align-items: center;
         gap: 9px;
         padding: 8px 10px;
@@ -175,12 +181,12 @@
       }
 
       .nav-copy strong {
-        font-size: 13px;
+        font-size: 14px;
       }
 
       .nav-copy small {
         color: var(--muted);
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 400;
       }
 
@@ -210,7 +216,7 @@
       }
 
       :focus-visible {
-        outline: 3px solid rgba(40, 95, 158, 0.34);
+        outline: 3px solid var(--blue);
       }
 
       .topbar {
@@ -274,8 +280,8 @@
         gap: 7px;
         padding: 3px 9px;
         border-radius: 999px;
-        font-size: 12px;
-        font-weight: 650;
+        font-size: 13px;
+        font-weight: 600;
       }
 
       .mode-chip {
@@ -304,7 +310,7 @@
       main {
         width: min(1180px, 100%);
         margin: 0 auto;
-        padding: 30px 24px 112px;
+        padding: 30px 24px 48px;
       }
 
       .page-heading {
@@ -328,7 +334,7 @@
         max-width: 70ch;
         margin: 0;
         color: var(--muted);
-        font-size: 14px;
+        font-size: 15px;
       }
 
       .source-chip {
@@ -362,14 +368,14 @@
       .sequence h2,
       .panel-title {
         margin: 0;
-        font-size: 14px;
-        font-weight: 700;
+        font-size: 15px;
+        font-weight: 650;
       }
 
       .sequence-note {
         margin: 4px 0 14px;
         color: var(--muted);
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .stage-list {
@@ -413,21 +419,21 @@
         border-radius: 50%;
         color: var(--muted);
         background: #f6f8fa;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 750;
       }
 
       .stage strong {
         display: block;
         margin: 2px 0 1px;
-        font-size: 13px;
+        font-size: 14px;
       }
 
       .stage small {
         display: block;
         overflow: hidden;
         color: var(--muted);
-        font-size: 11px;
+        font-size: 12px;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
@@ -483,7 +489,7 @@
       .bench-header p {
         margin: 0;
         color: var(--muted);
-        font-size: 13px;
+        font-size: 14px;
       }
 
       .button-row {
@@ -493,7 +499,7 @@
       }
 
       .button {
-        min-height: 40px;
+        min-height: 44px;
         padding: 8px 14px;
         border: 1px solid var(--line-strong);
         border-radius: var(--radius-sm);
@@ -581,7 +587,7 @@
 
       .source-summary {
         color: var(--muted);
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 400;
         text-align: end;
       }
@@ -595,13 +601,13 @@
         max-width: 74ch;
         margin: 14px 0 0;
         color: var(--muted);
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .privacy-note {
         margin: 12px 0 0;
         color: var(--muted);
-        font-size: 11px;
+        font-size: 12px;
       }
 
       .candidate-field {
@@ -613,8 +619,9 @@
       .candidate-field-header,
       .section-heading {
         display: flex;
-        align-items: baseline;
+        align-items: center;
         justify-content: space-between;
+        flex-wrap: wrap;
         gap: 16px;
       }
 
@@ -622,7 +629,7 @@
       .section-heading p {
         margin: 0;
         color: var(--muted);
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .trajectory {
@@ -777,7 +784,7 @@
         min-width: 0;
         overflow: hidden;
         font-family: var(--font-mono);
-        font-size: 10px;
+        font-size: 12px;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
@@ -789,7 +796,7 @@
         border-radius: var(--radius-sm);
         color: var(--blue-deep);
         background: transparent;
-        font-size: 11px;
+        font-size: 12px;
         cursor: pointer;
       }
 
@@ -806,12 +813,16 @@
       .field-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
         gap: 12px;
         margin-top: 15px;
       }
 
       .field {
-        display: grid;
+        display: flex;
+        min-width: 0;
+        align-self: start;
+        flex-direction: column;
         gap: 6px;
       }
 
@@ -821,15 +832,15 @@
 
       .field label {
         color: var(--muted);
-        font-size: 11px;
-        font-weight: 650;
+        font-size: 13px;
+        font-weight: 600;
       }
 
       .field input,
       .field select,
       .field textarea {
         width: 100%;
-        min-height: 40px;
+        min-height: 44px;
         padding: 8px 10px;
         border: 1px solid var(--line-strong);
         border-radius: var(--radius-sm);
@@ -855,17 +866,18 @@
 
       .field-hint {
         color: var(--muted);
-        font-size: 11px;
+        font-size: 12px;
       }
 
       .field-error {
-        min-height: 16px;
+        min-height: 18px;
         color: var(--red);
-        font-size: 11px;
+        font-size: 12px;
       }
 
       .promotion-actions {
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
         gap: 12px;
         margin-top: 14px;
@@ -873,7 +885,7 @@
 
       .promotion-note {
         color: var(--muted);
-        font-size: 11px;
+        font-size: 12px;
       }
 
       .input-panel {
@@ -889,13 +901,13 @@
       }
 
       .file-field label {
-        font-size: 11px;
-        font-weight: 650;
+        font-size: 13px;
+        font-weight: 600;
       }
 
       .file-field small {
         color: var(--muted);
-        font-size: 10px;
+        font-size: 12px;
       }
 
       .file-field input {
@@ -904,7 +916,7 @@
         border: 1px solid var(--line);
         border-radius: var(--radius-sm);
         background: var(--surface);
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .file-field input::file-selector-button {
@@ -957,7 +969,7 @@
         gap: 6px 16px;
         margin: 24px 0 0;
         color: var(--muted);
-        font-size: 12px;
+        font-size: 13px;
         text-align: center;
       }
 
@@ -966,8 +978,7 @@
       }
 
       .tools-surface[hidden],
-      .review-surface[hidden],
-      .command-dock[hidden] {
+      .review-surface[hidden] {
         display: none;
       }
 
@@ -1031,20 +1042,24 @@
       }
 
       .tool-copy strong {
-        font-size: 14px;
+        font-size: 15px;
       }
 
       .tool-copy small {
         max-width: 66ch;
         margin-top: 2px;
         color: var(--muted);
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .tool-state {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: flex-end;
         min-width: 92px;
         color: var(--green);
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 650;
         text-align: right;
         text-decoration: none;
@@ -1063,74 +1078,7 @@
         max-width: 76ch;
         margin: 18px 0 0;
         color: var(--muted);
-        font-size: 12px;
-      }
-
-      .command-dock {
-        position: fixed;
-        z-index: 10;
-        right: max(28px, calc((100vw - 1540px) / 2 + 28px));
-        bottom: 24px;
-        left: max(272px, calc((100vw - 1540px) / 2 + 272px));
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 10px;
-        max-width: 860px;
-        margin: 0 auto;
-        padding: 8px 8px 8px 14px;
-        border: 1px solid var(--line-strong);
-        border-radius: var(--radius-command);
-        background: rgba(255, 255, 255, 0.97);
-        box-shadow: var(--command-shadow);
-      }
-
-      .command-copy {
-        min-width: 0;
-      }
-
-      .command-input {
-        width: 100%;
-        min-height: 30px;
-        padding: 2px 0;
-        border: 0;
-        color: var(--ink);
-        background: transparent;
-      }
-
-      .command-input:focus {
-        outline: 0;
-      }
-
-      .command-hint {
-        display: block;
-        overflow: hidden;
-        color: var(--muted);
-        font-size: 10px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .command-submit {
-        display: grid;
-        width: 36px;
-        height: 36px;
-        place-items: center;
-        border: 0;
-        border-radius: 50%;
-        color: #ffffff;
-        background: var(--blue);
-        font-weight: 750;
-        cursor: pointer;
-      }
-
-      .command-submit:hover {
-        background: var(--blue-deep);
-      }
-
-      .command-submit:disabled {
-        color: var(--disabled-text);
-        background: var(--surface-muted);
+        font-size: 13px;
       }
 
       @media (max-width: 1080px) {
@@ -1138,9 +1086,6 @@
           grid-template-columns: 208px minmax(0, 1fr);
         }
 
-        .command-dock {
-          left: 228px;
-        }
       }
 
       @media (max-width: 760px) {
@@ -1158,7 +1103,7 @@
           z-index: 8;
           top: 0;
           display: grid;
-          grid-template-columns: minmax(0, 1fr) auto auto;
+          grid-template-columns: minmax(0, 1fr) repeat(2, 44px);
           align-items: center;
           gap: 8px;
           padding: 8px 12px;
@@ -1169,27 +1114,27 @@
         .workspace-nav .nav-action,
         .workspace-nav .nav-section-label,
         .workspace-nav .session-item,
-        .workspace-nav .nav-spacer {
+        .workspace-nav .nav-spacer,
+        .workspace-nav .nav-external {
           display: none;
         }
 
         .workspace-nav .nav-item {
-          width: auto;
+          width: 44px;
+          height: 44px;
+          min-height: 44px;
+          justify-content: center;
+          padding: 0;
         }
 
-        .workspace-nav .nav-copy small {
+        .workspace-nav .nav-copy {
           display: none;
         }
 
         .topbar {
-          top: 53px;
+          top: 61px;
         }
 
-        .command-dock {
-          right: 14px;
-          bottom: 14px;
-          left: 14px;
-        }
 
         .page-heading {
           grid-template-columns: 1fr;
@@ -1219,16 +1164,21 @@
           padding: 0 16px;
         }
 
-        .topbar .brand span:last-child {
-          display: none;
+        .mode-chip {
+          width: 28px;
+          min-width: 28px;
+          padding: 3px 8px;
+          overflow: hidden;
+          font-size: 0;
+          white-space: nowrap;
         }
 
-        .mode-chip {
+        .topbar a {
           display: none;
         }
 
         main {
-          padding: 26px 14px 108px;
+          padding: 26px 14px 40px;
         }
 
         .lab-shell {
@@ -1264,8 +1214,12 @@
         }
 
         .promotion-actions {
-          align-items: flex-start;
-          flex-direction: column;
+          grid-template-columns: 1fr;
+          align-items: start;
+        }
+
+        .promotion-actions .button {
+          width: 100%;
         }
 
         .source-panel summary {
@@ -1286,6 +1240,12 @@
           grid-column: 2;
           text-align: left;
         }
+
+        .field input,
+        .field select,
+        .field textarea {
+          font-size: 16px;
+        }
       }
 
       @media (forced-colors: active) {
@@ -1297,31 +1257,23 @@
         }
       }
 
-      @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          scroll-behavior: auto !important;
-          transition-duration: 0.01ms !important;
-        }
-      }
     </style>
   </head>
   <body>
     <div class="app-frame">
-      <aside class="workspace-nav" aria-label="Workspace navigation">
+      <aside class="workspace-nav" aria-label="TraceGate navigation">
         <div class="nav-identity">
           <span class="brand-mark" aria-hidden="true">A</span>
-          <span>AWE TraceGate</span>
+          <span>TraceGate Review</span>
         </div>
         <button class="nav-action" id="newReviewButton" type="button">+ New review</button>
 
-        <p class="nav-section-label">Workspace</p>
-        <button class="nav-item" id="reviewNavButton" type="button" aria-current="page">
+        <p class="nav-section-label">TraceGate</p>
+        <button class="nav-item" id="reviewNavButton" type="button" aria-current="page" aria-label="TraceGate review">
           <span class="nav-icon" aria-hidden="true">&#9678;</span>
           <span class="nav-copy"><strong>Review</strong><small>Validate one evidence chain</small></span>
         </button>
-        <button class="nav-item" id="toolsNavButton" type="button">
+        <button class="nav-item" id="toolsNavButton" type="button" aria-label="Integration tools">
           <span class="nav-icon" aria-hidden="true">&#9881;</span>
           <span class="nav-copy"><strong>Tools</strong><small>Available integration surfaces</small></span>
         </button>
@@ -1332,7 +1284,7 @@
           <span class="nav-copy"><strong id="sessionTitle">Sample evidence</strong><small id="sessionStatus">Not validated</small></span>
         </button>
         <div class="nav-spacer"></div>
-        <a class="nav-item" href="https://github.com/kingggg5/awe-tracegate">
+        <a class="nav-item nav-external" href="https://github.com/kingggg5/awe-tracegate">
           <span class="nav-icon" aria-hidden="true">&#8599;</span>
           <span class="nav-copy"><strong>GitHub</strong><small>Source, issues, and releases</small></span>
         </a>
@@ -1341,7 +1293,7 @@
       <div class="app-content">
         <header class="topbar">
           <div class="brand">
-            <span id="surfaceTitle">Review workspace</span>
+            <span id="surfaceTitle">Review</span>
           </div>
           <div class="topbar-actions">
             <span class="mode-chip" id="serverStatus" data-state="checking">Checking server</span>
@@ -1353,7 +1305,7 @@
       <div class="review-surface" id="reviewSurface">
       <section class="page-heading" aria-labelledby="page-title">
         <div>
-          <h1 id="page-title">Review a workflow candidate</h1>
+          <h1 id="page-title" tabindex="-1">Review a workflow candidate</h1>
           <p>
             Validate repeated traces, replay the exact evidence, compare frozen
             evaluations, and record a review decision. No model credentials are
@@ -1367,7 +1319,7 @@
         <aside class="sequence" aria-label="Review progress">
           <h2>Review status</h2>
           <p class="sequence-note">Each step must finish before a decision is recorded.</p>
-          <ol class="stage-list">
+          <ol class="stage-list" tabindex="0" aria-label="Review status stages">
             <li class="stage" id="stageEvidence" data-state="waiting">
               <span class="stage-marker">1</span>
               <span><strong>Inputs</strong><small>Sample data loaded</small></span>
@@ -1464,7 +1416,7 @@
               <h3 class="panel-title" id="candidate-title">Compiled workflow</h3>
               <span class="status-chip" id="compileStatus" data-status="waiting">Waiting</span>
             </div>
-            <div class="trajectory" id="trajectory">
+            <div class="trajectory" id="trajectory" tabindex="0" aria-label="Compiled workflow nodes">
               <div class="empty-state">Select evidence, then run validation.</div>
             </div>
           </section>
@@ -1508,40 +1460,43 @@
           <section class="promotion" aria-labelledby="promotion-title">
             <div class="section-heading">
               <h3 class="panel-title" id="promotion-title">Human decision</h3>
-              <span class="status-chip" id="promotionStatus" data-status="waiting">Not recorded</span>
+              <span class="status-chip" id="promotionStatus" data-status="waiting" role="status" aria-live="polite">Not recorded</span>
             </div>
             <div class="field-grid">
               <div class="field">
                 <label for="decision">Decision</label>
-                <select id="decision">
+                <select id="decision" required aria-describedby="decisionHint decisionError" aria-errormessage="decisionError">
+                  <option value="" selected disabled>Select a decision</option>
                   <option value="approved">Approve candidate</option>
                   <option value="rejected">Reject candidate</option>
                 </select>
+                <span class="field-hint" id="decisionHint">Choose explicitly; TraceGate never preselects approval.</span>
+                <span class="field-error" id="decisionError" aria-live="polite"></span>
               </div>
               <div class="field">
-                <label for="actor">Reviewer ID</label>
-                <input id="actor" required maxlength="128" autocomplete="username" placeholder="name@example.com" aria-describedby="actorHint actorError" />
-                <span class="field-hint" id="actorHint">Letters, numbers, and . _ : @ + -</span>
-                <span class="field-error" id="actorError"></span>
+                <label for="actor">Reviewer identifier</label>
+                <input id="actor" required maxlength="128" autocomplete="username" placeholder="name@example.com" aria-describedby="actorHint actorError" aria-errormessage="actorError" />
+                <span class="field-hint" id="actorHint">Recorded in the receipt; TraceGate does not authenticate this identity.</span>
+                <span class="field-error" id="actorError" aria-live="polite"></span>
               </div>
               <div class="field field-wide">
                 <label for="commitSha">Commit SHA</label>
-                <input id="commitSha" required minlength="40" maxlength="64" spellcheck="false" autocomplete="off" placeholder="40- or 64-character lowercase commit SHA" aria-describedby="commitError" />
-                <span class="field-error" id="commitError"></span>
+                <input id="commitSha" required minlength="40" maxlength="64" spellcheck="false" autocomplete="off" placeholder="40- or 64-character lowercase commit SHA" aria-describedby="commitError" aria-errormessage="commitError" />
+                <span class="field-error" id="commitError" aria-live="polite"></span>
               </div>
               <div class="field field-wide">
                 <label for="rationale">Review notes</label>
-                <textarea id="rationale" required maxlength="1024" placeholder="Explain why this candidate should be approved or rejected." aria-describedby="rationaleError"></textarea>
-                <span class="field-error" id="rationaleError"></span>
+                <textarea id="rationale" required maxlength="1024" placeholder="Explain why this candidate should be approved or rejected." aria-describedby="rationaleError" aria-errormessage="rationaleError"></textarea>
+                <span class="field-error" id="rationaleError" aria-live="polite"></span>
               </div>
             </div>
             <div class="promotion-actions">
-              <button class="button" id="promoteButton" type="button" disabled>
-                Record decision
-              </button>
               <span class="promotion-note" id="promotionNote">
                 Complete verification and evaluation before recording a decision.
               </span>
+              <button class="button" id="promoteButton" type="button" disabled>
+                Record decision
+              </button>
             </div>
           </section>
 
@@ -1557,7 +1512,7 @@
 
       <section class="tools-surface" id="toolsSurface" hidden aria-labelledby="tools-title">
         <div class="tools-heading">
-          <h1 id="tools-title">Integration surfaces</h1>
+          <h1 id="tools-title" tabindex="-1">Integration surfaces</h1>
           <p>
             Connect an existing harness to one deterministic evidence contract.
             TraceGate never borrows an agent credential or executes a tool on its behalf.
@@ -1603,14 +1558,6 @@
       </section>
         </main>
 
-        <form class="command-dock" id="commandForm" role="search">
-          <div class="command-copy">
-            <label class="sr-only" for="commandInput">Review command</label>
-            <input class="command-input" id="commandInput" type="text" autocomplete="off" placeholder="Try: validate evidence" />
-            <span class="command-hint" id="commandHint">Local commands only · /validate · /files · /export · /tools · /help</span>
-          </div>
-          <button class="command-submit" id="commandSubmit" type="submit" aria-label="Run command">&#8593;</button>
-        </form>
       </div>
     </div>
 
@@ -1754,24 +1701,9 @@
         workflow_shape_mismatch: "The traces do not share one workflow shape"
       });
       const stageIds = ["Evidence", "Compile", "Replay", "Evaluate", "Promote"];
-      const COMMAND_ALIASES = Object.freeze({
-        "/docs": "docs",
-        "/export": "export",
-        "/files": "files",
-        "/help": "help",
-        "/new": "new",
-        "/sample": "sample",
-        "/tools": "tools",
-        "/validate": "validate",
-        "export review": "export",
-        "load sample data": "sample",
-        "new review": "new",
-        "open api docs": "docs",
-        "open evidence files": "files",
-        "show integrations": "tools",
-        "show tools": "tools",
-        "validate evidence": "validate"
-      });
+      const scrollBehavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth";
       const state = {
         inputs: clone(syntheticInputs),
         source: "synthetic",
@@ -1789,19 +1721,18 @@
         apiToolState: document.getElementById("apiToolState"),
         baselineFile: document.getElementById("baselineFile"),
         candidateFile: document.getElementById("candidateFile"),
-        commandForm: document.getElementById("commandForm"),
-        commandHint: document.getElementById("commandHint"),
-        commandInput: document.getElementById("commandInput"),
         commitError: document.getElementById("commitError"),
         commitSha: document.getElementById("commitSha"),
         currentReviewButton: document.getElementById("currentReviewButton"),
         decision: document.getElementById("decision"),
+        decisionError: document.getElementById("decisionError"),
         downloadButton: document.getElementById("downloadButton"),
         errorNotice: document.getElementById("errorNotice"),
         experimentFile: document.getElementById("experimentFile"),
         loadButton: document.getElementById("loadButton"),
         newReviewButton: document.getElementById("newReviewButton"),
         policyFile: document.getElementById("policyFile"),
+        pageTitle: document.getElementById("page-title"),
         promoteButton: document.getElementById("promoteButton"),
         rationale: document.getElementById("rationale"),
         rationaleError: document.getElementById("rationaleError"),
@@ -1820,6 +1751,7 @@
         surfaceTitle: document.getElementById("surfaceTitle"),
         toolsNavButton: document.getElementById("toolsNavButton"),
         toolsSurface: document.getElementById("toolsSurface"),
+        toolsTitle: document.getElementById("tools-title"),
         traceFile: document.getElementById("traceFile")
       });
 
@@ -1851,17 +1783,23 @@
         return value.slice(0, 16) + "…" + value.slice(-8);
       }
 
-      function setSurface(surface) {
+      function setSurface(surface, { moveFocus = true } = {}) {
         const showTools = surface === "tools";
-        elements.reviewSurface.hidden = showTools;
+        const showReview = surface === "review";
+        elements.reviewSurface.hidden = !showReview;
         elements.toolsSurface.hidden = !showTools;
-        elements.reviewNavButton.toggleAttribute("aria-current", !showTools);
+        elements.reviewNavButton.toggleAttribute("aria-current", showReview);
         elements.toolsNavButton.toggleAttribute("aria-current", showTools);
-        elements.surfaceTitle.textContent = showTools ? "Tools" : "Review workspace";
-        document.title = showTools
-          ? "AWE TraceGate Tools"
-          : "AWE TraceGate Review Workspace";
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        const titles = {
+          review: ["Review", "AWE TraceGate Review"],
+          tools: ["Tools", "AWE TraceGate Tools"]
+        };
+        elements.surfaceTitle.textContent = titles[surface][0];
+        document.title = titles[surface][1];
+        if (moveFocus) {
+          (showTools ? elements.toolsTitle : elements.pageTitle).focus({ preventScroll: true });
+        }
+        window.scrollTo({ top: 0, behavior: scrollBehavior });
       }
 
       function updateSession(status) {
@@ -1869,66 +1807,6 @@
           ? state.sourceFiles.traces
           : "Sample evidence";
         elements.sessionStatus.textContent = status;
-      }
-
-      function setCommandHint(message) {
-        elements.commandHint.textContent = message;
-      }
-
-      async function executeCommand(rawCommand) {
-        const normalized = rawCommand.trim().toLowerCase().replace(/\s+/g, " ");
-        const command = COMMAND_ALIASES[normalized];
-        if (!command) {
-          setCommandHint("Command not recognized · try /validate, /files, /export, /tools, /sample, /new, or /help");
-          return;
-        }
-
-        if (command === "help") {
-          setCommandHint("Commands · /validate · /files · /export · /tools · /sample · /new · /docs");
-        } else if (command === "validate") {
-          setSurface("review");
-          if (runButton.disabled) {
-            setCommandHint("Validation is already running.");
-          } else {
-            setCommandHint("Running the deterministic evidence chain…");
-            await runEvidenceLoop();
-            const outcome = state.compilation && state.compilation.status === "refused"
-              ? "REFUSED"
-              : state.evaluation
-                ? state.evaluation.status.toUpperCase()
-                : "INCOMPLETE";
-            setCommandHint("Validation finished · " + outcome + " · inspect the evidence before recording a decision");
-          }
-        } else if (command === "files") {
-          setSurface("review");
-          elements.sourcePanel.open = true;
-          elements.sourcePanel.scrollIntoView({ behavior: "smooth", block: "center" });
-          elements.traceFile.focus();
-          setCommandHint("Choose all four required files, then select Use selected files.");
-        } else if (command === "export") {
-          setSurface("review");
-          if (downloadButton.disabled) {
-            setCommandHint("Validate evidence before exporting a review.");
-          } else {
-            downloadReceipts();
-            setCommandHint("Review export downloaded.");
-          }
-        } else if (command === "sample") {
-          setSurface("review");
-          restoreSyntheticEvidence();
-          setCommandHint("Included sample evidence is ready to validate.");
-        } else if (command === "new") {
-          setSurface("review");
-          restoreSyntheticEvidence();
-          elements.sourcePanel.open = true;
-          elements.sourcePanel.scrollIntoView({ behavior: "smooth", block: "start" });
-          setCommandHint("New review ready · select evidence files or keep the labelled sample.");
-        } else if (command === "tools") {
-          setSurface("tools");
-          setCommandHint("Showing integration surfaces that are implemented today.");
-        } else if (command === "docs") {
-          window.location.assign("/docs");
-        }
       }
 
       function setStage(name, stageState, detail) {
@@ -2037,12 +1915,14 @@
       }
 
       function clearDecisionContext() {
-        elements.decision.value = "approved";
+        elements.decision.value = "";
         elements.commitSha.value = "";
         elements.rationale.value = "";
-        [elements.commitSha, elements.rationale].forEach((field) => {
+        [elements.decision, elements.actor, elements.commitSha, elements.rationale].forEach((field) => {
           field.removeAttribute("aria-invalid");
         });
+        elements.decisionError.textContent = "";
+        elements.actorError.textContent = "";
         elements.commitError.textContent = "";
         elements.rationaleError.textContent = "";
       }
@@ -2167,8 +2047,13 @@
 
       function reviewFieldError(field) {
         const value = field.value.trim();
+        if (field === elements.decision) {
+          return value === "approved" || value === "rejected"
+            ? ""
+            : "Select approve or reject before recording the decision.";
+        }
         if (field === elements.actor) {
-          return value && ACTOR_PATTERN.test(value) ? "" : "Enter a valid reviewer ID.";
+          return value && ACTOR_PATTERN.test(value) ? "" : "Enter a valid reviewer identifier.";
         }
         if (field === elements.commitSha) {
           return COMMIT_PATTERN.test(value) ? "" : "Enter a lowercase 40- or 64-character commit SHA.";
@@ -2177,11 +2062,13 @@
       }
 
       function renderReviewFieldError(field) {
-        const output = field === elements.actor
-          ? elements.actorError
-          : field === elements.commitSha
-            ? elements.commitError
-            : elements.rationaleError;
+        const output = field === elements.decision
+          ? elements.decisionError
+          : field === elements.actor
+            ? elements.actorError
+            : field === elements.commitSha
+              ? elements.commitError
+              : elements.rationaleError;
         const message = reviewFieldError(field);
         output.textContent = message;
         field.setAttribute("aria-invalid", String(Boolean(message)));
@@ -2189,17 +2076,22 @@
       }
 
       function validateReviewFields() {
-        return [elements.actor, elements.commitSha, elements.rationale]
-          .map(renderReviewFieldError)
-          .every(Boolean);
+        const fields = [elements.decision, elements.actor, elements.commitSha, elements.rationale];
+        const results = fields.map(renderReviewFieldError);
+        const firstInvalid = fields[results.findIndex((result) => !result)];
+        if (firstInvalid) firstInvalid.focus();
+        return results.every(Boolean);
       }
 
       function updatePromotionEligibility() {
+        const hasDecision = decisionSelect.value === "approved" || decisionSelect.value === "rejected";
         const isApproval = decisionSelect.value === "approved";
-        promoteButton.disabled = isApproval ? !approvalEligible() : !evidenceChainReady();
+        promoteButton.disabled = !hasDecision || (isApproval ? !approvalEligible() : !evidenceChainReady());
         const note = document.getElementById("promotionNote");
         if (!evidenceChainReady()) {
           note.textContent = "Exact replay and evaluation are required before a decision can be recorded.";
+        } else if (!hasDecision) {
+          note.textContent = "Choose approve or reject. No decision is selected by default.";
         } else if (isApproval && !approvalEligible()) {
           note.textContent = "Approval requires PASS and a candidate digest matching the compilation receipt.";
         } else {
@@ -2464,23 +2356,22 @@
 
       runButton.addEventListener("click", runEvidenceLoop);
       promoteButton.addEventListener("click", recordDecision);
-      decisionSelect.addEventListener("change", updatePromotionEligibility);
+      decisionSelect.addEventListener("change", () => {
+        decisionSelect.removeAttribute("aria-invalid");
+        elements.decisionError.textContent = "";
+        updatePromotionEligibility();
+      });
       downloadButton.addEventListener("click", downloadReceipts);
       document.getElementById("loadButton").addEventListener("click", loadSelectedFiles);
       document.getElementById("restoreButton").addEventListener("click", restoreSyntheticEvidence);
-      elements.reviewNavButton.addEventListener("click", () => setSurface("review"));
-      elements.currentReviewButton.addEventListener("click", () => setSurface("review"));
-      elements.toolsNavButton.addEventListener("click", () => setSurface("tools"));
-      elements.newReviewButton.addEventListener("click", () => executeCommand("/new"));
-      elements.commandForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const command = elements.commandInput.value;
-        if (!command.trim()) {
-          setCommandHint("Enter a command or type /help.");
-          return;
-        }
-        elements.commandInput.value = "";
-        await executeCommand(command);
+      elements.reviewNavButton.addEventListener("click", (event) => setSurface("review", { moveFocus: event.detail === 0 }));
+      elements.currentReviewButton.addEventListener("click", (event) => setSurface("review", { moveFocus: event.detail === 0 }));
+      elements.toolsNavButton.addEventListener("click", (event) => setSurface("tools", { moveFocus: event.detail === 0 }));
+      elements.newReviewButton.addEventListener("click", () => {
+        setSurface("review", { moveFocus: false });
+        restoreSyntheticEvidence();
+        elements.sourcePanel.open = true;
+        elements.sourcePanel.scrollIntoView({ behavior: scrollBehavior, block: "start" });
       });
       [elements.actor, elements.commitSha, elements.rationale].forEach((input) => {
         input.addEventListener("input", () => {

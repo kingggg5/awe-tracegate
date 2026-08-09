@@ -9,7 +9,7 @@ stable contract release.
 
 ### Added
 
-- A local Review Workspace that drives the real compile, exact replay, frozen
+- A local TraceGate Review UI that drives the real compile, exact replay, frozen
   evaluation, and human-decision API path, with local evidence-file loading.
 - A content-addressed experiment manifest with frozen split, harness, strategy,
   model, environment, grader, token, cost, latency, trace, and commit evidence.
@@ -18,10 +18,10 @@ stable contract release.
   repository, and commit expectations.
 - Consent-, scope-, expiry-, and revocation-gated redaction policies.
 - A generated TypeScript API client with OpenAPI drift and dependency-audit CI.
-- A current desktop capture of the complete Review Workspace evidence chain.
+- A current desktop capture of the complete TraceGate Review evidence chain.
 - Explicit resource bounds for untrusted OTLP attributes, spans, and nested
   redaction input.
-- A command-led app shell with deterministic review commands, a truthful tools
+- An app shell with explicit evidence buttons and forms, a truthful tools
   inventory, responsive navigation, and `awe serve` loopback startup.
 - A digest-only `pallets/itsdangerous` compatibility pilot at an exact commit,
   including 297 passing upstream tests and replayable TraceGate receipts.
@@ -31,8 +31,11 @@ stable contract release.
 
 - Indexed dependency observations in one pass, removing repeated cross-trace
   scans for large candidates while preserving canonical receipts.
-- Cached the packaged Review Workspace document per process and sourced the
+- Cached the packaged TraceGate Review document per process and sourced the
   OpenAPI version from the package version.
+- Removed the fixed command dock after browser QA found it could cover the
+  human-decision form. The separate AWE Workspace owns the goal/command
+  composer.
 - Reframed the discovery-loop direction as a separate permissioned runtime that
   exports evidence to TraceGate instead of expanding the verifier's authority.
 

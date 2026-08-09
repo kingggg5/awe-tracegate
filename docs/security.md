@@ -16,7 +16,7 @@ Treat all of the following as untrusted:
 - paths supplied on the command line;
 - receipts received from another machine;
 - requests to the optional HTTP API;
-- JSONL and JSON files selected in the local Review Workspace.
+- JSONL and JSON files selected in the local TraceGate Review UI;
 - generic experiment exports and OTLP span attributes;
 - signed bundles, embedded public keys, signer labels, and consent records.
 
@@ -51,8 +51,12 @@ policy, grant a capability, approve a step, or change an effect class.
 - SHA-256 integrity is not signer identity. Ed25519 proves possession of the
   trusted private key, not that a signer label is authorized. Operators must
   manage key-to-identity policy, rotation, revocation, and custody externally.
-- Actor IDs in promotion receipts are assertions, not authenticated identities;
-  use an operator-owned identity boundary before relying on them.
+- Reviewer identifiers in promotion receipts are assertions, not authenticated
+  identities. TraceGate Review labels this field accordingly; use an
+  operator-owned identity boundary before relying on it.
+- The human-decision form starts with no selection. This prevents accidental
+  default approval in the UI, but it does not authenticate or authorize the
+  reviewer.
 - A `compiled` decision does not prove semantic correctness, policy compliance,
   usefulness, or production safety.
 - Repeated successful traces may contain correlated mistakes or incomplete
@@ -63,8 +67,8 @@ policy, grant a capability, approve a step, or change an effect class.
 - The local API is not an internet-facing deployment profile. It does not imply
   authentication, tenant isolation, rate limiting, or denial-of-service
   protection.
-- Python process isolation is not a sandbox. AWE avoids executing trace content
-  rather than claiming the host process contains hostile code.
+- Python process isolation is not a sandbox. TraceGate avoids executing trace
+  content rather than claiming the host process contains hostile code.
 - The OpenTelemetry GenAI conventions are still Development. TraceGate pins one
   reviewed revision and refuses legacy token aliases instead of silently
   guessing across schema generations.
@@ -77,8 +81,8 @@ receipts. Hashing a secret does not make publication safe: low-entropy values
 may be guessed and metadata can still be sensitive.
 
 Operators remain responsible for classifying, minimizing, redacting, retaining,
-and deleting their trace data before AWE reads it. The project does not claim an
-automatic PII or secret-redaction guarantee.
+and deleting their trace data before TraceGate reads it. The project does not
+claim an automatic PII or secret-redaction guarantee.
 
 The built-in redactor is deliberately conservative and deterministic. It
 handles explicit sensitive keys plus common email and token patterns, but it
@@ -109,17 +113,23 @@ request-size limits, timeouts, audit logging, TLS, and network policy. Never use
 the health endpoint or a successful compile response as authorization for a
 side effect.
 
-The Review Workspace is a local review convenience, not a hardened public web
-application. Selected files are parsed by the page and sent to its same-origin
-API. Its 10 MB browser file limit is a usability guard, not a server security
-boundary; operators must still review and redact evidence before loading it.
-Do not bind the API to a public interface without the operator-owned controls
-above.
+TraceGate Review is a local review convenience, not a hardened public web
+application or an agent runtime. Selected files are parsed by the page and sent
+to its same-origin API. Its 10 MB browser file limit is a usability guard, not
+a server security boundary; operators must still review and redact evidence
+before loading it. Do not bind the API to a public interface without the
+operator-owned controls above.
 
-The command bar uses a fixed local allowlist and dispatches only existing review
-actions. It does not evaluate prompt text, call a model, run shell commands, or
-load arbitrary plugins. The tools view is an inventory, not an OAuth or secret
-storage surface.
+TraceGate Review exposes explicit buttons and forms for existing review actions.
+It has no natural-language composer and does not evaluate prompt text, call a
+model, run shell commands, or load arbitrary plugins. The tools view is an
+inventory, not an OAuth or secret storage surface.
+
+AWE Workspace owns the separate goal/command composer and is a different
+application and process boundary. Connecting it to TraceGate does not give
+Workspace permission to change gate policy, authenticate a reviewer, or turn
+its own output into approval. Treat Workspace traces as untrusted evidence at
+the same typed ingestion boundary as every other producer.
 
 ## Dependency and release hygiene
 
