@@ -954,6 +954,54 @@ class ExplanationReceipt(ContractModel):
         return self
 
 
+class ReviewBundleCheck(ContractModel):
+    """One deterministic readiness check over a local review bundle."""
+
+    check_id: Identifier
+    status: Literal["pass", "fail"]
+    detail: Reason
+
+
+class ReviewBundleReport(ContractModel):
+    """Fail-closed health report for the standard Gate v2 bundle layout."""
+
+    schema_version: Literal["awe.review-bundle-report.v1"] = (
+        "awe.review-bundle-report.v1"
+    )
+    status: Literal["READY", "INCOMPLETE", "INVALID"]
+    checks: Annotated[
+        tuple[ReviewBundleCheck, ...], Field(min_length=1, max_length=32, strict=False)
+    ]
+    next_actions: Annotated[tuple[Reason, ...], Field(max_length=8, strict=False)] = ()
+    gate_v2_status: GateStatus | None = None
+    gate_v2_receipt_hash: Sha256Digest | None = None
+    explanation_hash: Sha256Digest | None = None
+    report_hash: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_report(self) -> Self:
+        check_ids = tuple(check.check_id for check in self.checks)
+        if check_ids != tuple(sorted(set(check_ids))):
+            raise ValueError("review bundle check ids must be unique and sorted")
+        failed = any(check.status == "fail" for check in self.checks)
+        if self.status == "READY" and failed:
+            raise ValueError("ready review bundle cannot contain failed checks")
+        if self.status != "READY" and not failed:
+            raise ValueError("non-ready review bundle requires a failed check")
+        if self.status == "READY" and (
+            self.gate_v2_status is None
+            or self.gate_v2_receipt_hash is None
+            or self.explanation_hash is None
+        ):
+            raise ValueError("ready review bundle requires verified receipt identity")
+        expected = canonical_digest(
+            self.model_dump(mode="json", exclude={"report_hash"})
+        )
+        if self.report_hash != expected:
+            raise ValueError("review bundle report hash is invalid")
+        return self
+
+
 class GateReceipt(ContractModel):
     """Atomic, content-addressed decision over one complete evidence chain."""
 

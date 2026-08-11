@@ -60,6 +60,18 @@ than a novelty claim available to TraceGate.
 
 TraceGate v0 does not route models or optimize configurations.
 
+## Developer experience and loop catalogs
+
+- [Loop Engineering](https://github.com/cobusgreyling/loop-engineering)
+  provides a unified CLI front door, readiness doctor, machine-readable pattern
+  catalog, copy-ready starters, and honest operating stories for recurring
+  agent loops.
+
+AWE adopts the useful onboarding principle, not the runtime scope. `awe demo`,
+`awe doctor`, and the small decision-recipe catalog help a reviewer reach a
+reproducible evidence result quickly. TraceGate still does not schedule loops,
+run agents, create worktrees, execute shell commands, or auto-promote changes.
+
 ## Context and token optimization
 
 - [Headroom](https://github.com/headroomlabs-ai/headroom) provides a local-first

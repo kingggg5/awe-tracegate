@@ -215,6 +215,12 @@ atomic gate, exit `0` means PASS, `2` means REVIEW or BLOCK, and `1` means a
 malformed input or invocation. Diagnostic `compile`, `verify`, and `evaluate`
 commands remain available, but their individual outputs are not an atomic pass.
 
+`awe demo` generates a self-contained synthetic Gate v2 chain without a model
+or network call. `awe doctor` then reloads the standard review-bundle layout and
+fails closed unless its typed artifacts, held-input comparison, Gate v2 receipt,
+and explanation graph reproduce. The doctor reports bundle integrity, not model
+quality or production safety.
+
 `awe skill inspect`, `awe conformance`, and `awe capabilities --json` provide
 non-executing integration surfaces for Skill authors, adapters, and installers.
 

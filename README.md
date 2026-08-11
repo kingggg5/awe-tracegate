@@ -90,26 +90,47 @@ verifier itself requires no model-provider credential in every path.
 | Compare a controlled agent, strategy, prompt, commit, or model change | The v0.3 source install and [`awe compare`](#compare-controlled-experiments) | A held-input comparison receipt, followed by optional Gate v2 review |
 | Add a repeatable review workflow to Codex or Claude Code | [Install the Skills](#install-the-skills) | Focused host instructions that orchestrate the same local verifier |
 
-For a local v1 smoke test, clone the repository and run the included frozen
-fixtures:
+For a complete local tour, clone the repository and run the self-contained
+synthetic demo:
 
 ```bash
 git clone https://github.com/kingggg5/awe-tracegate.git
 cd awe-tracegate
 python -m pip install -e ".[api]"
-awe gate \
-  --traces examples/repo_analysis/traces.jsonl \
-  --baseline examples/evaluation/baseline.json \
-  --candidate examples/evaluation/candidate.json \
-  --policy examples/evaluation/policy.json \
-  --out gate.json
-awe explain gate.json --out explanation.json
+awe demo --out awe-demo
+awe doctor awe-demo
 ```
 
-`gate.json` is the portable decision artifact; `explanation.json` is a
-deterministic evidence graph with the inputs, links, reasons, and limitations
-behind that decision. It is useful for review, but it does not add or infer
-evidence.
+The first command generates and runs the complete synthetic Gate v2 path. The
+second independently reloads its held inputs and re-checks the comparison,
+Gate v2 receipt, typed quality evidence, and explanation graph. It exits `0`
+only when the bundle is internally reproducible; missing or mismatched evidence
+exits `2` with a versioned `awe.review-bundle-report.v1` when `--json` is used.
+
+```text
+AWE TraceGate synthetic demo
+  Gate v2             PASS
+  Comparison          pass
+  Comparison replay   valid
+  Quality             baseline=pass candidate=pass
+  Receipt              sha256:3fb1b2ed...96344d
+  Evidence graph       sha256:a418df8b...f7277d
+  Scope                 synthetic, offline, no model or network calls
+
+AWE review bundle: READY
+  [PASS] comparison_replay
+  [PASS] explanation_replay
+  [PASS] gate_replay
+  [PASS] typed_contracts
+```
+
+The demo is a contract/reproducibility check, not an agent benchmark. Replace
+its synthetic files with separately captured harness evidence before making a
+real change decision. See the [decision recipes](docs/decision-recipes.md) for
+the smallest valid evidence chain for each use case. The v0.3 doctor profile
+covers the package-free standard layout; Gate v2 receipts that bind a Skill BOM
+or provenance package must still be replayed with their explicit protected
+expectations.
 
 For the complete v2 chain, use the checked-in
 [canonical synthetic fixture](examples/canonical-agent-change/README.md). It
@@ -268,6 +289,20 @@ changes, not another observability backend or experiment runner.
 
 This separation lets teams keep their preferred agent and eval stack while using
 one small, auditable gate at the point where a change becomes reusable.
+
+### Pick a decision, not a feature
+
+| Decision you need | Minimum path | Fail-closed condition |
+| --- | --- | --- |
+| Did a prompt or Skill change help on the frozen suite? | `compare` -> `verify-comparison` | Cases, seeds, controls, or subject identity do not match |
+| May CI accept these existing artifacts? | `gate` | Compilation, replay, evaluation, policy, or candidate linkage is incomplete |
+| Is the richer promotion bundle coherent? | `gate-v2` -> `doctor` | Comparison, quality evidence, or graph cannot be replayed from held inputs |
+| Can another harness feed TraceGate? | `import-experiment` -> `conformance` | Required identity or outcome fields are missing |
+| Can evidence leave the repository? | `redact` -> consent check -> optional `sign` | Scope, consent, redaction, or trusted-key expectations are incomplete |
+
+[Decision recipes](docs/decision-recipes.md) include copy-ready inputs,
+commands, outputs, and anti-claims for each path. The catalog is intentionally
+small: AWE does not need a separate command for every agent host or eval vendor.
 
 ## Install the evidence engine
 

@@ -49,6 +49,7 @@ from .contracts import (
     SignedReceiptBundle,
     SkillBom,
 )
+from .demo import generate_demo, inspect_review_bundle
 from .evaluation import (
     compare_experiments,
     evaluate_candidate,
@@ -168,6 +169,27 @@ def _build_parser() -> argparse.ArgumentParser:
         "--json",
         action="store_true",
         help="emit JSON (the only stable output format)",
+    )
+
+    demo_parser = subcommands.add_parser(
+        "demo", help="generate and run the complete offline synthetic Gate v2 demo"
+    )
+    demo_parser.add_argument(
+        "--out",
+        type=Path,
+        default=Path("awe-demo"),
+        help="empty output directory (default: ./awe-demo)",
+    )
+    demo_parser.add_argument(
+        "--json", action="store_true", help="emit the machine-readable fixture summary"
+    )
+
+    doctor_parser = subcommands.add_parser(
+        "doctor", help="replay every decision-bearing link in a Gate v2 bundle"
+    )
+    doctor_parser.add_argument("bundle", type=Path, nargs="?", default=Path("awe-demo"))
+    doctor_parser.add_argument(
+        "--json", action="store_true", help="emit the versioned readiness report"
     )
 
     gate_parser = subcommands.add_parser(
@@ -414,6 +436,48 @@ def _compile(args: argparse.Namespace) -> int:
 def _capabilities(args: argparse.Namespace) -> int:
     _emit(describe_capabilities(__version__))
     return 0
+
+
+def _demo(args: argparse.Namespace) -> int:
+    generate_demo(args.out)
+    metadata = _load_json(args.out / "fixture.json")
+    if args.json:
+        _emit(metadata)
+        return 0
+    expected = metadata["expected"]
+    print("AWE TraceGate synthetic demo")
+    print(f"  Gate v2             {expected['gate_v2_status']}")
+    print(f"  Comparison          {expected['comparison_status']}")
+    print(f"  Comparison replay   {expected['comparison_verification_status']}")
+    print(
+        "  Quality             "
+        f"baseline={expected['baseline_quality_status']} "
+        f"candidate={expected['candidate_quality_status']}"
+    )
+    print(f"  Receipt              {expected['gate_v2_receipt_hash']}")
+    print(f"  Evidence graph       {expected['explanation_hash']}")
+    print(f"  Artifacts             {args.out.resolve()}")
+    print("  Scope                 synthetic, offline, no model or network calls")
+    print(f"\nNext: awe doctor {args.out}")
+    return 0
+
+
+def _doctor(args: argparse.Namespace) -> int:
+    report = inspect_review_bundle(args.bundle)
+    if args.json:
+        _emit(report)
+    else:
+        print(f"AWE review bundle: {report.status}")
+        for check in report.checks:
+            marker = "PASS" if check.status == "pass" else "FAIL"
+            print(f"  [{marker}] {check.check_id}: {check.detail}")
+        if report.gate_v2_status is not None:
+            print(f"\n  Decision      {report.gate_v2_status}")
+            print(f"  Receipt       {report.gate_v2_receipt_hash}")
+            print(f"  Evidence graph {report.explanation_hash}")
+        for action in report.next_actions:
+            print(f"\nNext: {action}")
+    return 0 if report.status == "READY" else 2
 
 
 def _gate(args: argparse.Namespace) -> int:
@@ -789,6 +853,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "compare": _compare,
             "compile": _compile,
             "conformance": _conformance,
+            "demo": _demo,
+            "doctor": _doctor,
             "evaluate": _evaluate,
             "gate": _gate,
             "gate-v2": _gate_v2,

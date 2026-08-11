@@ -38,6 +38,8 @@ The pre-alpha source currently provides:
   Claude Code marketplace metadata;
 - a GitHub Action that cannot report `PASS` without the complete linked gate
   chain;
+- a one-command synthetic Gate v2 demo plus a fail-closed review-bundle doctor
+  with a versioned machine-readable report;
 - governed redaction, consent records, signing, separate human-decision
   receipts, a loopback API, generated TypeScript types, and a local review UI;
 - reproducible release-bundle tooling, checksums, an SPDX SBOM, clean-install

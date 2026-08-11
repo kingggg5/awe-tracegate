@@ -8,6 +8,7 @@ from pathlib import Path
 from awe_tracegate.contracts import (
     ComparisonPolicy,
     EvaluationBundle,
+    EvaluationPolicy,
     ExecutionTrace,
     ExperimentManifest,
     ExperimentQualityEvidence,
@@ -78,6 +79,9 @@ def test_canonical_fixture_is_reproducible_and_replays_the_full_v2_chain(
     comparison_policy = ComparisonPolicy.model_validate_json(
         (FIXTURE_DIRECTORY / "comparison-policy.json").read_text(encoding="utf-8")
     )
+    evaluation_policy = EvaluationPolicy.model_validate_json(
+        (FIXTURE_DIRECTORY / "evaluation-policy.json").read_text(encoding="utf-8")
+    )
     quality_policy = QualityPolicy.model_validate_json(
         (FIXTURE_DIRECTORY / "quality-policy.json").read_text(encoding="utf-8")
     )
@@ -98,7 +102,7 @@ def test_canonical_fixture_is_reproducible_and_replays_the_full_v2_chain(
                 encoding="utf-8"
             )
         ),
-        None,
+        evaluation_policy,
         baseline,
         candidate,
         comparison_policy,

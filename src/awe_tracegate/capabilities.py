@@ -18,6 +18,8 @@ def describe_capabilities(package_version: str) -> CapabilitiesDocument:
                     "compare",
                     "compile",
                     "conformance",
+                    "demo",
+                    "doctor",
                     "evaluate",
                     "gate",
                     "gate-v2",
@@ -47,6 +49,7 @@ def describe_capabilities(package_version: str) -> CapabilitiesDocument:
                     "exact_input_gate_replay",
                     "offline_keyless_gate",
                     "paired_experiment_comparison",
+                    "review_bundle_exact_input_replay",
                     "typed_terminal_outcome_assessment",
                     "strict_typed_contracts",
                 )

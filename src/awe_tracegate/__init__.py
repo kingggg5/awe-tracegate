@@ -26,10 +26,12 @@ from .contracts import (
     PromotionReceipt,
     QualityPolicy,
     ReceiptVerification,
+    ReviewBundleReport,
     SensitivityPolicy,
     SensitivityReceipt,
     SkillBom,
 )
+from .demo import generate_demo, inspect_review_bundle
 from .evaluation import (
     compare_experiments,
     evaluate_candidate,
@@ -77,6 +79,7 @@ __all__ = [
     "PromotionReceipt",
     "QualityPolicy",
     "ReceiptVerification",
+    "ReviewBundleReport",
     "SensitivityPolicy",
     "SensitivityReceipt",
     "SkillBom",
@@ -90,8 +93,10 @@ __all__ = [
     "explain_receipt",
     "gate_evidence",
     "gate_evidence_v2",
+    "generate_demo",
     "import_generic_evaluation",
     "import_otel_genai_evaluation",
+    "inspect_review_bundle",
     "inspect_skill",
     "validate_comparison_receipt_inputs",
     "validate_evidence_envelope",

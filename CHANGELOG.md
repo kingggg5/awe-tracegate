@@ -30,6 +30,12 @@ stable contract release.
 
 ### Added
 
+- `awe demo` as a zero-network, zero-model front door for the complete
+  synthetic Gate v2 chain, plus `awe doctor` and
+  `awe.review-bundle-report.v1` for replaying the standard held-input bundle
+  layout without trusting its precomputed decision.
+- A compact decision-recipe guide that maps common agent-change questions to
+  the minimum valid inputs, commands, outputs, and fail-closed boundaries.
 - An opt-in `awe.gate-receipt.v2` that composes the unchanged v1 gate with a
   supplied `ComparisonReceipt`, deterministic held-input replay, manifest-to-
   evaluation projection checks, and optional typed quality sidecars.
