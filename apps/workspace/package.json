@@ -1,0 +1,32 @@
+{
+  "name": "@awe-tracegate/workspace",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Human-gated agent runtime coordinator for the AWE TraceGate monorepo",
+  "license": "Apache-2.0",
+  "packageManager": "npm@11.12.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kingggg5/awe-tracegate.git",
+    "directory": "apps/workspace"
+  },
+  "bugs": {
+    "url": "https://github.com/kingggg5/awe-tracegate/issues"
+  },
+  "homepage": "https://github.com/kingggg5/awe-tracegate/tree/main/apps/workspace#readme",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit && node --check web/app.js",
+    "prestart": "npm run build",
+    "start": "node dist/src/server.js",
+    "test": "npm run build && node --test \"dist/tests/*.test.js\""
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}

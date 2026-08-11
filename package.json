@@ -32,7 +32,11 @@
     "LICENSE"
   ],
   "scripts": {
-    "test:installer": "node --test npm/install.test.mjs"
+    "test:installer": "node --test npm/install.test.mjs",
+    "workspace:install": "npm ci --prefix apps/workspace",
+    "workspace:check": "npm run check --prefix apps/workspace",
+    "workspace:test": "npm test --prefix apps/workspace",
+    "workspace:start": "npm start --prefix apps/workspace"
   },
   "engines": {
     "node": ">=20"

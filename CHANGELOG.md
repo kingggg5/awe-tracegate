@@ -42,8 +42,12 @@ stable contract release.
   policy-only evidence workspaces. The scaffold records raw file hashes and
   never generates traces, results, consent, signatures, receipts, or decisions.
 - An original evidence-loop diagram and a shorter decision-first README path,
-  informed by successful open-source onboarding patterns without importing an
-  agent runtime into TraceGate.
+  informed by successful open-source onboarding patterns while keeping runtime
+  coordination outside the trusted TraceGate core.
+- A private TypeScript package at `apps/workspace` for local goals, discovery
+  briefs, exact permission approval, typed Codex/Claude/external handoffs, and
+  checkpoints. It has a separate process and CI job and cannot execute tools or
+  issue evidence decisions.
 - `awe demo` as a zero-network, zero-model front door for the complete
   synthetic Gate v2 chain, plus `awe doctor` and
   `awe.review-bundle-report.v1` for replaying the standard held-input bundle

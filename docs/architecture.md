@@ -2,8 +2,10 @@
 
 **AWE is reproducible evidence infrastructure for agent experiments.** Its
 product question is: *did an agent change improve, and can we trust the evidence
-behind that conclusion?* TraceGate is the trusted evidence-integrity and
-decision core, not an agent runtime, eval runner, or observability store.
+behind that conclusion?* TraceGate is the trusted Python evidence-integrity and
+decision core, not an agent executor, eval runner, or observability store. The
+repository also contains a separate TypeScript Workspace coordinator under
+`apps/workspace`.
 
 The current trusted contract is an offline, read-only evidence transformation:
 
@@ -24,6 +26,32 @@ The compiler, verifier, evaluator, redactor, and promotion recorder have no
 model, tool, browser, network, or workflow-execution loop. Given the same
 supported inputs and contract versions, they must return the same canonical
 decision.
+
+## Monorepo boundaries
+
+```text
+apps/workspace (TypeScript, local coordination, untrusted)
+    -> goal + explicit grants + human approval
+    -> awe.runtime-handoff.v1
+    -> external Codex / Claude Code / other host
+    -> captured artifacts and references (untrusted)
+    -> src/awe_tracegate (Python, deterministic trusted core)
+    -> PASS / REVIEW / BLOCK receipt
+    -> separate human reuse or promotion decision
+```
+
+The dependency direction is one-way. Workspace may probe the loopback
+TraceGate API and may point a reviewer at evidence, but TraceGate never imports
+Workspace, accepts its local approval as evidence, or delegates a decision to
+it. The two surfaces also have separate package manifests, test suites, and
+processes.
+
+Workspace v1 is a handoff coordinator rather than an embedded agent executor.
+It persists bounded local goals and discovery briefs, lets a user select an
+external runner, requires an exact permission approval, exports a typed handoff,
+and records optional checkpoints. Its only permission identifiers are
+`read_goal`, `read_evidence_references`, and `write_checkpoint`; none grants a
+shell, browser, network, secret, deployment, or promotion capability.
 
 ## Design goals
 

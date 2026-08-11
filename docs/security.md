@@ -162,11 +162,26 @@ It has no natural-language composer and does not evaluate prompt text, call a
 model, run shell commands, or load arbitrary plugins. The tools view is an
 inventory, not an OAuth or secret storage surface.
 
-Any external agent host or workspace owns its goal/command composer and remains
-a different process boundary. Connecting one to TraceGate does not give it
-permission to change gate policy, authenticate a reviewer, or turn its own
-output into approval. Treat its traces as untrusted evidence at the same typed
+The repository includes AWE Workspace under `apps/workspace`, but it remains a
+different package and process boundary. Connecting it or any external agent host
+to TraceGate does not give it permission to change gate policy, authenticate a
+reviewer, or turn its own output into approval. Treat its goals, handoffs,
+checkpoints, artifact references, and traces as untrusted data at the same typed
 ingestion boundary as every other producer.
+
+Workspace binds only to a loopback host, accepts only a loopback TraceGate URL,
+requires same-origin mutations, bounds request bodies and stored records, and
+uses restrictive local file permissions where the platform supports them. It
+is still a single-user local coordinator, not a hardened multi-tenant identity
+service. A local reviewer identifier is asserted rather than authenticated,
+and cancelling a handoff record does not stop work already running in an
+external host.
+
+The `awe.runtime-handoff.v1` permission names describe the data a user approved
+for export. They do not install a connector or grant an operating-system
+capability. In particular, the Workspace has no shell, browser, network,
+credential, deployment, or promotion permission. External hosts must enforce
+their own sandbox and approval model.
 
 ## Dependency and release hygiene
 
