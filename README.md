@@ -560,6 +560,25 @@ permissions. It then rebuilds and byte-compares the Python, npm, plugin, and
 schema archives before publishing checksums, an SPDX SBOM, and GitHub artifact
 attestations.
 
+### Maintainer release setup
+
+The workflow is ready for registry publication, but the registries must be
+configured once before the first `v0.3.0` tag:
+
+1. In npm, add a **GitHub Actions Trusted Publisher** for `kingggg5`,
+   `awe-tracegate`, workflow file `release.yml`, environment `npm`, and allow
+   `npm publish`.
+2. In PyPI, add a **GitHub Trusted Publisher** for the same owner/repository,
+   workflow `.github/workflows/release.yml`, environment `pypi`.
+3. In GitHub, create protected `npm` and `pypi` environments; keep the tag rule
+   restricted to maintainers and require the release CI to pass.
+
+No registry token is stored in the repository. npm and PyPI mint short-lived
+OIDC credentials only after the exact tag has passed the read-only verification
+job. If either registry publish fails, the workflow does not create the GitHub
+Release, so the failure remains visible rather than being presented as a full
+release.
+
 Implemented in the v0.3 source branch (not yet a registry release):
 
 - atomic evidence gate, exact-input replay validation, and Skill BOM;

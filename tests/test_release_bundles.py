@@ -140,13 +140,30 @@ def test_release_workflow_assembles_and_smokes_complete_artifact_set() -> None:
     assert "workflow_call:" in continuous_integration
     assert "verify-tagged-source:" in workflow
     assert "uses: ./.github/workflows/ci.yml" in workflow
+    assert "release-build:" in workflow
     assert "needs: verify-tagged-source" in workflow
+    assert "publish-npm:" in workflow
+    assert "publish-pypi:" in workflow
+    assert "github-release:" in workflow
+    assert "needs: [publish-npm, publish-pypi]" in workflow
+    assert "environment: npm" in workflow
+    assert "name: pypi" in workflow
+    assert "npm publish" in workflow
+    assert (
+        "pypa/gh-action-pypi-publish@106e0b0b7c337fa67ed433972f777c6357f78598"
+        in workflow
+    )
+    assert (
+        "actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0" in workflow
+    )
     assert "permissions:\n  contents: read" in workflow
     assert "contents: write" in workflow
     assert workflow.index("needs: verify-tagged-source") < workflow.index(
         "contents: write"
     )
     assert "build_release_bundles.py version" in workflow
+    assert "Require a tag on the protected main tip" in workflow
+    assert "git fetch --no-tags origin main" in workflow
     assert "python -m build --outdir dist" in workflow
     assert "npm pack --pack-destination dist" in workflow
     assert "dist/awe-tracegate-plugin.zip" in workflow
