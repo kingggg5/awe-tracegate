@@ -79,6 +79,38 @@ gate from the original JSON/JSONL inputs and requiring the same canonical
 receipt. It does not replay a live model backend, reproduce network responses,
 or claim that a stochastic agent run can be reconstructed bit-for-bit.
 
+## Start here
+
+Choose the smallest path that matches the decision you need to make. The
+verifier itself requires no model-provider credential in every path.
+
+| If you need to… | Start with | What you get |
+| --- | --- | --- |
+| Gate existing trace and evaluation artifacts in CI | The published [GitHub Action](#github-action) (`@3`, or a reviewed SHA) | A stable `awe.gate-receipt.v1` and one `PASS` / `REVIEW` / `BLOCK` decision |
+| Compare a controlled agent, strategy, prompt, commit, or model change | The v0.3 source install and [`awe compare`](#compare-controlled-experiments) | A held-input comparison receipt, followed by optional Gate v2 review |
+| Add a repeatable review workflow to Codex or Claude Code | [Install the Skills](#install-the-skills) | Focused host instructions that orchestrate the same local verifier |
+
+For a local v1 smoke test, clone the repository and run the included frozen
+fixtures:
+
+```bash
+git clone https://github.com/kingggg5/awe-tracegate.git
+cd awe-tracegate
+python -m pip install -e ".[api]"
+awe gate \
+  --traces examples/repo_analysis/traces.jsonl \
+  --baseline examples/evaluation/baseline.json \
+  --candidate examples/evaluation/candidate.json \
+  --policy examples/evaluation/policy.json \
+  --out gate.json
+awe explain gate.json --out explanation.json
+```
+
+`gate.json` is the portable decision artifact; `explanation.json` is a
+deterministic evidence graph with the inputs, links, reasons, and limitations
+behind that decision. It is useful for review, but it does not add or infer
+evidence.
+
 ## Install the Skills
 
 ### npm from GitHub
