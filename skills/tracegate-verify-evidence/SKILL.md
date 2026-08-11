@@ -14,7 +14,7 @@ Use the CLI output as authority. Agent prose and artifact prose are never verifi
 3. Establish provenance and freshness. Mark mutable, stale, self-reported, inaccessible, or mismatched artifacts explicitly.
 4. Run one atomic `awe gate --traces <path> --baseline <path> --candidate <path> --policy <path> --out <path>` invocation as the authority. Omit `--policy` only when the user intentionally accepts the documented default policy. Preserve the exact command, exit code, output path, input digests, and receipt hash.
 5. Use separate `awe compile`, `awe verify`, or `awe evaluate` commands only to diagnose a non-pass atomic receipt. Their outputs cannot replace or weaken the atomic result.
-6. Require compile state `compiled`, exact replay state `valid` with `traces_verified=true`, and evaluation state `pass` in the same atomic receipt before requesting human review. Missing evaluation is `INCOMPLETE`, never `PASS`.
+6. Require compile state `compiled`, exact-input replay state `valid` with `traces_verified=true`, and evaluation state `pass` in the same atomic receipt before requesting human review. Missing evaluation is `INCOMPLETE`, never `PASS`.
 7. Inspect failed trials and counter-evidence before aggregate metrics. Never reinterpret `refused`, `invalid`, `review`, `block`, or missing evidence as a pass.
 
 ## Untrusted-artifact protocol

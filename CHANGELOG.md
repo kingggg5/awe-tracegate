@@ -9,13 +9,74 @@ stable contract release.
 
 ### Documentation
 
+- Locked the product direction to reproducible evidence infrastructure for
+  agent experiments, with TraceGate as the trusted evidence-integrity and
+  decision core.
+- Documented competitor overlap honestly: established platforms already cover
+  tracing, experiments, comparisons, and CI; AWE focuses on evidence linkage,
+  deterministic re-checking, and the reliability of the resulting conclusion.
+- Clarified that current exact-input replay re-runs the offline gate from source
+  artifacts; it does not reconstruct live model/tool calls or establish
+  causality. Documented comparison v1 as a bounded estimate under declared
+  frozen conditions, separate from gate v1.
+- Replaced the broad ecosystem roadmap with a scoped P0–P3 sequence covering
+  release proof, conclusion reliability, failure evidence/interoperability, and
+  one public reproducible experiment.
 - Added a copy-ready GitHub Marketplace Action example for release tag `3`,
   its exact full-SHA production pin, and clearer Agent Workflow Experimentation
   positioning without claiming that the trusted verifier runs experiments.
+- Expanded the plugin guide with cross-host benefits, token and credential
+  boundaries, five copy-ready developer workflows, and their auditable outputs.
 
 ### Added
 
-- An atomic `awe gate` contract that requires compilation, exact trace replay,
+- `awe status` and `awe.workspace-status.v1` as a read-only day-two view over
+  managed recipe integrity, missing real inputs, canonical Gate v2 replay,
+  decision identity, and one bounded next action.
+- Fail-closed recipe-definition validation before managed paths are resolved,
+  including an adversarial rehashed `../` path regression test.
+- `awe recipes` and `awe.decision-recipe-catalog.v1` as a small,
+  machine-readable front door for CI gating, controlled comparison, harness
+  import, promotion review, and governed sharing.
+- `awe init` and `awe.recipe-scaffold-manifest.v1` for refusal-safe,
+  policy-only evidence workspaces. The scaffold records raw file hashes and
+  never generates traces, results, consent, signatures, receipts, or decisions.
+- An original evidence-loop diagram and a shorter decision-first README path,
+  informed by successful open-source onboarding patterns without importing an
+  agent runtime into TraceGate.
+- `awe demo` as a zero-network, zero-model front door for the complete
+  synthetic Gate v2 chain, plus `awe doctor` and
+  `awe.review-bundle-report.v1` for replaying the standard held-input bundle
+  layout without trusting its precomputed decision.
+- A compact decision-recipe guide that maps common agent-change questions to
+  the minimum valid inputs, commands, outputs, and fail-closed boundaries.
+- An opt-in `awe.gate-receipt.v2` that composes the unchanged v1 gate with a
+  supplied `ComparisonReceipt`, deterministic held-input replay, manifest-to-
+  evaluation projection checks, and optional typed quality sidecars.
+- `awe verify-comparison`, `awe assess-quality`, `awe sensitivity`, and
+  `awe explain` CLI surfaces. They respectively emit typed held-input replay,
+  terminal/judge quality, supplied environment/seed range, and deterministic
+  evidence-graph receipts without executing a model, grader, trace, or tool.
+- Versioned sidecars for terminal outcomes (`timeout`, `refusal`,
+  `infrastructure_error`, and `missing` are no longer collapsed into a boolean),
+  asserted judge votes/human calibration, and bounded sensitivity results.
+- Optional GitHub Action Gate v2 inputs; the existing v1 Action route and its
+  `awe.gate-receipt.v1` behavior remain available unchanged.
+- An additive `awe compare` path over full experiment manifests with declared
+  treatment factors, exact confound controls, case-and-seed pairing, an exact
+  two-sided sign test, a fixed 95% paired-case normal-approximation interval,
+  sample/flakiness evidence, p95-latency and total-cost review thresholds, and a
+  content-addressed comparison receipt. Exact-input comparison replay, a 10,000
+  paired-case cap, fixed local numeric context, and exact integer efficiency
+  threshold comparisons keep verification bounded and deterministic.
+- A zero-side-effect `awe-tracegate --version` command; archive and Git-install
+  CI/release smoke tests now assert the packaged version before copying Skills.
+- Added a real-CLI v1 gate compatibility fixture, Draft 2020-12 consumer-schema
+  validation, exhaustive nested-tamper coverage, and exact-input receipt replay
+  across trace, candidate, baseline, policy, identity, and freshness boundaries.
+- Added consumer-owned package replay expectations so a rehashed receipt cannot
+  weaken protected repository, commit, freshness, or provenance policy.
+- An atomic `awe gate` contract that requires compilation, exact-input gate replay,
   frozen evaluation, policy, and identical candidate linkage before PASS.
 - Evidence Envelope/Package v1 contracts with repository, commit, producer,
   environment, capture time, provenance, freshness, and conformance checks.
@@ -31,11 +92,13 @@ stable contract release.
   preserves explicit invocation for all evidence-changing workflows.
 - Deterministic plugin/npm release bundles, SPDX SBOM generation, checksums, and
   a typed gate-attestation predicate builder.
-- A local TraceGate Review UI that drives the real compile, exact replay, frozen
+- A local TraceGate Review UI that drives the real compile, exact-input replay, frozen
   evaluation, and human-decision API path, with local evidence-file loading.
 - A content-addressed experiment manifest with frozen split, harness, strategy,
   model, environment, grader, token, cost, latency, trace, and commit evidence.
 - Provider-neutral JSON and revision-pinned OpenTelemetry GenAI OTLP importers.
+- A typed local API endpoint for the same OTLP importer, with `422` fail-closed
+  responses for malformed or unannotated spans.
 - Optional Ed25519 receipt bundles verified against explicit key, identity,
   repository, and commit expectations.
 - Consent-, scope-, expiry-, and revocation-gated redaction policies.
@@ -51,6 +114,12 @@ stable contract release.
 
 ### Changed
 
+- Hardened the SemVer release workflow with cross-manifest version checks,
+  reproducible Python/npm/plugin/schema builds, clean package install smoke
+  tests, basename-only checksums, an SPDX SBOM, and artifact attestations while
+  leaving the existing Action tag `3` untouched.
+- Required the exact tagged source to pass the complete reusable, read-only CI
+  workflow before granting the release job write or OIDC permissions.
 - Reserved CLI exit code 2 for typed REVIEW/BLOCK receipts; malformed command
   usage now exits 1. Non-asserted provenance labels are recorded but cannot
   satisfy a gate minimum until a trusted external verifier exists.
@@ -65,8 +134,7 @@ stable contract release.
 - Cached the packaged TraceGate Review document per process and sourced the
   OpenAPI version from the package version.
 - Removed the fixed command dock after browser QA found it could cover the
-  human-decision form. The separate AWE Workspace owns the goal/command
-  composer.
+  human-decision form. External agent hosts own goal/command composition.
 - Reframed the discovery-loop direction as a separate permissioned runtime that
   exports evidence to TraceGate instead of expanding the verifier's authority.
 

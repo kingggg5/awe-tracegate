@@ -1,0 +1,172 @@
+{
+  "baseline_bundle_digest": "sha256:3285c366636eb150aedc64e561de8b62a4587367fb07ccb4881dd971519df03d",
+  "candidate_bundle_digest": "sha256:6cba415533caeabec99a64ca22dba45573d86bc9a7781fadd25b4b2293f122bc",
+  "candidate_digest": "sha256:4715249d4e3efbc7fc54d3959211b2877cc99a855c666cbbdda4ffe32a85eab8",
+  "commit_sha": null,
+  "compilation": {
+    "candidate": {
+      "candidate_digest": "sha256:4715249d4e3efbc7fc54d3959211b2877cc99a855c666cbbdda4ffe32a85eab8",
+      "dependencies": [
+        {
+          "consumer_input": "changes",
+          "consumer_node": "score_release_risk",
+          "evidence_digest": "sha256:b04a49c7955448bebcdb5aea2802cba2baf46f3ac7b6f4b0d1969e1e640833a7",
+          "observation_count": 2,
+          "producer_field": "/changes",
+          "producer_node": "detect_dependencies",
+          "trace_ids": [
+            "repo_analysis_001",
+            "repo_analysis_002"
+          ]
+        },
+        {
+          "consumer_input": "diff",
+          "consumer_node": "detect_dependencies",
+          "evidence_digest": "sha256:cc63cef8c7ad5563c12e2967821999b3148e753a0d3f62748af9b472fa806726",
+          "observation_count": 2,
+          "producer_field": "/diff",
+          "producer_node": "read_diff",
+          "trace_ids": [
+            "repo_analysis_001",
+            "repo_analysis_002"
+          ]
+        },
+        {
+          "consumer_input": "head_sha",
+          "consumer_node": "score_release_risk",
+          "evidence_digest": "sha256:f5bc015d9473e273ae65bc7494dec661cf32678d88497c87ef29d39139ccef61",
+          "observation_count": 2,
+          "producer_field": "/head_sha",
+          "producer_node": "read_diff",
+          "trace_ids": [
+            "repo_analysis_001",
+            "repo_analysis_002"
+          ]
+        }
+      ],
+      "effect_scope": "pure_or_read",
+      "intent": "repo_analysis",
+      "nodes": [
+        {
+          "effect": "read",
+          "inputs": [
+            {
+              "input_name": "repository",
+              "source_field": "/repository",
+              "source_kind": "workflow_input",
+              "source_node": null
+            }
+          ],
+          "node_id": "read_diff",
+          "output_fields": [
+            "/diff",
+            "/head_sha"
+          ],
+          "tool": "repo.read_diff",
+          "tool_version": "1.0.0"
+        },
+        {
+          "effect": "read",
+          "inputs": [
+            {
+              "input_name": "diff",
+              "source_field": "/diff",
+              "source_kind": "step_output",
+              "source_node": "read_diff"
+            }
+          ],
+          "node_id": "detect_dependencies",
+          "output_fields": [
+            "/changes"
+          ],
+          "tool": "repo.detect_dependencies",
+          "tool_version": "1.0.0"
+        },
+        {
+          "effect": "pure",
+          "inputs": [
+            {
+              "input_name": "changes",
+              "source_field": "/changes",
+              "source_kind": "step_output",
+              "source_node": "detect_dependencies"
+            },
+            {
+              "input_name": "head_sha",
+              "source_field": "/head_sha",
+              "source_kind": "step_output",
+              "source_node": "read_diff"
+            }
+          ],
+          "node_id": "score_release_risk",
+          "output_fields": [
+            "/reasons",
+            "/risk_score"
+          ],
+          "tool": "risk.score",
+          "tool_version": "1.0.0"
+        }
+      ],
+      "schema_version": "awe.candidate.v1",
+      "source_trace_ids": [
+        "repo_analysis_001",
+        "repo_analysis_002"
+      ]
+    },
+    "compiler_version": "awe.compiler.v1",
+    "input_bundle_digest": "sha256:351cc5ab98177204e0bbd25ae91ee6cab069bce54e626ad5093b3b384d053234",
+    "reasons": [],
+    "receipt_hash": "sha256:f4bab189f87c108abdd2ae12791391b24288056788865b099d017aaca0fe22ed",
+    "schema_version": "awe.compilation-receipt.v1",
+    "status": "compiled"
+  },
+  "evaluation": {
+    "baseline": {
+      "p95_latency_ms": 190,
+      "safety_violations": 0,
+      "success_count": 3,
+      "success_rate_bps": 10000,
+      "total_cost_microusd": 3600,
+      "trial_count": 3
+    },
+    "baseline_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "candidate": {
+      "p95_latency_ms": 130,
+      "safety_violations": 0,
+      "success_count": 3,
+      "success_rate_bps": 10000,
+      "total_cost_microusd": 2550,
+      "trial_count": 3
+    },
+    "candidate_digest": "sha256:4715249d4e3efbc7fc54d3959211b2877cc99a855c666cbbdda4ffe32a85eab8",
+    "dataset_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "evaluator_version": "awe.evaluator.v1",
+    "policy_digest": "sha256:16309c868d4e7a7ea5fff9d31b13a02825498dcd9fc24cb575c55cd7eb6048ca",
+    "reasons": [],
+    "receipt_hash": "sha256:62433eb7aa8ce3bcf25196140d795fea2c1577cbb791309cee62cc4658b09c41",
+    "schema_version": "awe.evaluation-receipt.v1",
+    "status": "pass"
+  },
+  "evidence_evaluated_at": null,
+  "evidence_package_digest": null,
+  "evidence_provenance_level": null,
+  "gate_version": "awe.gate.v1",
+  "maximum_evidence_age_seconds": null,
+  "minimum_provenance_level": null,
+  "policy_digest": "sha256:16309c868d4e7a7ea5fff9d31b13a02825498dcd9fc24cb575c55cd7eb6048ca",
+  "reasons": [],
+  "receipt_hash": "sha256:20846ba82b0d81a8946989e3e55c28a9899033154cf7e8ab5b1d358992572638",
+  "repository_uri": null,
+  "schema_version": "awe.gate-receipt.v1",
+  "skill_bom_digest": null,
+  "status": "PASS",
+  "traces_digest": "sha256:351cc5ab98177204e0bbd25ae91ee6cab069bce54e626ad5093b3b384d053234",
+  "verification": {
+    "reasons": [],
+    "receipt_hash": "sha256:f4bab189f87c108abdd2ae12791391b24288056788865b099d017aaca0fe22ed",
+    "schema_version": "awe.receipt-verification.v2",
+    "status": "valid",
+    "traces_verified": true,
+    "verification_hash": "sha256:ea9d3349e70baeae7796ba1db0ff14ac69ed7e52fc054160558bff56a9a7c767"
+  }
+}

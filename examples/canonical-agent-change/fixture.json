@@ -1,0 +1,23 @@
+{
+  "baseline_commit_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "candidate_commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "classification": "synthetic_offline_contract_fixture",
+  "expected": {
+    "baseline_quality_status": "pass",
+    "candidate_quality_status": "pass",
+    "comparison_status": "pass",
+    "comparison_verification_status": "valid",
+    "explanation_hash": "sha256:a418df8b4f0451bcf7b38fe953e8c1be257274123737a00c3aba6f9f9df7277d",
+    "gate_v2_receipt_hash": "sha256:3fb1b2edf5c34446865a915bb630362a95bb4a2fbd00bc70f8a932279a96344d",
+    "gate_v2_status": "PASS"
+  },
+  "fixture_id": "synthetic-agent-change-v1",
+  "limitations": [
+    "Synthetic fixtures do not demonstrate an external adopter or real model performance.",
+    "The verifier replays supplied artifacts; it does not reconstruct model or tool calls.",
+    "Judge and human labels are asserted fixture data, not authenticated identities."
+  ],
+  "repository_uri": "https://example.invalid/awe-tracegate-fixture",
+  "schema_version": "awe.canonical-fixture.v1",
+  "source_traces_digest": "sha256:351cc5ab98177204e0bbd25ae91ee6cab069bce54e626ad5093b3b384d053234"
+}

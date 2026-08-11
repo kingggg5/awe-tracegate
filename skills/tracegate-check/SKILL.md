@@ -11,10 +11,11 @@ Inspect only. Keep the verification path local, offline, and keyless.
 
 1. Read repository instructions and record the project root and immutable revision when available.
 2. Check Python 3.11+, `awe --version`, and `awe capabilities --json`. Fall back to `awe --help` only when the installed version does not expose machine-readable capabilities. Do not install anything.
-3. Check for the requested trace, receipt, baseline, candidate, and policy paths by name and type only. Do not parse their contents in this skill.
-4. If an optional API is already running, check only its declared loopback `/healthz` endpoint. Do not start a service or scan ports.
-5. Classify each capability as `AVAILABLE`, `NOT_CONFIGURED`, `UNREACHABLE`, or `UNSUPPORTED`, preserving the CLI's reported version and schema.
-6. Recommend one smallest next action or one explicitly invoked TraceGate skill.
+3. When a managed recipe workspace or canonical Gate v2 bundle already exists, run `awe status PATH --json`. Treat exit `2` as a typed `ACTION_REQUIRED` or `INVALID` result, not as permission to repair files automatically.
+4. Otherwise check for the requested trace, receipt, baseline, candidate, and policy paths by name and type only. Do not parse their contents in this skill.
+5. If an optional API is already running, check only its declared loopback `/healthz` endpoint. Do not start a service or scan ports.
+6. Classify each capability as `AVAILABLE`, `NOT_CONFIGURED`, `UNREACHABLE`, or `UNSUPPORTED`, preserving the CLI's reported version and schema.
+7. Recommend one smallest next action or one explicitly invoked TraceGate skill.
 
 ## Return
 

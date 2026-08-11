@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
@@ -11,6 +13,15 @@ import {
   checkSkills,
   installSkills,
 } from "./install.mjs";
+
+test("reports the package version without touching a repository", () => {
+  const result = execFileSync(
+    process.execPath,
+    [fileURLToPath(new URL("./cli.mjs", import.meta.url)), "--version"],
+    { encoding: "utf8" },
+  );
+  assert.equal(result.trim(), "awe-tracegate 0.3.0");
+});
 
 async function workspace(t) {
   const root = await mkdtemp(join(tmpdir(), "awe-tracegate-npm-test-"));

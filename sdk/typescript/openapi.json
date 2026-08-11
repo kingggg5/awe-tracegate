@@ -1684,6 +1684,47 @@
         "summary": "Import Experiment"
       }
     },
+    "/v1/experiments/import/otlp": {
+      "post": {
+        "description": "Normalize a pinned OTLP GenAI export without executing its spans.",
+        "operationId": "import_otlp_experiment_v1_experiments_import_otlp_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Request",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentManifest"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Import Otlp Experiment"
+      }
+    },
     "/v1/promote": {
       "post": {
         "operationId": "promote_v1_promote_post",

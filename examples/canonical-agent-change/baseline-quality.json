@@ -1,0 +1,807 @@
+{
+  "evidence_digest": "sha256:95bf552b99fa846af65037216ed9b4f2532322261eefc2dd28ee6339b13cdd54",
+  "manifest_digest": "sha256:0e8e3ab2395fdbfae27a008379ebb1c7cad919a412884d56f40930e7965ba3bc",
+  "schema_version": "awe.experiment-quality-evidence.v1",
+  "trials": [
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-1-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-1-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-10-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-10-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-11-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-11-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-12-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-12-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-13-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-13-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-14-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-14-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-15-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-15-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-16-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-16-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-17-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-17-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-18-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-18-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-19-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-19-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-2-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-2-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-20-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-20-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-3-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-3-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-4-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-4-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-5-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-5-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-6-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-6-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-7-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-7-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-8-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-8-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-9-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "fail"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "fail"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "fail"
+        }
+      ],
+      "terminal_outcome": "failure",
+      "trial_id": "baseline-case-9-seed-2"
+    }
+  ]
+}

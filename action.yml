@@ -1,5 +1,5 @@
 name: AWE TraceGate
-description: Atomically gate repeated agent traces with exact replay and frozen evaluation.
+description: Atomically gate repeated agent traces, frozen evaluation, and optional held-input experiment comparison.
 author: kingggg5
 
 branding:
@@ -21,7 +21,7 @@ inputs:
     required: false
     default: ""
   receipt-path:
-    description: Path where the atomic awe.gate-receipt.v1 receipt will be written.
+    description: Path where the atomic Gate v1 or Gate v2 receipt will be written.
     required: false
     default: awe-gate-receipt.json
   evidence-package:
@@ -50,6 +50,34 @@ inputs:
     default: ""
   skill-bom:
     description: Optional exact awe.skill-bom.v1 artifact for a skill-specific gate.
+    required: false
+    default: ""
+  comparison-receipt:
+    description: Optional awe.comparison-receipt.v1 to replay from held experiments with Gate v2.
+    required: false
+    default: ""
+  baseline-experiment:
+    description: Baseline awe.experiment-manifest.v1 for optional Gate v2 comparison.
+    required: false
+    default: ""
+  candidate-experiment:
+    description: Candidate awe.experiment-manifest.v1 for optional Gate v2 comparison.
+    required: false
+    default: ""
+  comparison-policy:
+    description: Optional awe.comparison-policy.v1 for optional Gate v2 comparison.
+    required: false
+    default: ""
+  baseline-quality:
+    description: Optional baseline awe.experiment-quality-evidence.v1 for Gate v2.
+    required: false
+    default: ""
+  candidate-quality:
+    description: Optional candidate awe.experiment-quality-evidence.v1 for Gate v2.
+    required: false
+    default: ""
+  quality-policy:
+    description: Optional awe.quality-policy.v1 for Gate v2 terminal and judge checks.
     required: false
     default: ""
 
@@ -84,12 +112,19 @@ runs:
       env:
         AWE_BASELINE: ${{ inputs.baseline-evaluation }}
         AWE_CANDIDATE: ${{ inputs.candidate-evaluation }}
+        AWE_CANDIDATE_EXPERIMENT: ${{ inputs.candidate-experiment }}
+        AWE_CANDIDATE_QUALITY: ${{ inputs.candidate-quality }}
         AWE_COMMIT_SHA: ${{ inputs.commit-sha }}
+        AWE_COMPARISON: ${{ inputs.comparison-receipt }}
+        AWE_COMPARISON_POLICY: ${{ inputs.comparison-policy }}
         AWE_EVALUATED_AT: ${{ inputs.evaluated-at }}
         AWE_EVIDENCE_PACKAGE: ${{ inputs.evidence-package }}
         AWE_MAX_AGE_SECONDS: ${{ inputs.max-age-seconds }}
         AWE_MINIMUM_PROVENANCE: ${{ inputs.minimum-provenance }}
         AWE_POLICY: ${{ inputs.evaluation-policy }}
+        AWE_BASELINE_EXPERIMENT: ${{ inputs.baseline-experiment }}
+        AWE_BASELINE_QUALITY: ${{ inputs.baseline-quality }}
+        AWE_QUALITY_POLICY: ${{ inputs.quality-policy }}
         AWE_RECEIPT_PATH: ${{ inputs.receipt-path }}
         AWE_REPOSITORY_URI: ${{ inputs.repository }}
         AWE_SKILL_BOM: ${{ inputs.skill-bom }}
@@ -108,15 +143,61 @@ runs:
           exit 1
         fi
 
-        args=(
-          gate
-          --traces "${AWE_TRACES}"
-          --baseline "${AWE_BASELINE}"
-          --candidate "${AWE_CANDIDATE}"
-          --out "${AWE_RECEIPT_PATH}"
-        )
-        if [[ -n "${AWE_POLICY}" ]]; then
-          args+=(--policy "${AWE_POLICY}")
+        comparison_requested=false
+        for value in \
+          "${AWE_COMPARISON}" \
+          "${AWE_BASELINE_EXPERIMENT}" \
+          "${AWE_CANDIDATE_EXPERIMENT}" \
+          "${AWE_COMPARISON_POLICY}" \
+          "${AWE_BASELINE_QUALITY}" \
+          "${AWE_CANDIDATE_QUALITY}" \
+          "${AWE_QUALITY_POLICY}"; do
+          if [[ -n "${value}" ]]; then
+            comparison_requested=true
+          fi
+        done
+
+        if [[ "${comparison_requested}" == true ]]; then
+          if [[ -z "${AWE_COMPARISON}" || -z "${AWE_BASELINE_EXPERIMENT}" || -z "${AWE_CANDIDATE_EXPERIMENT}" ]]; then
+            echo "comparison-receipt, baseline-experiment, and candidate-experiment are required for Gate v2" >&2
+            exit 1
+          fi
+          args=(
+            gate-v2
+            --traces "${AWE_TRACES}"
+            --baseline "${AWE_BASELINE}"
+            --candidate "${AWE_CANDIDATE}"
+            --comparison "${AWE_COMPARISON}"
+            --baseline-experiment "${AWE_BASELINE_EXPERIMENT}"
+            --candidate-experiment "${AWE_CANDIDATE_EXPERIMENT}"
+            --out "${AWE_RECEIPT_PATH}"
+          )
+          if [[ -n "${AWE_POLICY}" ]]; then
+            args+=(--evaluation-policy "${AWE_POLICY}")
+          fi
+          if [[ -n "${AWE_COMPARISON_POLICY}" ]]; then
+            args+=(--comparison-policy "${AWE_COMPARISON_POLICY}")
+          fi
+          if [[ -n "${AWE_BASELINE_QUALITY}" ]]; then
+            args+=(--baseline-quality "${AWE_BASELINE_QUALITY}")
+          fi
+          if [[ -n "${AWE_CANDIDATE_QUALITY}" ]]; then
+            args+=(--candidate-quality "${AWE_CANDIDATE_QUALITY}")
+          fi
+          if [[ -n "${AWE_QUALITY_POLICY}" ]]; then
+            args+=(--quality-policy "${AWE_QUALITY_POLICY}")
+          fi
+        else
+          args=(
+            gate
+            --traces "${AWE_TRACES}"
+            --baseline "${AWE_BASELINE}"
+            --candidate "${AWE_CANDIDATE}"
+            --out "${AWE_RECEIPT_PATH}"
+          )
+          if [[ -n "${AWE_POLICY}" ]]; then
+            args+=(--policy "${AWE_POLICY}")
+          fi
         fi
         if [[ -n "${AWE_SKILL_BOM}" ]]; then
           args+=(--skill-bom "${AWE_SKILL_BOM}")

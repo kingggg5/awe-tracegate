@@ -9,9 +9,12 @@ __pycache__/
 build/
 dist/
 .awe/
+awe-demo/
+awe-evidence/
 .awe-server.*.log
 .awe-serve-smoke.*.log
 .env
 node_modules/
 .impeccable/
 .plugin-scaffold/
+.codex-*-tmp/

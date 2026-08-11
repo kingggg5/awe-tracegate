@@ -3,24 +3,37 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Literal
 
+from .adapters import evaluation_bundle_from_manifest
 from .compiler import compile_traces, input_bundle_digest
 from .contracts import (
     PENDING_SHA256_DIGEST,
+    ComparisonPolicy,
+    ComparisonReceipt,
     EvaluationBundle,
     EvaluationPolicy,
     EvidencePackage,
     ExecutionTrace,
+    ExperimentManifest,
+    ExperimentQualityEvidence,
+    ExperimentQualityReceipt,
     GateReceipt,
+    GateReceiptV2,
     GitCommitSha,
     ProvenanceLevel,
+    QualityPolicy,
     RepositoryUri,
     SkillBom,
     canonical_digest,
 )
-from .evaluation import evaluate_candidate
+from .evaluation import (
+    evaluate_candidate,
+    verify_comparison_receipt_inputs,
+)
+from .quality import assess_experiment_quality
 from .verifier import verify_compilation_receipt
 
 _PROVENANCE_RANK: dict[ProvenanceLevel, int] = {
@@ -28,6 +41,39 @@ _PROVENANCE_RANK: dict[ProvenanceLevel, int] = {
     "signature_verified": 1,
     "attested": 2,
 }
+
+
+@dataclass(frozen=True, slots=True)
+class GateReplayExpectations:
+    """Consumer-owned identity and freshness policy for package replay.
+
+    These values must come from the protected repository or deployment policy,
+    never from the untrusted receipt being checked.
+    """
+
+    repository_uri: RepositoryUri
+    commit_sha: GitCommitSha
+    evaluated_at: datetime | None
+    maximum_evidence_age_seconds: int | None
+    minimum_provenance_level: ProvenanceLevel | None
+
+    def __post_init__(self) -> None:
+        if self.evaluated_at is not None and self.evaluated_at.utcoffset() != timedelta(
+            0
+        ):
+            raise ValueError("expected evaluation time must include the UTC timezone")
+        if self.maximum_evidence_age_seconds is not None and self.evaluated_at is None:
+            raise ValueError("expected maximum evidence age requires evaluated_at")
+        if (
+            self.maximum_evidence_age_seconds is not None
+            and not 0 <= self.maximum_evidence_age_seconds <= 31_556_952_000
+        ):
+            raise ValueError("expected maximum evidence age is outside policy bounds")
+        if self.minimum_provenance_level not in (None, "asserted"):
+            raise ValueError(
+                "only asserted provenance can be expected until an external "
+                "signature or attestation verifier is configured"
+            )
 
 
 def _package_provenance(package: EvidencePackage) -> ProvenanceLevel:
@@ -131,7 +177,7 @@ def gate_evidence(
     """Create one fail-closed receipt over the complete local evidence chain.
 
     Inputs are never executed. A PASS requires a compiled read-only candidate,
-    exact replay of the supplied traces, a frozen evaluation for that exact
+    exact-input replay of the supplied traces, a frozen evaluation for that exact
     candidate digest, and (when supplied) a provenance package containing each
     exact gate input.
     """
@@ -253,3 +299,302 @@ def gate_evidence(
     return GateReceipt.model_validate(
         {**payload, "receipt_hash": canonical_digest(payload)}
     )
+
+
+def validate_gate_receipt_inputs(
+    receipt: GateReceipt,
+    traces: Sequence[ExecutionTrace],
+    baseline: EvaluationBundle,
+    candidate: EvaluationBundle,
+    policy: EvaluationPolicy | None = None,
+    *,
+    evidence_package: EvidencePackage | None = None,
+    skill_bom: SkillBom | None = None,
+    expectations: GateReplayExpectations | None = None,
+) -> GateReceipt:
+    """Replay a v1 receipt against every exact input it claims to bind.
+
+    Parsing a content-addressed receipt proves internal consistency, not who
+    produced it. Consumers that possess the source artifacts must call this
+    boundary before trusting the decision. Package-bearing replays also require
+    identity and policy expectations obtained independently of the receipt. A
+    modified receipt with recomputed hashes cannot weaken those controls.
+    """
+
+    if evidence_package is None:
+        if expectations is not None:
+            raise ValueError("replay expectations require an evidence package")
+    elif expectations is None:
+        raise ValueError(
+            "package replay requires consumer-owned identity and policy expectations"
+        )
+
+    if expectations is not None:
+        claimed_controls = (
+            receipt.evidence_evaluated_at,
+            receipt.maximum_evidence_age_seconds,
+            receipt.minimum_provenance_level,
+        )
+        expected_controls = (
+            expectations.evaluated_at,
+            expectations.maximum_evidence_age_seconds,
+            expectations.minimum_provenance_level,
+        )
+        if claimed_controls != expected_controls:
+            raise ValueError("gate receipt does not match consumer-owned controls")
+
+    replayed = gate_evidence(
+        traces,
+        baseline,
+        candidate,
+        policy,
+        evidence_package=evidence_package,
+        expected_repository=(
+            expectations.repository_uri if expectations is not None else None
+        ),
+        expected_commit_sha=(
+            expectations.commit_sha if expectations is not None else None
+        ),
+        evaluated_at=(expectations.evaluated_at if expectations is not None else None),
+        maximum_age_seconds=(
+            expectations.maximum_evidence_age_seconds
+            if expectations is not None
+            else None
+        ),
+        minimum_provenance_level=(
+            expectations.minimum_provenance_level if expectations is not None else None
+        ),
+        skill_bom=skill_bom,
+    )
+    if replayed.receipt_hash != receipt.receipt_hash:
+        raise ValueError("gate receipt does not match exact input replay")
+    return receipt
+
+
+def gate_evidence_v2(
+    traces: Sequence[ExecutionTrace],
+    baseline: EvaluationBundle,
+    candidate: EvaluationBundle,
+    evaluation_policy: EvaluationPolicy | None,
+    comparison: ComparisonReceipt,
+    baseline_manifest: ExperimentManifest,
+    candidate_manifest: ExperimentManifest,
+    comparison_policy: ComparisonPolicy | None = None,
+    *,
+    baseline_quality_evidence: ExperimentQualityEvidence | None = None,
+    candidate_quality_evidence: ExperimentQualityEvidence | None = None,
+    quality_policy: QualityPolicy | None = None,
+    evidence_package: EvidencePackage | None = None,
+    expected_repository: RepositoryUri | None = None,
+    expected_commit_sha: GitCommitSha | None = None,
+    evaluated_at: datetime | None = None,
+    maximum_age_seconds: int | None = None,
+    minimum_provenance_level: ProvenanceLevel | None = None,
+    skill_bom: SkillBom | None = None,
+) -> GateReceiptV2:
+    """Create Gate v2 without changing the existing v1 receipt contract.
+
+    Gate v2 composes the original trace/evaluation decision with a supplied
+    ComparisonReceipt that is re-derived from held experiment inputs. Rich
+    terminal-state and judge evidence is sidecar data bound to each immutable
+    manifest. Nothing in this path runs external tools, models, or graders.
+    """
+
+    active_evaluation_policy = evaluation_policy or EvaluationPolicy()
+    active_comparison_policy = comparison_policy or ComparisonPolicy()
+    active_quality_policy = quality_policy or QualityPolicy()
+    v1_gate = gate_evidence(
+        traces,
+        baseline,
+        candidate,
+        active_evaluation_policy,
+        evidence_package=evidence_package,
+        expected_repository=expected_repository,
+        expected_commit_sha=expected_commit_sha,
+        evaluated_at=evaluated_at,
+        maximum_age_seconds=maximum_age_seconds,
+        minimum_provenance_level=minimum_provenance_level,
+        skill_bom=skill_bom,
+    )
+    comparison_verification = verify_comparison_receipt_inputs(
+        comparison,
+        baseline_manifest,
+        candidate_manifest,
+        active_comparison_policy,
+    )
+    baseline_quality = (
+        assess_experiment_quality(
+            baseline_manifest,
+            baseline_quality_evidence,
+            active_quality_policy,
+        )
+        if baseline_quality_evidence is not None
+        else None
+    )
+    candidate_quality = (
+        assess_experiment_quality(
+            candidate_manifest,
+            candidate_quality_evidence,
+            active_quality_policy,
+        )
+        if candidate_quality_evidence is not None
+        else None
+    )
+
+    block_reasons: list[str] = []
+    review_reasons: list[str] = []
+    if v1_gate.status == "BLOCK":
+        block_reasons.extend(f"gate_v1:{reason}" for reason in v1_gate.reasons)
+    elif v1_gate.status != "PASS":
+        review_reasons.extend(f"gate_v1:{reason}" for reason in v1_gate.reasons)
+    if comparison_verification.status != "valid":
+        block_reasons.extend(
+            f"comparison_verification:{reason}"
+            for reason in comparison_verification.reasons
+        )
+    if comparison.status == "block":
+        block_reasons.extend(f"comparison:{reason}" for reason in comparison.reasons)
+    elif comparison.status != "pass":
+        review_reasons.extend(f"comparison:{reason}" for reason in comparison.reasons)
+
+    expected_baseline_bundle = canonical_digest(
+        evaluation_bundle_from_manifest(baseline_manifest)
+    )
+    expected_candidate_bundle = canonical_digest(
+        evaluation_bundle_from_manifest(candidate_manifest)
+    )
+    if v1_gate.baseline_bundle_digest != expected_baseline_bundle:
+        block_reasons.append("comparison_baseline_evaluation_bundle_mismatch")
+    if v1_gate.candidate_bundle_digest != expected_candidate_bundle:
+        block_reasons.append("comparison_candidate_evaluation_bundle_mismatch")
+    if v1_gate.candidate_digest != comparison.candidate_subject_digest:
+        block_reasons.append("comparison_candidate_subject_mismatch")
+
+    quality_receipts: tuple[ExperimentQualityReceipt | None, ...] = (
+        baseline_quality,
+        candidate_quality,
+    )
+    if any(receipt is None for receipt in quality_receipts):
+        review_reasons.append("comparison_quality_evidence_required")
+    for label, receipt in (
+        ("baseline", baseline_quality),
+        ("candidate", candidate_quality),
+    ):
+        if receipt is None:
+            continue
+        if receipt.status == "block":
+            block_reasons.extend(
+                f"{label}_quality:{reason}" for reason in receipt.reasons
+            )
+        elif receipt.status == "review":
+            review_reasons.extend(
+                f"{label}_quality:{reason}" for reason in receipt.reasons
+            )
+
+    status: Literal["PASS", "REVIEW", "BLOCK", "ERROR"]
+    if block_reasons:
+        status = "BLOCK"
+        reasons = tuple(sorted(set(block_reasons + review_reasons)))
+    elif review_reasons:
+        status = "REVIEW"
+        reasons = tuple(sorted(set(review_reasons)))
+    else:
+        status = "PASS"
+        reasons = ()
+
+    payload = {
+        "schema_version": "awe.gate-receipt.v2",
+        "gate_version": "awe.gate.v2",
+        "status": status,
+        "reasons": reasons,
+        "v1_gate": v1_gate.model_dump(mode="json"),
+        "comparison": comparison.model_dump(mode="json"),
+        "comparison_verification": comparison_verification.model_dump(mode="json"),
+        "baseline_quality": (
+            baseline_quality.model_dump(mode="json")
+            if baseline_quality is not None
+            else None
+        ),
+        "candidate_quality": (
+            candidate_quality.model_dump(mode="json")
+            if candidate_quality is not None
+            else None
+        ),
+    }
+    return GateReceiptV2.model_validate(
+        {**payload, "receipt_hash": canonical_digest(payload)}
+    )
+
+
+def validate_gate_v2_receipt_inputs(
+    receipt: GateReceiptV2,
+    traces: Sequence[ExecutionTrace],
+    baseline: EvaluationBundle,
+    candidate: EvaluationBundle,
+    evaluation_policy: EvaluationPolicy | None,
+    baseline_manifest: ExperimentManifest,
+    candidate_manifest: ExperimentManifest,
+    comparison_policy: ComparisonPolicy | None = None,
+    *,
+    baseline_quality_evidence: ExperimentQualityEvidence | None = None,
+    candidate_quality_evidence: ExperimentQualityEvidence | None = None,
+    quality_policy: QualityPolicy | None = None,
+    evidence_package: EvidencePackage | None = None,
+    skill_bom: SkillBom | None = None,
+    expectations: GateReplayExpectations | None = None,
+) -> GateReceiptV2:
+    """Replay Gate v2 against held inputs and independently owned controls."""
+
+    if evidence_package is None:
+        if expectations is not None:
+            raise ValueError("replay expectations require an evidence package")
+    elif expectations is None:
+        raise ValueError(
+            "package replay requires consumer-owned identity and policy expectations"
+        )
+    if expectations is not None:
+        claimed_controls = (
+            receipt.v1_gate.evidence_evaluated_at,
+            receipt.v1_gate.maximum_evidence_age_seconds,
+            receipt.v1_gate.minimum_provenance_level,
+        )
+        expected_controls = (
+            expectations.evaluated_at,
+            expectations.maximum_evidence_age_seconds,
+            expectations.minimum_provenance_level,
+        )
+        if claimed_controls != expected_controls:
+            raise ValueError("Gate v2 does not match consumer-owned controls")
+    replayed = gate_evidence_v2(
+        traces,
+        baseline,
+        candidate,
+        evaluation_policy,
+        receipt.comparison,
+        baseline_manifest,
+        candidate_manifest,
+        comparison_policy,
+        baseline_quality_evidence=baseline_quality_evidence,
+        candidate_quality_evidence=candidate_quality_evidence,
+        quality_policy=quality_policy,
+        evidence_package=evidence_package,
+        expected_repository=(
+            expectations.repository_uri if expectations is not None else None
+        ),
+        expected_commit_sha=(
+            expectations.commit_sha if expectations is not None else None
+        ),
+        evaluated_at=(expectations.evaluated_at if expectations is not None else None),
+        maximum_age_seconds=(
+            expectations.maximum_evidence_age_seconds
+            if expectations is not None
+            else None
+        ),
+        minimum_provenance_level=(
+            expectations.minimum_provenance_level if expectations is not None else None
+        ),
+        skill_bom=skill_bom,
+    )
+    if replayed.receipt_hash != receipt.receipt_hash:
+        raise ValueError("Gate v2 receipt does not match exact input replay")
+    return receipt

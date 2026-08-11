@@ -3,7 +3,7 @@
 | Stage | Acceptable state | Stop state |
 | --- | --- | --- |
 | Compile | `compiled` | `refused` |
-| Exact replay | `valid` and `traces_verified=true` | `invalid` or traces not verified |
+| Exact-input replay | `valid` and `traces_verified=true` | `invalid` or traces not verified |
 | Frozen evaluation | `pass` | missing, `review`, or `block` |
 | Human decision | Explicit separate approval or rejection | Missing or inconsistent chain |
 
