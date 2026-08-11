@@ -34,9 +34,11 @@ Discover → Experiment → Evaluate → Verify → Improve
                               TraceGate
 ```
 
-AWE does not build or run your agent. It focuses on a narrower engineering
-question: **did this controlled agent, strategy, or model change improve the
-result—and is the supplied evidence strong enough to act on?**
+The trusted TraceGate core does not build or run your agent. It focuses on a
+narrower engineering question: **did this controlled agent, strategy, or model
+change improve the result—and is the supplied evidence strong enough to act
+on?** The same repository also includes AWE Workspace, a separate local process
+for human-approved handoffs to external agent hosts.
 
 **TraceGate is AWE's trusted evidence-integrity and decision core.** It is a
 portable Agent Skills plugin for Codex and Claude Code plus an offline
@@ -80,6 +82,7 @@ and can require typed terminal outcomes plus asserted judge-calibration evidence
 | Connect an eval harness | Strict evidence envelopes and conformance checks |
 | Share results | Consent-aware redaction, signing, and a local disclosure workflow |
 | Work across agent hosts | The same focused Skills for Codex, Claude Code, npm, or Git installs |
+| Coordinate agent work locally | AWE Workspace saves goals and exports explicitly approved, narrowly permissioned handoffs |
 | Avoid another model credential | The verifier is offline and needs no LLM-provider key |
 | Re-check a decision later | Re-run Gate v1 or comparison verification from separately held inputs and compare receipt hashes |
 | Operate the workflow after setup | `awe status` summarizes scaffold integrity, missing real inputs, bundle replay, decision, and next action |
@@ -94,6 +97,35 @@ In the current release, **exact-input replay** means re-running the deterministi
 gate from the original JSON/JSONL inputs and requiring the same canonical
 receipt. It does not replay a live model backend, reproduce network responses,
 or claim that a stochastic agent run can be reconstructed bit-for-bit.
+
+## Agent runtime workspace
+
+The monorepo includes [`apps/workspace`](apps/workspace), a dependency-light
+TypeScript app for coordinating agent work without moving execution authority
+into TraceGate. It supports this local flow:
+
+```text
+Save goal -> Define discovery brief -> Select external runner and permissions
+          -> Human approval -> Export typed handoff -> Record checkpoint
+          -> Validate resulting held evidence with TraceGate
+```
+
+Workspace currently supports Codex, Claude Code, or another external runner and
+only three grants: read the selected goal, read stored evidence references, and
+write a local checkpoint. It does not invoke the runner, execute a shell or
+browser, install connectors, hold provider credentials, or convert a checkpoint
+into evidence. This keeps the repository convenient for end users while the
+Python decision core remains offline, keyless, and fail-closed.
+
+```bash
+npm run workspace:install
+npm run workspace:test
+npm run workspace:start
+```
+
+Then open <http://127.0.0.1:8787>. See the
+[Workspace package README](apps/workspace/README.md) for its API, schemas, and
+security boundary.
 
 ## Start here
 

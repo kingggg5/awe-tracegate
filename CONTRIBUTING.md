@@ -17,7 +17,8 @@ By participating, you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Development setup
 
-Requires Python 3.11 or newer.
+Requires Python 3.11 or newer. Changes under `apps/workspace` additionally
+require Node.js 24.
 
 ```bash
 python -m venv .venv
@@ -34,6 +35,9 @@ python -m pytest
 awe schema --out-dir schemas
 python scripts/install_skills.py --list
 npm run test:installer
+npm run workspace:install
+npm run workspace:check
+npm run workspace:test
 npm pack --dry-run
 ```
 
@@ -74,13 +78,17 @@ manually edited Claude adapter.
 
 ## Project boundaries
 
-The current project does not accept features that add:
+The trusted TraceGate core does not accept features that add:
 
 - model calls to the verifier;
 - shell, browser, deployment, rollback, or write-tool execution;
-- an autonomous planner, runtime, or self-modifying loop;
+- an autonomous planner, model/tool executor, or self-modifying loop;
 - automatic promotion of compiled candidates;
 - unsupported claims of safety, optimality, or research novelty.
+
+The Workspace package may coordinate local goals and explicitly approved
+handoffs, but it must remain a separate untrusted process and may not execute
+tools, hold provider credentials, or issue a gate decision.
 
 A proposal outside these boundaries needs a separate threat model and explicit
 maintainer agreement before implementation.

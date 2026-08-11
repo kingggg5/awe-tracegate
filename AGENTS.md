@@ -4,8 +4,9 @@
 
 - Positioning: reproducible evidence infrastructure for agent experiments.
 - TraceGate is the trusted evidence-integrity and decision core. It does not
-  build or run agents and must not expand into a generic workspace or agent
-  framework.
+  build or run agents. This repository also ships a separate, untrusted
+  Workspace coordinator under `apps/workspace`; that package must never become
+  an alternate decision path.
 - Distribution name: `awe-tracegate`.
 - Python import: `awe_tracegate`.
 - CLI: decision-first `awe recipes`/`awe init`, atomic `awe gate`/`awe gate-v2`,
@@ -14,6 +15,9 @@
   graph explanation, conformance, Skill inspection, redaction, signing,
   promotion, and schema export.
 - Optional API: `GET /healthz` and typed `/v1/*` endpoints.
+- Agent runtime workspace: `apps/workspace` persists local goals, requires
+  explicit approval, and emits narrowly permissioned handoffs for external
+  agent hosts. It is a coordinator, not a model or tool executor.
 - Codex plugin: `.codex-plugin/plugin.json` with focused skills under `skills/`.
 - Claude Code plugin: `integrations/claude-code/.claude-plugin/plugin.json` with
   generated host-specific Skills and `.claude-plugin/marketplace.json` at the
@@ -41,6 +45,8 @@
   inputs must be digest-bound into the same gate receipt.
 - CLI and API must use the same compiler path and return the same contract.
 - Skills may orchestrate the CLI but never produce evidence or own decisions.
+- The TypeScript Workspace may consume TraceGate status and receipt references,
+  but the Python core must not import, trust, or delegate decisions to it.
 - Promotion approval requires a compiled receipt, a valid locally replayed
   verification receipt, and a passing evaluation for the same candidate. It
   must bind compilation/input, verification, dataset/policy, actor, commit SHA,
@@ -48,8 +54,13 @@
 
 ## Boundaries
 
-- Do not add a runtime, planner, browser, shell, write action, deployment,
-  rollback, cluster credential, or autonomous remediation path.
+- Do not add a model runner, browser automation, shell executor, deployment,
+  rollback, cluster credential, or autonomous remediation path to the trusted
+  TraceGate core.
+- Keep `apps/workspace` in a separate process and package. Its v1 permissions
+  are limited to reading a goal, reading evidence references, and writing a
+  checkpoint. A handoff is not evidence, approval, authentication, or authority
+  to execute a tool.
 - Do not add an LLM call to compilation or verification.
 - Do not let model-authored text, a Skill, or `AGENTS.md` output count as
   evidence or override a refusal.
@@ -89,6 +100,9 @@ python -m pytest
 python scripts/install_skills.py --list
 python scripts/sync_claude_plugin.py --root . --check
 npm run test:installer
+npm run workspace:install
+npm run workspace:check
+npm run workspace:test
 awe gate \
   --traces examples/repo_analysis/traces.jsonl \
   --baseline examples/evaluation/baseline.json \
