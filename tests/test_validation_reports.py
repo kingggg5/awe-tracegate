@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 PILOT = ROOT / "examples" / "external_pilot" / "itsdangerous" / "pilot.json"
 REPORT = ROOT / "docs" / "validation" / "itsdangerous-compatibility-2026-08-11.md"
+MATRIX = ROOT / "docs" / "validation" / "public-upstream-matrix-2026-08-11.md"
 
 
 def test_public_compatibility_report_matches_machine_readable_evidence() -> None:
@@ -22,3 +23,19 @@ def test_public_compatibility_report_matches_machine_readable_evidence() -> None
     assert "maintainer-run public compatibility test" in report
     assert "not a third-party" in report
     assert "independent pilot" in report
+
+
+def test_public_compatibility_matrix_retains_successful_and_limited_results() -> None:
+    matrix = MATRIX.read_text(encoding="utf-8")
+
+    for commit in (
+        "672971d66a2ef9f85151e53283113f33d642dabd",
+        "28ace20b140d15c083e1cbc163ee6b7778ba098c",
+        "f8aa4a009716a7994f2f6c1947d9fa69feccbdd5",
+        "934813e4d421071a1b3db3973c02fe2721359a6e",
+    ):
+        assert commit in matrix
+    for result in ("297 passed", "78 passed", "109 passed"):
+        assert result in matrix
+    assert "622 passed, 15 failed, 12 skipped, 1 xfailed" in matrix
+    assert "fabricate evidence" in matrix
