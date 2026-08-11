@@ -141,7 +141,7 @@ jobs:
           "${cli}" check --target "${target_root}"
           unzip -t dist/awe-tracegate-plugin.zip
       - name: Upload verified release artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: awe-tracegate-release-assets
           path: dist/
