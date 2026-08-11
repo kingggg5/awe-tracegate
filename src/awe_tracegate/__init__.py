@@ -63,6 +63,7 @@ from .recipes import (
 from .sensitivity import assess_sensitivity
 from .skill_bom import inspect_skill
 from .verifier import verify_compilation_receipt
+from .workspace_status import WorkspaceStatusReport, inspect_workspace_status
 
 __all__ = [
     "AdapterConformanceReceipt",
@@ -94,6 +95,7 @@ __all__ = [
     "SensitivityPolicy",
     "SensitivityReceipt",
     "SkillBom",
+    "WorkspaceStatusReport",
     "assess_experiment_quality",
     "assess_sensitivity",
     "build_recipe_scaffold",
@@ -112,6 +114,7 @@ __all__ = [
     "initialize_evidence_workspace",
     "inspect_review_bundle",
     "inspect_skill",
+    "inspect_workspace_status",
     "validate_comparison_receipt_inputs",
     "validate_evidence_envelope",
     "validate_gate_receipt_inputs",

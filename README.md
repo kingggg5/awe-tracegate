@@ -73,6 +73,7 @@ and can require typed terminal outcomes plus asserted judge-calibration evidence
 | Work across agent hosts | The same focused Skills for Codex, Claude Code, npm, or Git installs |
 | Avoid another model credential | The verifier is offline and needs no LLM-provider key |
 | Re-check a decision later | Re-run Gate v1 or comparison verification from separately held inputs and compare receipt hashes |
+| Operate the workflow after setup | `awe status` summarizes scaffold integrity, missing real inputs, bundle replay, decision, and next action |
 | Make a richer promotion decision | Gate v2 composes the v1 gate, held-input comparison replay, and typed quality evidence |
 | Investigate a decision | `awe explain` emits a deterministic evidence graph and explicit limitations |
 
@@ -115,6 +116,7 @@ workspace:
 awe recipes
 awe recipes --show promotion_review
 awe init --recipe promotion_review --out awe-evidence
+awe status awe-evidence
 ```
 
 `awe init` writes only guidance, explicit policy defaults, their raw-file
@@ -122,6 +124,12 @@ digests, and `awe.recipe-scaffold-manifest.v1`. It never fabricates traces,
 experiment results, consent, signatures, receipts, or a human verdict. Existing
 output directories are refused instead of overwritten. Use `--dry-run --json`
 to inspect the exact managed files without writing.
+
+`awe status` is the read-only day-two view. A policy-only recipe remains
+`ACTION_REQUIRED`; file presence is never upgraded into verified evidence. A
+canonical Gate v2 directory becomes `READY` only when the same held-input
+checks used by `awe doctor` reproduce. Modified recipe definitions, digests, or
+path redirection attempts are `INVALID`.
 
 `awe demo` generates and runs the complete synthetic Gate v2 path. `awe doctor`
 independently reloads its held inputs and re-checks the comparison, Gate v2

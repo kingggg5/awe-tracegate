@@ -71,6 +71,7 @@ from .schemas import export_schemas
 from .sensitivity import assess_sensitivity
 from .skill_bom import inspect_skill
 from .verifier import verify_compilation_receipt
+from .workspace_status import inspect_workspace_status
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
@@ -196,6 +197,14 @@ def _build_parser() -> argparse.ArgumentParser:
     doctor_parser.add_argument("bundle", type=Path, nargs="?", default=Path("awe-demo"))
     doctor_parser.add_argument(
         "--json", action="store_true", help="emit the versioned readiness report"
+    )
+
+    status_parser = subcommands.add_parser(
+        "status", help="summarize a recipe workspace or canonical Gate v2 bundle"
+    )
+    status_parser.add_argument("workspace", type=Path, nargs="?", default=Path("."))
+    status_parser.add_argument(
+        "--json", action="store_true", help="emit the versioned operational report"
     )
 
     recipes_parser = subcommands.add_parser(
@@ -524,6 +533,24 @@ def _doctor(args: argparse.Namespace) -> int:
         for action in report.next_actions:
             print(f"\nNext: {action}")
     return 0 if report.status == "READY" else 2
+
+
+def _status(args: argparse.Namespace) -> int:
+    report = inspect_workspace_status(args.workspace)
+    if args.json:
+        _emit(report)
+    else:
+        print(f"AWE workspace: {report.state} ({report.scope})")
+        if report.recipe_id is not None:
+            print(f"  Recipe        {report.recipe_id}")
+        if report.decision is not None:
+            print(f"  Decision      {report.decision}")
+            print(f"  Receipt       {report.receipt_hash}")
+        for check in report.checks:
+            print(f"  [{check.status.upper()}] {check.check_id}: {check.detail}")
+        for action in report.next_actions:
+            print(f"\nNext: {action}")
+    return 0 if report.state == "READY" else 2
 
 
 def _recipes(args: argparse.Namespace) -> int:
@@ -965,6 +992,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "sign": _sign,
             "sensitivity": _sensitivity,
             "skill": _skill,
+            "status": _status,
             "verify": _verify,
             "verify-comparison": _verify_comparison,
             "verify-signature": _verify_signature,

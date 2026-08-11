@@ -42,6 +42,7 @@ from .contracts import (
     SkillBom,
 )
 from .recipes import DecisionRecipeCatalog, RecipeScaffoldManifest
+from .workspace_status import WorkspaceStatusReport
 
 SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "adapter-conformance-v1.schema.json": AdapterConformanceReceipt,
@@ -77,6 +78,7 @@ SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "sensitivity-receipt-v1.schema.json": SensitivityReceipt,
     "signed-receipt-bundle-v1.schema.json": SignedReceiptBundle,
     "skill-bom-v1.schema.json": SkillBom,
+    "workspace-status-v1.schema.json": WorkspaceStatusReport,
     "quality-policy-v1.schema.json": QualityPolicy,
 }
 

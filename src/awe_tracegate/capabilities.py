@@ -33,6 +33,7 @@ def describe_capabilities(package_version: str) -> CapabilitiesDocument:
                     "sign",
                     "sensitivity",
                     "skill.inspect",
+                    "status",
                     "verify",
                     "verify-comparison",
                     "verify-signature",
@@ -55,6 +56,7 @@ def describe_capabilities(package_version: str) -> CapabilitiesDocument:
                     "paired_experiment_comparison",
                     "review_bundle_exact_input_replay",
                     "typed_terminal_outcome_assessment",
+                    "workspace_operational_status",
                     "strict_typed_contracts",
                 )
             )

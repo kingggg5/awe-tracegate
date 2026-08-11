@@ -42,6 +42,8 @@ The pre-alpha source currently provides:
   with a versioned machine-readable report;
 - a content-addressed decision-recipe catalog and refusal-safe `awe init`
   scaffold that creates policies and guidance without generating evidence;
+- a read-only `awe status` day-two view over recipe integrity and canonical Gate
+  v2 replay, with explicit `READY`, `ACTION_REQUIRED`, and `INVALID` states;
 - governed redaction, consent records, signing, separate human-decision
   receipts, a loopback API, generated TypeScript types, and a local review UI;
 - reproducible release-bundle tooling, checksums, an SPDX SBOM, clean-install

@@ -30,6 +30,11 @@ stable contract release.
 
 ### Added
 
+- `awe status` and `awe.workspace-status.v1` as a read-only day-two view over
+  managed recipe integrity, missing real inputs, canonical Gate v2 replay,
+  decision identity, and one bounded next action.
+- Fail-closed recipe-definition validation before managed paths are resolved,
+  including an adversarial rehashed `../` path regression test.
 - `awe recipes` and `awe.decision-recipe-catalog.v1` as a small,
   machine-readable front door for CI gating, controlled comparison, harness
   import, promotion review, and governed sharing.

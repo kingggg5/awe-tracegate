@@ -11,6 +11,7 @@ awe recipes
 awe recipes --show controlled_comparison
 awe recipes --json > decision-recipes.json
 awe init --recipe controlled_comparison --out awe-evidence
+awe status awe-evidence
 ```
 
 The five built-in recipe IDs are `ci_gate`, `controlled_comparison`,
@@ -27,6 +28,12 @@ Preview it with:
 ```bash
 awe init --recipe promotion_review --out awe-evidence --dry-run --json
 ```
+
+After initialization, `awe status` verifies the managed recipe definition and
+raw file digests, reports missing real inputs, and returns exit `2` while action
+is still required. For a canonical Gate v2 bundle it delegates to the same
+deterministic replay checks as `awe doctor`; it never treats artifact presence
+as a passing decision.
 
 ## One-minute contract tour
 

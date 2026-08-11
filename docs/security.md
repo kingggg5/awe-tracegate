@@ -61,6 +61,10 @@ policy, grant a capability, approve a step, or change an effect class.
 - Decision recipes are onboarding metadata, not evidence. `awe init` refuses an
   existing output directory and creates policy/guidance files only; it cannot
   fabricate a passing trial, receipt, consent record, signature, or verdict.
+- `awe status` treats recipe manifests as untrusted. It requires the complete
+  managed path/digest definition to match the installed catalog before reading
+  managed files, preventing a rehashed manifest from redirecting inspection
+  through `..` or another substituted path.
 - Approval requires a compiled receipt, locally replayed exact traces, a valid
   verification receipt, and a passing evaluation for the identical candidate.
   The promotion receipt records every linked digest plus the actor and exact

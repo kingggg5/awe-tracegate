@@ -9,7 +9,7 @@
 - Distribution name: `awe-tracegate`.
 - Python import: `awe_tracegate`.
 - CLI: decision-first `awe recipes`/`awe init`, atomic `awe gate`/`awe gate-v2`,
-  diagnostic compile/verify/evaluate,
+  read-only `awe status`, diagnostic compile/verify/evaluate,
   held-input comparison verification, quality/sensitivity assessment, evidence
   graph explanation, conformance, Skill inspection, redaction, signing,
   promotion, and schema export.

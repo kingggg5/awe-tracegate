@@ -229,6 +229,14 @@ policy defaults in a new directory, then records their raw SHA-256 digests in
 chain: it sets up a review, but cannot create traces, outcomes, consent,
 signatures, receipts, or a human decision.
 
+`awe status` adds a read-only operational projection over these layouts. For a
+recipe workspace it validates the manifest against the installed built-in
+definition *before* resolving managed paths, then verifies raw file digests and
+reports missing real inputs. For a canonical Gate v2 directory it reuses the
+doctor replay path. The status report is content-addressed
+`awe.workspace-status.v1`; `READY` describes reproducible bundle integrity, not
+authorization or universal agent quality.
+
 `awe skill inspect`, `awe conformance`, and `awe capabilities --json` provide
 non-executing integration surfaces for Skill authors, adapters, and installers.
 
