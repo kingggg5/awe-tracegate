@@ -119,10 +119,19 @@ test("coordinates an approved runtime handoff without executing tools", async ()
   assert.equal(proposed?.state, "awaiting_approval");
   const approved = await store.approveRuntimeRun(
     proposed!.run_id,
-    { approved_by: "Ari", granted_permissions: ["read_goal", "write_checkpoint"] },
+    {
+      approved_by: "Ari",
+      granted_permissions: ["read_goal", "write_checkpoint"],
+      trace_consent_scopes: ["capture_trace", "evaluate_migration"],
+    },
     new Date("2026-08-11T02:01:00Z"),
   );
   assert.equal(approved?.state, "handoff_ready");
+  assert.equal(approved?.approval?.trace_consent?.status, "active");
+  assert.deepEqual(approved?.approval?.trace_consent?.scopes, [
+    "capture_trace",
+    "evaluate_migration",
+  ]);
   assert.match(approved?.status_message ?? "", /No tool has been executed/);
 
   const checkpointed = await store.recordRuntimeCheckpoint(
@@ -140,6 +149,42 @@ test("coordinates an approved runtime handoff without executing tools", async ()
     }),
     /awaiting approval/,
   );
+
+  const cancelled = await store.cancelRuntimeRun(
+    proposed!.run_id,
+    new Date("2026-08-11T02:03:00Z"),
+  );
+  assert.equal(cancelled?.state, "cancelled");
+  assert.equal(cancelled?.approval?.trace_consent?.status, "revoked");
+  assert.equal(cancelled?.approval?.trace_consent?.revoked_at, "2026-08-11T02:03:00.000Z");
+});
+
+test("revokes an asserted trace consent without deleting the handoff", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "awe-workspace-"));
+  const store = new GoalStore(join(directory, "workspace.json"));
+  const goal = await store.create({ text: "Evaluate a migration", mode: "capture" });
+  const proposed = await store.createRuntimeRun(goal.goal_id, {
+    runner: "codex",
+    requested_permissions: ["read_goal"],
+  });
+  await store.approveRuntimeRun(
+    proposed!.run_id,
+    {
+      approved_by: "ari@example.com",
+      granted_permissions: ["read_goal"],
+      trace_consent_scopes: ["capture_trace", "evaluate_migration"],
+    },
+    new Date("2026-08-11T02:00:00Z"),
+  );
+
+  const revoked = await store.revokeRuntimeTraceConsent(
+    proposed!.run_id,
+    new Date("2026-08-11T02:05:00Z"),
+  );
+
+  assert.equal(revoked?.state, "handoff_ready");
+  assert.equal(revoked?.approval?.trace_consent?.status, "revoked");
+  assert.equal(revoked?.approval?.trace_consent?.revoked_at, "2026-08-11T02:05:00.000Z");
 });
 
 test("refuses approval escalation and checkpoint writes without a matching grant", async () => {

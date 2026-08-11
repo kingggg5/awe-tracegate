@@ -124,7 +124,7 @@
               <div class="section-heading">
                 <div>
                   <h2 id="runtimeTitle">Runtime handoffs</h2>
-                  <p>Prepare a narrow, reviewable handoff. Workspace does not invoke the runner or execute tools.</p>
+                  <p>Prepare a narrow, reviewable handoff. Workspace does not invoke the runner; trace capture is a separate, optional consent.</p>
                 </div>
               </div>
 
@@ -144,7 +144,7 @@
                   <label><input type="checkbox" name="runtimePermission" value="write_checkpoint" /><span><strong>Write checkpoints</strong><small>Record a local summary and an optional artifact reference.</small></span></label>
                 </fieldset>
                 <div class="runtime-form-footer">
-                  <p id="runtimeHint">No shell, browser, network, credential, deployment, or promotion permission is available here.</p>
+                  <p id="runtimeHint">No shell, browser, network, credential, deployment, or promotion permission is available here. Trace consent is off until a reviewer explicitly selects it.</p>
                   <button class="primary-action" id="createRuntimeButton" type="submit" disabled>Prepare handoff</button>
                 </div>
               </form>

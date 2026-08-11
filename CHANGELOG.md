@@ -30,6 +30,15 @@ stable contract release.
 
 ### Added
 
+- `awe-discovery` as an external, non-executing adapter for consented Codex,
+  Claude Code, and generic JSONL traces. It emits redacted exact-revision trace
+  receipts and PostgreSQL/Alembic Discovery bundles with forward, rollback,
+  data-preservation, test, typed terminal-outcome, and deterministic failure
+  evidence.
+- AWE Workspace handoff v2 with separate opt-in `capture_trace` and
+  `evaluate_migration` consent, asserted reviewer identity, local revocation,
+  and explicit non-retroactive deletion warnings.
+
 - `awe status` and `awe.workspace-status.v1` as a read-only day-two view over
   managed recipe integrity, missing real inputs, canonical Gate v2 replay,
   decision identity, and one bounded next action.

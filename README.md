@@ -83,6 +83,7 @@ and can require typed terminal outcomes plus asserted judge-calibration evidence
 | Share results | Consent-aware redaction, signing, and a local disclosure workflow |
 | Work across agent hosts | The same focused Skills for Codex, Claude Code, npm, or Git installs |
 | Coordinate agent work locally | AWE Workspace saves goals and exports explicitly approved, narrowly permissioned handoffs |
+| Learn from real coding-agent runs | A consented external adapter normalizes Codex, Claude Code, or generic JSONL into redacted trace receipts and PostgreSQL/Alembic evidence bundles |
 | Avoid another model credential | The verifier is offline and needs no LLM-provider key |
 | Re-check a decision later | Re-run Gate v1 or comparison verification from separately held inputs and compare receipt hashes |
 | Operate the workflow after setup | `awe status` summarizes scaffold integrity, missing real inputs, bundle replay, decision, and next action |
@@ -106,16 +107,19 @@ into TraceGate. It supports this local flow:
 
 ```text
 Save goal -> Define discovery brief -> Select external runner and permissions
-          -> Human approval -> Export typed handoff -> Record checkpoint
+          -> Human approval + optional trace consent -> Export typed handoff
+          -> External agent + isolated harness -> Discovery adapter
           -> Validate resulting held evidence with TraceGate
 ```
 
 Workspace currently supports Codex, Claude Code, or another external runner and
 only three grants: read the selected goal, read stored evidence references, and
-write a local checkpoint. It does not invoke the runner, execute a shell or
-browser, install connectors, hold provider credentials, or convert a checkpoint
-into evidence. This keeps the repository convenient for end users while the
-Python decision core remains offline, keyless, and fail-closed.
+write a local checkpoint. Trace capture and PostgreSQL/Alembic evaluation are
+separate, optional consent scopes and are off by default. Consent can be revoked
+locally, but already exported copies require separate handling. Workspace does
+not invoke the runner, execute a shell or browser, install connectors, hold
+provider credentials, or convert a checkpoint into evidence. This keeps the
+Python decision core offline, keyless, and fail-closed.
 
 ```bash
 npm run workspace:install
@@ -126,6 +130,46 @@ npm run workspace:start
 Then open <http://127.0.0.1:8787>. See the
 [Workspace package README](apps/workspace/README.md) for its API, schemas, and
 security boundary.
+
+## PostgreSQL/Alembic agent reliability
+
+The first implemented external Discovery adapter deliberately targets one
+domain: coding-agent changes to PostgreSQL/Alembic migrations. It connects the
+three AWE boundaries without turning TraceGate into an agent runtime:
+
+```text
+Workspace: goal -> permissions -> human approval -> optional trace consent
+External host: Codex / Claude Code / other runner -> raw JSONL trace
+Isolated harness: forward -> rollback -> data preservation -> tests
+Discovery adapter: redact -> bind exact repo/SHA -> group typed failures
+TraceGate: compare -> exact held-input replay -> Gate v2 -> explain
+```
+
+`awe-discovery ingest-trace` accepts Codex `exec --json`, Claude Code
+`--output-format stream-json`, or the documented generic JSONL shape. It keeps
+event types, allowlisted operation names, typed outcomes, usage counters, and
+payload digests; it does not retain raw prompts, commands, or outputs. The
+repository/SHA binding is explicitly caller-asserted until a trusted runner
+attestation is supplied. Payload digests prove integrity, not anonymity, so
+capture-side secret/PII controls are still required.
+
+`awe-discovery build-migration-bundle` requires separate
+`evaluate_migration` consent and exactly four sorted evidence lanes for every
+frozen case: forward migration, rollback, data preservation, and tests. A
+successful `alembic upgrade head` cannot hide missing rollback evidence or data
+loss. The adapter emits an `ExperimentManifest`, typed quality evidence, a
+deterministic failure-cluster report, and one content-addressed bundle ready for
+the existing comparison flow.
+
+```bash
+awe-discovery ingest-trace --help
+awe-discovery build-migration-bundle --help
+```
+
+Run the complete checked-in example in
+[`examples/postgres-alembic-discovery`](examples/postgres-alembic-discovery).
+The fixture is synthetic; an independent real-world pilot remains a release
+criterion.
 
 ## Start here
 

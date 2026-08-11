@@ -2,7 +2,8 @@ export const WORKSPACE_SCHEMA_VERSION = "awe.workspace.goal.v2" as const;
 export const WORKSPACE_STORE_SCHEMA_VERSION = "awe.workspace-store.v3" as const;
 export const DISCOVERY_BRIEF_SCHEMA_VERSION = "awe.discovery-brief.v1" as const;
 export const RUNTIME_RUN_SCHEMA_VERSION = "awe.runtime-run.v1" as const;
-export const RUNTIME_HANDOFF_SCHEMA_VERSION = "awe.runtime-handoff.v1" as const;
+export const RUNTIME_HANDOFF_SCHEMA_VERSION = "awe.runtime-handoff.v2" as const;
+export const TRACE_CAPTURE_CONSENT_SCHEMA_VERSION = "awe.trace-capture-consent.v1" as const;
 
 export type GoalMode = "capture" | "review" | "discover";
 export type GoalIntent =
@@ -21,6 +22,7 @@ export type RuntimePermission =
   | "read_goal"
   | "read_evidence_references"
   | "write_checkpoint";
+export type TraceConsentScope = "capture_trace" | "evaluate_migration";
 export type RuntimeRunState =
   | "awaiting_approval"
   | "handoff_ready"
@@ -58,6 +60,20 @@ export interface RuntimeApproval {
   readonly approved_by: string;
   readonly granted_permissions: readonly RuntimePermission[];
   readonly approved_at: string;
+  readonly trace_consent?: TraceCaptureConsent;
+}
+
+export interface TraceCaptureConsent {
+  readonly schema_version: typeof TRACE_CAPTURE_CONSENT_SCHEMA_VERSION;
+  readonly consent_id: string;
+  readonly run_id: string;
+  readonly actor_id: string;
+  readonly runner: RuntimeRunner;
+  readonly scopes: readonly TraceConsentScope[];
+  readonly status: "active" | "revoked";
+  readonly granted_at: string;
+  readonly expires_at?: string;
+  readonly revoked_at?: string;
 }
 
 export interface RuntimeCheckpoint {
@@ -129,6 +145,7 @@ export interface CreateRuntimeRunInput {
 export interface ApproveRuntimeRunInput {
   readonly approved_by: string;
   readonly granted_permissions: readonly RuntimePermission[];
+  readonly trace_consent_scopes?: readonly TraceConsentScope[];
 }
 
 export interface RecordRuntimeCheckpointInput {
@@ -143,6 +160,7 @@ export interface RuntimeHandoff {
   readonly runner: RuntimeRunner;
   readonly goal: Pick<Goal, "goal_id" | "text" | "mode" | "discovery">;
   readonly granted_permissions: readonly RuntimePermission[];
+  readonly trace_consent?: TraceCaptureConsent;
   readonly checkpoints: readonly RuntimeCheckpoint[];
   readonly restrictions: readonly string[];
   readonly created_at: string;
@@ -161,6 +179,10 @@ const RUNTIME_PERMISSION_VALUES = new Set<RuntimePermission>([
   "read_goal",
   "read_evidence_references",
   "write_checkpoint",
+]);
+const TRACE_CONSENT_SCOPE_VALUES = new Set<TraceConsentScope>([
+  "capture_trace",
+  "evaluate_migration",
 ]);
 
 function normalizeRequiredText(value: unknown, field: string, maximum: number): string {
@@ -264,6 +286,23 @@ function parseRuntimePermissions(value: unknown, field: string): readonly Runtim
   return [...permissions].sort();
 }
 
+function parseTraceConsentScopes(value: unknown): readonly TraceConsentScope[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value) || value.length > TRACE_CONSENT_SCOPE_VALUES.size) {
+    throw new TypeError("Trace consent scopes must be an array of supported values.");
+  }
+  const scopes = value.map((item) => {
+    if (typeof item !== "string" || !TRACE_CONSENT_SCOPE_VALUES.has(item as TraceConsentScope)) {
+      throw new TypeError("Trace consent scopes contain an unsupported value.");
+    }
+    return item as TraceConsentScope;
+  });
+  if (new Set(scopes).size !== scopes.length) {
+    throw new TypeError("Trace consent scopes must not contain duplicates.");
+  }
+  return [...scopes].sort();
+}
+
 export function parseCreateRuntimeRunInput(value: unknown): CreateRuntimeRunInput {
   if (typeof value !== "object" || value === null) {
     throw new TypeError("Runtime request body must be a JSON object.");
@@ -289,12 +328,19 @@ export function parseApproveRuntimeRunInput(value: unknown): ApproveRuntimeRunIn
     throw new TypeError("Approval body must be a JSON object.");
   }
   const candidate = value as Record<string, unknown>;
+  const approvedBy = normalizeRequiredText(candidate.approved_by, "Reviewer ID", 128);
+  if (!/^[A-Za-z0-9][A-Za-z0-9_.:@+-]*$/.test(approvedBy)) {
+    throw new TypeError(
+      "Reviewer ID must start with a letter or number and use only letters, numbers, . _ : @ + or -.",
+    );
+  }
   return {
-    approved_by: normalizeRequiredText(candidate.approved_by, "Approver", 200),
+    approved_by: approvedBy,
     granted_permissions: parseRuntimePermissions(
       candidate.granted_permissions,
       "Granted permissions",
     ),
+    trace_consent_scopes: parseTraceConsentScopes(candidate.trace_consent_scopes),
   };
 }
 
@@ -351,9 +397,11 @@ export function toRuntimeHandoff(goal: Goal, run: RuntimeRun): RuntimeHandoff {
       ...(goal.discovery ? { discovery: goal.discovery } : {}),
     },
     granted_permissions: run.approval.granted_permissions,
+    ...(run.approval.trace_consent ? { trace_consent: run.approval.trace_consent } : {}),
     checkpoints: run.checkpoints,
     restrictions: [
       "No shell, browser, network, credential, deployment, or promotion permission is granted.",
+      "Trace consent authorizes only the named external adapter scope; it does not grant a host capability.",
       "Do not treat agent output, checkpoints, or artifact references as TraceGate evidence.",
       "Use a separate human decision and TraceGate receipt before reuse or promotion.",
     ],

@@ -110,6 +110,35 @@ test("requires a narrow, explicit runtime permission request", () => {
     /one to three/,
   );
   assert.deepEqual(
+    parseApproveRuntimeRunInput({
+      approved_by: "Ari",
+      granted_permissions: ["read_goal"],
+      trace_consent_scopes: ["evaluate_migration", "capture_trace"],
+    }),
+    {
+      approved_by: "Ari",
+      granted_permissions: ["read_goal"],
+      trace_consent_scopes: ["capture_trace", "evaluate_migration"],
+    },
+  );
+  assert.throws(
+    () =>
+      parseApproveRuntimeRunInput({
+        approved_by: "Ari",
+        granted_permissions: ["read_goal"],
+        trace_consent_scopes: ["capture_trace", "capture_trace"],
+      }),
+    /duplicates/,
+  );
+  assert.throws(
+    () =>
+      parseApproveRuntimeRunInput({
+        approved_by: "local reviewer",
+        granted_permissions: ["read_goal"],
+      }),
+    /Reviewer ID/,
+  );
+  assert.deepEqual(
     parseRuntimeCheckpointInput({
       summary: "  External host produced a draft plan.  ",
       artifact_ref: "artifacts/plan.json",
@@ -148,6 +177,7 @@ test("runtime handoff requires an approved bounded run", () => {
     status_message: "Ready",
   };
   const handoff = toRuntimeHandoff(goal, run);
+  assert.equal(handoff.schema_version, "awe.runtime-handoff.v2");
   assert.equal(handoff.state, "handoff_ready");
   assert.deepEqual(handoff.granted_permissions, ["read_goal"]);
   assert.match(handoff.restrictions.join(" "), /No shell/);

@@ -31,10 +31,11 @@ decision.
 
 ```text
 apps/workspace (TypeScript, local coordination, untrusted)
-    -> goal + explicit grants + human approval
-    -> awe.runtime-handoff.v1
+    -> goal + explicit grants + human approval + optional consent
+    -> awe.runtime-handoff.v2
     -> external Codex / Claude Code / other host
-    -> captured artifacts and references (untrusted)
+    -> raw trace + isolated PostgreSQL/Alembic results (untrusted)
+    -> awe-discovery external adapter (redaction + deterministic projection)
     -> src/awe_tracegate (Python, deterministic trusted core)
     -> PASS / REVIEW / BLOCK receipt
     -> separate human reuse or promotion decision
@@ -46,12 +47,29 @@ Workspace, accepts its local approval as evidence, or delegates a decision to
 it. The two surfaces also have separate package manifests, test suites, and
 processes.
 
-Workspace v1 is a handoff coordinator rather than an embedded agent executor.
+Workspace is a handoff coordinator rather than an embedded agent executor.
 It persists bounded local goals and discovery briefs, lets a user select an
 external runner, requires an exact permission approval, exports a typed handoff,
 and records optional checkpoints. Its only permission identifiers are
 `read_goal`, `read_evidence_references`, and `write_checkpoint`; none grants a
 shell, browser, network, secret, deployment, or promotion capability.
+
+The first external Discovery adapter is intentionally domain-specific. It
+normalizes frozen Codex JSONL, Claude Code stream JSON, or generic JSONL only
+after a handoff contains active `capture_trace` consent. It emits a redacted
+`awe.agent-trace-receipt.v1` bound to a caller-asserted repository and commit.
+This is exact identity metadata, not cryptographic proof of runner provenance.
+Building
+an `awe.migration-discovery-bundle.v1` additionally requires
+`evaluate_migration` consent and externally supplied checks for forward
+migration, rollback, data preservation, and tests. The adapter never starts an
+agent, imports repository migration code, opens a database connection, or runs
+a command.
+
+Failure grouping is a deterministic taxonomy over supplied event/check fields.
+It is evidence navigation, not clustering by an LLM and not causal diagnosis.
+The resulting `ExperimentManifest` and quality sidecar enter the existing
+comparison/Gate v2 path; Workspace approval itself never becomes gate evidence.
 
 ## Design goals
 

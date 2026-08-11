@@ -168,7 +168,7 @@ test("creates an explicit runtime handoff without an embedded executor", async (
   closeAfter(testContext, workspace);
 
   const health = await fetch(new URL("/api/health", workspaceUrl));
-  assert.equal(((await health.json()) as { runtime: string }).runtime, "permissioned_handoff_v1");
+  assert.equal(((await health.json()) as { runtime: string }).runtime, "permissioned_handoff_v2");
 
   const goalResponse = await fetch(new URL("/api/goals", workspaceUrl), {
     method: "POST",
@@ -198,6 +198,7 @@ test("creates an explicit runtime handoff without an embedded executor", async (
     body: JSON.stringify({
       approved_by: "Ari",
       granted_permissions: ["read_goal", "write_checkpoint"],
+      trace_consent_scopes: ["capture_trace", "evaluate_migration"],
     }),
   });
   assert.equal(approved.status, 200);
@@ -209,10 +210,24 @@ test("creates an explicit runtime handoff without an embedded executor", async (
     schema_version: string;
     restrictions: string[];
     granted_permissions: string[];
+    trace_consent: { status: string; scopes: string[] };
   };
-  assert.equal(handoffBody.schema_version, "awe.runtime-handoff.v1");
+  assert.equal(handoffBody.schema_version, "awe.runtime-handoff.v2");
   assert.deepEqual(handoffBody.granted_permissions, ["read_goal", "write_checkpoint"]);
+  assert.equal(handoffBody.trace_consent.status, "active");
+  assert.deepEqual(handoffBody.trace_consent.scopes, ["capture_trace", "evaluate_migration"]);
   assert.match(handoffBody.restrictions.join(" "), /No shell/);
+
+  const revoked = await fetch(
+    new URL(`/api/runs/${run.run_id}/consent/revoke`, workspaceUrl),
+    { method: "POST", headers: { Origin: workspaceUrl.origin } },
+  );
+  assert.equal(revoked.status, 200);
+  assert.equal(
+    ((await revoked.json()) as { run: { approval: { trace_consent: { status: string } } } }).run
+      .approval.trace_consent.status,
+    "revoked",
+  );
 
   const checkpoint = await fetch(new URL(`/api/runs/${run.run_id}/checkpoint`, workspaceUrl), {
     method: "PATCH",

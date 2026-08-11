@@ -32,6 +32,15 @@ from .contracts import (
     SkillBom,
 )
 from .demo import generate_demo, inspect_review_bundle
+from .discovery import (
+    AgentTraceReceipt,
+    FailureClusterReport,
+    MigrationDiscoveryBundle,
+    PostgresAlembicExperiment,
+    TraceCaptureConsent,
+    build_migration_discovery_bundle,
+    import_agent_trace,
+)
 from .evaluation import (
     compare_experiments,
     evaluate_candidate,
@@ -67,6 +76,7 @@ from .workspace_status import WorkspaceStatusReport, inspect_workspace_status
 
 __all__ = [
     "AdapterConformanceReceipt",
+    "AgentTraceReceipt",
     "CapabilitiesDocument",
     "ComparisonPolicy",
     "ComparisonReceipt",
@@ -84,9 +94,12 @@ __all__ = [
     "ExperimentQualityEvidence",
     "ExperimentQualityReceipt",
     "ExplanationReceipt",
+    "FailureClusterReport",
     "GateReceipt",
     "GateReceiptV2",
     "GateReplayExpectations",
+    "MigrationDiscoveryBundle",
+    "PostgresAlembicExperiment",
     "PromotionReceipt",
     "QualityPolicy",
     "ReceiptVerification",
@@ -95,9 +108,11 @@ __all__ = [
     "SensitivityPolicy",
     "SensitivityReceipt",
     "SkillBom",
+    "TraceCaptureConsent",
     "WorkspaceStatusReport",
     "assess_experiment_quality",
     "assess_sensitivity",
+    "build_migration_discovery_bundle",
     "build_recipe_scaffold",
     "compare_experiments",
     "compile_traces",
@@ -109,6 +124,7 @@ __all__ = [
     "gate_evidence",
     "gate_evidence_v2",
     "generate_demo",
+    "import_agent_trace",
     "import_generic_evaluation",
     "import_otel_genai_evaluation",
     "initialize_evidence_workspace",

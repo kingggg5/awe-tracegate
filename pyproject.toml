@@ -53,6 +53,7 @@ test = [
 
 [project.scripts]
 awe = "awe_tracegate.cli:main"
+awe-discovery = "awe_tracegate.discovery_cli:main"
 
 [project.urls]
 Documentation = "https://github.com/kingggg5/awe-tracegate#readme"
