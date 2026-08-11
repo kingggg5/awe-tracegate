@@ -60,6 +60,12 @@ from .explain import ExplainableReceipt, explain_receipt
 from .gate import gate_evidence, gate_evidence_v2
 from .promotion import create_promotion_receipt
 from .quality import assess_experiment_quality
+from .recipes import (
+    RecipeId,
+    decision_recipe_catalog,
+    get_decision_recipe,
+    initialize_evidence_workspace,
+)
 from .redaction import redact_governed_json, redact_json
 from .schemas import export_schemas
 from .sensitivity import assess_sensitivity
@@ -190,6 +196,46 @@ def _build_parser() -> argparse.ArgumentParser:
     doctor_parser.add_argument("bundle", type=Path, nargs="?", default=Path("awe-demo"))
     doctor_parser.add_argument(
         "--json", action="store_true", help="emit the versioned readiness report"
+    )
+
+    recipes_parser = subcommands.add_parser(
+        "recipes", help="list decision-first evidence paths without running an agent"
+    )
+    recipes_parser.add_argument(
+        "--show",
+        choices=(
+            "ci_gate",
+            "controlled_comparison",
+            "harness_import",
+            "promotion_review",
+            "share_evidence",
+        ),
+        help="show one complete recipe",
+    )
+    recipes_parser.add_argument(
+        "--json", action="store_true", help="emit the versioned catalog or recipe"
+    )
+
+    init_parser = subcommands.add_parser(
+        "init", help="create a policy-only evidence workspace from a decision recipe"
+    )
+    init_parser.add_argument(
+        "--recipe",
+        required=True,
+        choices=(
+            "ci_gate",
+            "controlled_comparison",
+            "harness_import",
+            "promotion_review",
+            "share_evidence",
+        ),
+    )
+    init_parser.add_argument("--out", type=Path, required=True)
+    init_parser.add_argument(
+        "--dry-run", action="store_true", help="show the managed files without writing"
+    )
+    init_parser.add_argument(
+        "--json", action="store_true", help="emit the versioned scaffold manifest"
     )
 
     gate_parser = subcommands.add_parser(
@@ -478,6 +524,57 @@ def _doctor(args: argparse.Namespace) -> int:
         for action in report.next_actions:
             print(f"\nNext: {action}")
     return 0 if report.status == "READY" else 2
+
+
+def _recipes(args: argparse.Namespace) -> int:
+    if args.show:
+        recipe = get_decision_recipe(args.show)
+        if args.json:
+            _emit(recipe)
+            return 0
+        print(f"{recipe.title} ({recipe.recipe_id})")
+        print(f"  Decision: {recipe.question}")
+        print(f"  Result:   {recipe.outcome}")
+        print("\nCommands:")
+        for command in recipe.commands:
+            print(f"  {command}")
+        print("\nFail closed when:")
+        for condition in recipe.fail_closed_when:
+            print(f"  - {condition}")
+        return 0
+
+    catalog = decision_recipe_catalog()
+    if args.json:
+        _emit(catalog)
+        return 0
+    print("AWE decision recipes")
+    print("Choose the engineering decision first; TraceGate never runs the agent.\n")
+    for recipe in catalog.recipes:
+        print(f"  {recipe.recipe_id:<24} {recipe.question}")
+    print("\nInspect: awe recipes --show promotion_review")
+    print("Create:  awe init --recipe promotion_review --out awe-evidence")
+    return 0
+
+
+def _init(args: argparse.Namespace) -> int:
+    recipe_id: RecipeId = args.recipe
+    manifest = initialize_evidence_workspace(
+        args.out,
+        recipe_id,
+        dry_run=args.dry_run,
+    )
+    if args.json:
+        _emit(manifest)
+        return 0
+    action = "Would create" if args.dry_run else "Created"
+    print(f"{action} AWE evidence workspace for {recipe_id}")
+    for file in manifest.files:
+        print(f"  {file.path}")
+    print("  awe-recipe.json")
+    print("\nNo traces, results, consent, receipts, or decisions were generated.")
+    if not args.dry_run:
+        print(f"Next: review {args.out / 'README.md'}")
+    return 0
 
 
 def _gate(args: argparse.Namespace) -> int:
@@ -858,9 +955,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             "evaluate": _evaluate,
             "gate": _gate,
             "gate-v2": _gate_v2,
+            "init": _init,
             "import-experiment": _import_experiment,
             "promote": _promote,
             "redact": _redact,
+            "recipes": _recipes,
             "schema": _schema,
             "serve": _serve,
             "sign": _sign,

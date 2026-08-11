@@ -8,8 +8,14 @@
 
 **Reproducible evidence infrastructure for agent experiments.**
 
+[Quickstart](#start-here) · [Decision recipes](#pick-a-decision-not-a-feature) ·
+[GitHub Action](#github-action) · [Skills](#install-the-skills) ·
+[Architecture](docs/architecture.md) · [Roadmap](docs/roadmap.md)
+
 > Don't merely observe an agent. Determine whether the supplied evidence
 > supports the change.
+
+![AWE turns captured agent experiments into a reviewable evidence decision](docs/assets/awe-evidence-loop.svg)
 
 AWE stands for **Agent Workflow Experimentation**:
 
@@ -101,11 +107,27 @@ awe demo --out awe-demo
 awe doctor awe-demo
 ```
 
-The first command generates and runs the complete synthetic Gate v2 path. The
-second independently reloads its held inputs and re-checks the comparison,
-Gate v2 receipt, typed quality evidence, and explanation graph. It exits `0`
-only when the bundle is internally reproducible; missing or mismatched evidence
-exits `2` with a versioned `awe.review-bundle-report.v1` when `--json` is used.
+If you already know the decision you need, let the machine-readable recipe
+catalog choose the smallest valid evidence path and create a policy-only
+workspace:
+
+```bash
+awe recipes
+awe recipes --show promotion_review
+awe init --recipe promotion_review --out awe-evidence
+```
+
+`awe init` writes only guidance, explicit policy defaults, their raw-file
+digests, and `awe.recipe-scaffold-manifest.v1`. It never fabricates traces,
+experiment results, consent, signatures, receipts, or a human verdict. Existing
+output directories are refused instead of overwritten. Use `--dry-run --json`
+to inspect the exact managed files without writing.
+
+`awe demo` generates and runs the complete synthetic Gate v2 path. `awe doctor`
+independently reloads its held inputs and re-checks the comparison, Gate v2
+receipt, typed quality evidence, and explanation graph. It exits `0` only when
+the bundle is internally reproducible; missing or mismatched evidence exits `2`
+with a versioned `awe.review-bundle-report.v1` when `--json` is used.
 
 ```text
 AWE TraceGate synthetic demo
@@ -303,6 +325,9 @@ one small, auditable gate at the point where a change becomes reusable.
 [Decision recipes](docs/decision-recipes.md) include copy-ready inputs,
 commands, outputs, and anti-claims for each path. The catalog is intentionally
 small: AWE does not need a separate command for every agent host or eval vendor.
+The same catalog is available to CLIs, Skills, and integration tooling through
+`awe recipes --json` and the exported
+`awe.decision-recipe-catalog.v1` JSON Schema.
 
 ## Install the evidence engine
 

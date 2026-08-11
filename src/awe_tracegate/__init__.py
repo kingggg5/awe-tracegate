@@ -52,6 +52,14 @@ from .gate import (
     validate_gate_v2_receipt_inputs,
 )
 from .quality import assess_experiment_quality
+from .recipes import (
+    DecisionRecipe,
+    DecisionRecipeCatalog,
+    RecipeScaffoldManifest,
+    build_recipe_scaffold,
+    decision_recipe_catalog,
+    initialize_evidence_workspace,
+)
 from .sensitivity import assess_sensitivity
 from .skill_bom import inspect_skill
 from .verifier import verify_compilation_receipt
@@ -65,6 +73,8 @@ __all__ = [
     "CompilationCandidate",
     "CompilationReceipt",
     "CompileRequest",
+    "DecisionRecipe",
+    "DecisionRecipeCatalog",
     "EvaluationReceipt",
     "EvidenceEnvelope",
     "EvidencePackage",
@@ -79,16 +89,19 @@ __all__ = [
     "PromotionReceipt",
     "QualityPolicy",
     "ReceiptVerification",
+    "RecipeScaffoldManifest",
     "ReviewBundleReport",
     "SensitivityPolicy",
     "SensitivityReceipt",
     "SkillBom",
     "assess_experiment_quality",
     "assess_sensitivity",
+    "build_recipe_scaffold",
     "compare_experiments",
     "compile_traces",
     "create_evidence_envelope",
     "create_evidence_package",
+    "decision_recipe_catalog",
     "evaluate_candidate",
     "explain_receipt",
     "gate_evidence",
@@ -96,6 +109,7 @@ __all__ = [
     "generate_demo",
     "import_generic_evaluation",
     "import_otel_genai_evaluation",
+    "initialize_evidence_workspace",
     "inspect_review_bundle",
     "inspect_skill",
     "validate_comparison_receipt_inputs",

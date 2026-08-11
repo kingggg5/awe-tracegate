@@ -221,6 +221,14 @@ fails closed unless its typed artifacts, held-input comparison, Gate v2 receipt,
 and explanation graph reproduce. The doctor reports bundle integrity, not model
 quality or production safety.
 
+`awe recipes` is a content-addressed, machine-readable catalog over five
+decision paths. It uses exact recipe IDs rather than fuzzy natural-language
+routing. `awe init` materializes only the selected recipe README and explicit
+policy defaults in a new directory, then records their raw SHA-256 digests in
+`awe.recipe-scaffold-manifest.v1`. The scaffold is outside the evidence trust
+chain: it sets up a review, but cannot create traces, outcomes, consent,
+signatures, receipts, or a human decision.
+
 `awe skill inspect`, `awe conformance`, and `awe capabilities --json` provide
 non-executing integration surfaces for Skill authors, adapters, and installers.
 

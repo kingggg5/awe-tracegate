@@ -58,6 +58,9 @@ policy, grant a capability, approve a step, or change an effect class.
 - Terminal state, judge coverage/disagreement, human calibration, and
   environment/seed sensitivity are deterministic computations over supplied
   sidecars and manifests. They never invoke a model, grader, or provider.
+- Decision recipes are onboarding metadata, not evidence. `awe init` refuses an
+  existing output directory and creates policy/guidance files only; it cannot
+  fabricate a passing trial, receipt, consent record, signature, or verdict.
 - Approval requires a compiled receipt, locally replayed exact traces, a valid
   verification receipt, and a passing evaluation for the identical candidate.
   The promotion receipt records every linked digest plus the actor and exact

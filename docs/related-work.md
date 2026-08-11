@@ -68,9 +68,11 @@ TraceGate v0 does not route models or optimize configurations.
   agent loops.
 
 AWE adopts the useful onboarding principle, not the runtime scope. `awe demo`,
-`awe doctor`, and the small decision-recipe catalog help a reviewer reach a
-reproducible evidence result quickly. TraceGate still does not schedule loops,
-run agents, create worktrees, execute shell commands, or auto-promote changes.
+`awe doctor`, `awe recipes`, and the safe `awe init` scaffold help a reviewer
+reach a reproducible evidence result quickly. The implementation is original
+and uses AWE's strict contracts; no Loop Engineering runtime code or branding is
+vendored. TraceGate still does not schedule loops, run agents, create worktrees,
+execute shell commands, or auto-promote changes.
 
 ## Context and token optimization
 

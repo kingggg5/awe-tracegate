@@ -4,6 +4,30 @@ TraceGate recipes begin with a decision and the evidence already produced by a
 harness. They are not autonomous loops and never execute model, browser, shell,
 deployment, or project-code actions.
 
+## Catalog and safe scaffold
+
+```bash
+awe recipes
+awe recipes --show controlled_comparison
+awe recipes --json > decision-recipes.json
+awe init --recipe controlled_comparison --out awe-evidence
+```
+
+The five built-in recipe IDs are `ci_gate`, `controlled_comparison`,
+`harness_import`, `promotion_review`, and `share_evidence`. The catalog is a
+content-addressed `awe.decision-recipe-catalog.v1`; it is small enough to audit
+and stable enough for a Skill or integration to consume without fuzzy routing.
+
+`awe init` is intentionally not a data generator. It creates a new directory
+containing only a recipe README, explicit policy defaults when relevant, and a
+raw-file-digest manifest. It refuses an existing output directory and never
+creates trial results, evidence, consent, signatures, receipts, or decisions.
+Preview it with:
+
+```bash
+awe init --recipe promotion_review --out awe-evidence --dry-run --json
+```
+
 ## One-minute contract tour
 
 ```bash

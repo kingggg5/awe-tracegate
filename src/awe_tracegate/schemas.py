@@ -41,6 +41,7 @@ from .contracts import (
     SignedReceiptBundle,
     SkillBom,
 )
+from .recipes import DecisionRecipeCatalog, RecipeScaffoldManifest
 
 SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "adapter-conformance-v1.schema.json": AdapterConformanceReceipt,
@@ -51,6 +52,7 @@ SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "comparison-receipt-v1.schema.json": ComparisonReceipt,
     "comparison-verification-v1.schema.json": ComparisonVerification,
     "dataset-consent-v1.schema.json": DatasetConsentRecord,
+    "decision-recipe-catalog-v1.schema.json": DecisionRecipeCatalog,
     "evidence-envelope-v1.schema.json": EvidenceEnvelope,
     "evidence-package-v1.schema.json": EvidencePackage,
     "evaluation-bundle-v1.schema.json": EvaluationBundle,
@@ -68,6 +70,7 @@ SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "receipt-verification-v2.schema.json": ReceiptVerification,
     "redaction-summary-v1.schema.json": RedactionSummary,
     "redaction-policy-v1.schema.json": RedactionPolicy,
+    "recipe-scaffold-manifest-v1.schema.json": RecipeScaffoldManifest,
     "review-bundle-report-v1.schema.json": ReviewBundleReport,
     "signature-verification-v1.schema.json": SignatureVerification,
     "sensitivity-policy-v1.schema.json": SensitivityPolicy,

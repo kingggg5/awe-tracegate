@@ -30,6 +30,15 @@ stable contract release.
 
 ### Added
 
+- `awe recipes` and `awe.decision-recipe-catalog.v1` as a small,
+  machine-readable front door for CI gating, controlled comparison, harness
+  import, promotion review, and governed sharing.
+- `awe init` and `awe.recipe-scaffold-manifest.v1` for refusal-safe,
+  policy-only evidence workspaces. The scaffold records raw file hashes and
+  never generates traces, results, consent, signatures, receipts, or decisions.
+- An original evidence-loop diagram and a shorter decision-first README path,
+  informed by successful open-source onboarding patterns without importing an
+  agent runtime into TraceGate.
 - `awe demo` as a zero-network, zero-model front door for the complete
   synthetic Gate v2 chain, plus `awe doctor` and
   `awe.review-bundle-report.v1` for replaying the standard held-input bundle
