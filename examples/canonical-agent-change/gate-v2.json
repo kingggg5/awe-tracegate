@@ -1,0 +1,312 @@
+{
+  "baseline_quality": {
+    "judge_calibration": {
+      "abstaining_vote_count": 0,
+      "disagreeing_trial_count": 0,
+      "human_calibration_sample_count": 40,
+      "human_judge_agree_count": 40,
+      "human_judge_agreement_bps": 10000,
+      "judge_coverage_bps": 10000,
+      "judge_covered_trial_count": 40,
+      "judge_disagreement_bps": 0,
+      "multi_judge_trial_count": 40,
+      "trial_count": 40
+    },
+    "manifest_digest": "sha256:0e8e3ab2395fdbfae27a008379ebb1c7cad919a412884d56f40930e7965ba3bc",
+    "policy_digest": "sha256:dc1b623c5cf574d7c1424172b20d935cf9146023118d85609ec686985872f59e",
+    "quality_evidence_digest": "sha256:95bf552b99fa846af65037216ed9b4f2532322261eefc2dd28ee6339b13cdd54",
+    "reasons": [],
+    "receipt_hash": "sha256:a80c34bf7938bc9bceff336d2006eb4c60ba56e567378e12c810780791b5053d",
+    "schema_version": "awe.experiment-quality-receipt.v1",
+    "status": "pass",
+    "terminal_outcomes": {
+      "failure_count": 40,
+      "infrastructure_failure_count": 0,
+      "missing_trial_count": 0,
+      "refusal_count": 0,
+      "success_count": 0,
+      "timeout_count": 0,
+      "trial_count": 40,
+      "unreported_trial_count": 0
+    }
+  },
+  "candidate_quality": {
+    "judge_calibration": {
+      "abstaining_vote_count": 0,
+      "disagreeing_trial_count": 0,
+      "human_calibration_sample_count": 40,
+      "human_judge_agree_count": 40,
+      "human_judge_agreement_bps": 10000,
+      "judge_coverage_bps": 10000,
+      "judge_covered_trial_count": 40,
+      "judge_disagreement_bps": 0,
+      "multi_judge_trial_count": 40,
+      "trial_count": 40
+    },
+    "manifest_digest": "sha256:3e080da651e7be24cd93280cedb405087d71e07843ba8de8c808c1eb5bd5aede",
+    "policy_digest": "sha256:dc1b623c5cf574d7c1424172b20d935cf9146023118d85609ec686985872f59e",
+    "quality_evidence_digest": "sha256:4f14f91a00ce7e6b412e3b703c22df6e36a8cbb16f9e6c7c3a9b98aade6e7e76",
+    "reasons": [],
+    "receipt_hash": "sha256:7d1ad06c1bf241fa553f153dc6e3fda52d4b64b7d4f2b0170969161c57440a4a",
+    "schema_version": "awe.experiment-quality-receipt.v1",
+    "status": "pass",
+    "terminal_outcomes": {
+      "failure_count": 0,
+      "infrastructure_failure_count": 0,
+      "missing_trial_count": 0,
+      "refusal_count": 0,
+      "success_count": 40,
+      "timeout_count": 0,
+      "trial_count": 40,
+      "unreported_trial_count": 0
+    }
+  },
+  "comparison": {
+    "baseline": {
+      "p95_latency_ms": 100,
+      "safety_violations": 0,
+      "success_count": 0,
+      "success_rate_bps": 0,
+      "total_cost_microusd": 40000,
+      "trial_count": 40
+    },
+    "baseline_dataset_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "baseline_dataset_split_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "baseline_manifest_digest": "sha256:0e8e3ab2395fdbfae27a008379ebb1c7cad919a412884d56f40930e7965ba3bc",
+    "baseline_subject_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "candidate": {
+      "p95_latency_ms": 100,
+      "safety_violations": 0,
+      "success_count": 40,
+      "success_rate_bps": 10000,
+      "total_cost_microusd": 40000,
+      "trial_count": 40
+    },
+    "candidate_dataset_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "candidate_dataset_split_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "candidate_manifest_digest": "sha256:3e080da651e7be24cd93280cedb405087d71e07843ba8de8c808c1eb5bd5aede",
+    "candidate_subject_digest": "sha256:4715249d4e3efbc7fc54d3959211b2877cc99a855c666cbbdda4ffe32a85eab8",
+    "comparator_version": "awe.comparator.v1",
+    "conclusion": "improvement",
+    "policy_digest": "sha256:55a5bb14de44bc8236e8c22a9441936f543e63b9af5ddf57980d0a9561594b5c",
+    "reasons": [],
+    "receipt_hash": "sha256:755463fd7cef09d470b8ebb473df8e1ef62ef8c5bad7bc8cb7edd4d9d2a0dfe7",
+    "reliability": {
+      "aggregation_method": "paired_case_macro_v1",
+      "baseline_flaky_case_count": 0,
+      "candidate_flaky_case_count": 0,
+      "confidence_interval_lower_bps": 10000,
+      "confidence_interval_upper_bps": 10000,
+      "confidence_level_bps": 9500,
+      "confidence_method": "paired_case_normal_95_v1",
+      "discordant_case_count": 20,
+      "estimand_scope": "frozen_paired_cases",
+      "evidence_strength": "high",
+      "flaky_case_count": 0,
+      "flaky_case_rate_bps": 0,
+      "improved_case_count": 20,
+      "observed_success_delta_bps": 10000,
+      "paired_case_count": 20,
+      "paired_delta_variance_bps_squared": 0,
+      "paired_trial_count": 40,
+      "regressed_case_count": 0,
+      "repeated_case_count": 20,
+      "sign_test_method": "exact_two_sided_sign_v1",
+      "sign_test_p_value_ppm": 2,
+      "tied_case_count": 0
+    },
+    "schema_version": "awe.comparison-receipt.v1",
+    "status": "pass",
+    "treatment_factors": [
+      "agent_commit"
+    ],
+    "treatment_scope": "single_factor"
+  },
+  "comparison_verification": {
+    "baseline_manifest_digest": "sha256:0e8e3ab2395fdbfae27a008379ebb1c7cad919a412884d56f40930e7965ba3bc",
+    "candidate_manifest_digest": "sha256:3e080da651e7be24cd93280cedb405087d71e07843ba8de8c808c1eb5bd5aede",
+    "policy_digest": "sha256:55a5bb14de44bc8236e8c22a9441936f543e63b9af5ddf57980d0a9561594b5c",
+    "reasons": [],
+    "receipt_hash": "sha256:755463fd7cef09d470b8ebb473df8e1ef62ef8c5bad7bc8cb7edd4d9d2a0dfe7",
+    "schema_version": "awe.comparison-verification.v1",
+    "status": "valid",
+    "verification_hash": "sha256:0b026825bc9c5e427a0a7c66a8d32cf215854a5409bb3c4ba9f0148c9b54274a"
+  },
+  "gate_version": "awe.gate.v2",
+  "reasons": [],
+  "receipt_hash": "sha256:3fb1b2edf5c34446865a915bb630362a95bb4a2fbd00bc70f8a932279a96344d",
+  "schema_version": "awe.gate-receipt.v2",
+  "status": "PASS",
+  "v1_gate": {
+    "baseline_bundle_digest": "sha256:53e1786b5431c49d89459a34aca850396c92896c62e538cd9fa709cddb4699f5",
+    "candidate_bundle_digest": "sha256:10a5bbc433c7b85e8b49958f026bd06bbf741c9c18e707970ae47cb4552b9be0",
+    "candidate_digest": "sha256:4715249d4e3efbc7fc54d3959211b2877cc99a855c666cbbdda4ffe32a85eab8",
+    "commit_sha": null,
+    "compilation": {
+      "candidate": {
+        "candidate_digest": "sha256:4715249d4e3efbc7fc54d3959211b2877cc99a855c666cbbdda4ffe32a85eab8",
+        "dependencies": [
+          {
+            "consumer_input": "changes",
+            "consumer_node": "score_release_risk",
+            "evidence_digest": "sha256:b04a49c7955448bebcdb5aea2802cba2baf46f3ac7b6f4b0d1969e1e640833a7",
+            "observation_count": 2,
+            "producer_field": "/changes",
+            "producer_node": "detect_dependencies",
+            "trace_ids": [
+              "repo_analysis_001",
+              "repo_analysis_002"
+            ]
+          },
+          {
+            "consumer_input": "diff",
+            "consumer_node": "detect_dependencies",
+            "evidence_digest": "sha256:cc63cef8c7ad5563c12e2967821999b3148e753a0d3f62748af9b472fa806726",
+            "observation_count": 2,
+            "producer_field": "/diff",
+            "producer_node": "read_diff",
+            "trace_ids": [
+              "repo_analysis_001",
+              "repo_analysis_002"
+            ]
+          },
+          {
+            "consumer_input": "head_sha",
+            "consumer_node": "score_release_risk",
+            "evidence_digest": "sha256:f5bc015d9473e273ae65bc7494dec661cf32678d88497c87ef29d39139ccef61",
+            "observation_count": 2,
+            "producer_field": "/head_sha",
+            "producer_node": "read_diff",
+            "trace_ids": [
+              "repo_analysis_001",
+              "repo_analysis_002"
+            ]
+          }
+        ],
+        "effect_scope": "pure_or_read",
+        "intent": "repo_analysis",
+        "nodes": [
+          {
+            "effect": "read",
+            "inputs": [
+              {
+                "input_name": "repository",
+                "source_field": "/repository",
+                "source_kind": "workflow_input",
+                "source_node": null
+              }
+            ],
+            "node_id": "read_diff",
+            "output_fields": [
+              "/diff",
+              "/head_sha"
+            ],
+            "tool": "repo.read_diff",
+            "tool_version": "1.0.0"
+          },
+          {
+            "effect": "read",
+            "inputs": [
+              {
+                "input_name": "diff",
+                "source_field": "/diff",
+                "source_kind": "step_output",
+                "source_node": "read_diff"
+              }
+            ],
+            "node_id": "detect_dependencies",
+            "output_fields": [
+              "/changes"
+            ],
+            "tool": "repo.detect_dependencies",
+            "tool_version": "1.0.0"
+          },
+          {
+            "effect": "pure",
+            "inputs": [
+              {
+                "input_name": "changes",
+                "source_field": "/changes",
+                "source_kind": "step_output",
+                "source_node": "detect_dependencies"
+              },
+              {
+                "input_name": "head_sha",
+                "source_field": "/head_sha",
+                "source_kind": "step_output",
+                "source_node": "read_diff"
+              }
+            ],
+            "node_id": "score_release_risk",
+            "output_fields": [
+              "/reasons",
+              "/risk_score"
+            ],
+            "tool": "risk.score",
+            "tool_version": "1.0.0"
+          }
+        ],
+        "schema_version": "awe.candidate.v1",
+        "source_trace_ids": [
+          "repo_analysis_001",
+          "repo_analysis_002"
+        ]
+      },
+      "compiler_version": "awe.compiler.v1",
+      "input_bundle_digest": "sha256:351cc5ab98177204e0bbd25ae91ee6cab069bce54e626ad5093b3b384d053234",
+      "reasons": [],
+      "receipt_hash": "sha256:f4bab189f87c108abdd2ae12791391b24288056788865b099d017aaca0fe22ed",
+      "schema_version": "awe.compilation-receipt.v1",
+      "status": "compiled"
+    },
+    "evaluation": {
+      "baseline": {
+        "p95_latency_ms": 100,
+        "safety_violations": 0,
+        "success_count": 0,
+        "success_rate_bps": 0,
+        "total_cost_microusd": 40000,
+        "trial_count": 40
+      },
+      "baseline_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "candidate": {
+        "p95_latency_ms": 100,
+        "safety_violations": 0,
+        "success_count": 40,
+        "success_rate_bps": 10000,
+        "total_cost_microusd": 40000,
+        "trial_count": 40
+      },
+      "candidate_digest": "sha256:4715249d4e3efbc7fc54d3959211b2877cc99a855c666cbbdda4ffe32a85eab8",
+      "dataset_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "evaluator_version": "awe.evaluator.v1",
+      "policy_digest": "sha256:16309c868d4e7a7ea5fff9d31b13a02825498dcd9fc24cb575c55cd7eb6048ca",
+      "reasons": [],
+      "receipt_hash": "sha256:86dacfac91166861c3f6c9c982ad397cb34ab8849788b3aa2e9ac7bc446eebc7",
+      "schema_version": "awe.evaluation-receipt.v1",
+      "status": "pass"
+    },
+    "evidence_evaluated_at": null,
+    "evidence_package_digest": null,
+    "evidence_provenance_level": null,
+    "gate_version": "awe.gate.v1",
+    "maximum_evidence_age_seconds": null,
+    "minimum_provenance_level": null,
+    "policy_digest": "sha256:16309c868d4e7a7ea5fff9d31b13a02825498dcd9fc24cb575c55cd7eb6048ca",
+    "reasons": [],
+    "receipt_hash": "sha256:daaab527ec12051629ca42ead5abb1b2e6c69bff48cd0d5bdc77be1a13bc0b65",
+    "repository_uri": null,
+    "schema_version": "awe.gate-receipt.v1",
+    "skill_bom_digest": null,
+    "status": "PASS",
+    "traces_digest": "sha256:351cc5ab98177204e0bbd25ae91ee6cab069bce54e626ad5093b3b384d053234",
+    "verification": {
+      "reasons": [],
+      "receipt_hash": "sha256:f4bab189f87c108abdd2ae12791391b24288056788865b099d017aaca0fe22ed",
+      "schema_version": "awe.receipt-verification.v2",
+      "status": "valid",
+      "traces_verified": true,
+      "verification_hash": "sha256:ea9d3349e70baeae7796ba1db0ff14ac69ed7e52fc054160558bff56a9a7c767"
+    }
+  }
+}

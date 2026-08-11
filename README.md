@@ -111,6 +111,13 @@ deterministic evidence graph with the inputs, links, reasons, and limitations
 behind that decision. It is useful for review, but it does not add or infer
 evidence.
 
+For the complete v2 chain, use the checked-in
+[canonical synthetic fixture](examples/canonical-agent-change/README.md). It
+replays a compiled candidate, frozen paired experiment, terminal outcomes,
+asserted judge/human labels, comparison verification, Gate v2, and its evidence
+graph. It is intentionally **not** presented as a real benchmark or an
+independent external-adopter pilot.
+
 ## Install the Skills
 
 ### npm from GitHub

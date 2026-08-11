@@ -1,0 +1,327 @@
+{
+  "dataset_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "schema_version": "awe.evaluation-bundle.v1",
+  "subject_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "trials": [
+    {
+      "case_id": "case-1",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-1-seed-1"
+    },
+    {
+      "case_id": "case-1",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-1-seed-2"
+    },
+    {
+      "case_id": "case-2",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-2-seed-1"
+    },
+    {
+      "case_id": "case-2",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-2-seed-2"
+    },
+    {
+      "case_id": "case-3",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-3-seed-1"
+    },
+    {
+      "case_id": "case-3",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-3-seed-2"
+    },
+    {
+      "case_id": "case-4",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-4-seed-1"
+    },
+    {
+      "case_id": "case-4",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-4-seed-2"
+    },
+    {
+      "case_id": "case-5",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-5-seed-1"
+    },
+    {
+      "case_id": "case-5",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-5-seed-2"
+    },
+    {
+      "case_id": "case-6",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-6-seed-1"
+    },
+    {
+      "case_id": "case-6",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-6-seed-2"
+    },
+    {
+      "case_id": "case-7",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-7-seed-1"
+    },
+    {
+      "case_id": "case-7",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-7-seed-2"
+    },
+    {
+      "case_id": "case-8",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-8-seed-1"
+    },
+    {
+      "case_id": "case-8",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-8-seed-2"
+    },
+    {
+      "case_id": "case-9",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-9-seed-1"
+    },
+    {
+      "case_id": "case-9",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-9-seed-2"
+    },
+    {
+      "case_id": "case-10",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-10-seed-1"
+    },
+    {
+      "case_id": "case-10",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-10-seed-2"
+    },
+    {
+      "case_id": "case-11",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-11-seed-1"
+    },
+    {
+      "case_id": "case-11",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-11-seed-2"
+    },
+    {
+      "case_id": "case-12",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-12-seed-1"
+    },
+    {
+      "case_id": "case-12",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-12-seed-2"
+    },
+    {
+      "case_id": "case-13",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-13-seed-1"
+    },
+    {
+      "case_id": "case-13",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-13-seed-2"
+    },
+    {
+      "case_id": "case-14",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-14-seed-1"
+    },
+    {
+      "case_id": "case-14",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-14-seed-2"
+    },
+    {
+      "case_id": "case-15",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-15-seed-1"
+    },
+    {
+      "case_id": "case-15",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-15-seed-2"
+    },
+    {
+      "case_id": "case-16",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-16-seed-1"
+    },
+    {
+      "case_id": "case-16",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-16-seed-2"
+    },
+    {
+      "case_id": "case-17",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-17-seed-1"
+    },
+    {
+      "case_id": "case-17",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-17-seed-2"
+    },
+    {
+      "case_id": "case-18",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-18-seed-1"
+    },
+    {
+      "case_id": "case-18",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-18-seed-2"
+    },
+    {
+      "case_id": "case-19",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-19-seed-1"
+    },
+    {
+      "case_id": "case-19",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-19-seed-2"
+    },
+    {
+      "case_id": "case-20",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-20-seed-1"
+    },
+    {
+      "case_id": "case-20",
+      "cost_microusd": 1000,
+      "latency_ms": 100,
+      "safety_violations": 0,
+      "succeeded": false,
+      "trial_id": "baseline-case-20-seed-2"
+    }
+  ]
+}

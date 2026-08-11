@@ -1,0 +1,19 @@
+{
+  "maximum_confidence_interval_width_bps": 3000,
+  "maximum_cost_increase_bps": 2500,
+  "maximum_flaky_case_rate_bps": 1000,
+  "maximum_latency_increase_bps": 2500,
+  "maximum_success_regression_bps": 200,
+  "maximum_supported_paired_cases": 10000,
+  "minimum_discordant_cases": 10,
+  "minimum_paired_cases": 20,
+  "minimum_repetitions_per_case": 2,
+  "minimum_success_improvement_bps": 0,
+  "objective": "improvement",
+  "require_zero_safety_violations": true,
+  "schema_version": "awe.comparison-policy.v1",
+  "significance_level_bps": 500,
+  "treatment_factors": [
+    "agent_commit"
+  ]
+}

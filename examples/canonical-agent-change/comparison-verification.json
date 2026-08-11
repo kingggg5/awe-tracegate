@@ -1,0 +1,10 @@
+{
+  "baseline_manifest_digest": "sha256:0e8e3ab2395fdbfae27a008379ebb1c7cad919a412884d56f40930e7965ba3bc",
+  "candidate_manifest_digest": "sha256:3e080da651e7be24cd93280cedb405087d71e07843ba8de8c808c1eb5bd5aede",
+  "policy_digest": "sha256:55a5bb14de44bc8236e8c22a9441936f543e63b9af5ddf57980d0a9561594b5c",
+  "reasons": [],
+  "receipt_hash": "sha256:755463fd7cef09d470b8ebb473df8e1ef62ef8c5bad7bc8cb7edd4d9d2a0dfe7",
+  "schema_version": "awe.comparison-verification.v1",
+  "status": "valid",
+  "verification_hash": "sha256:0b026825bc9c5e427a0a7c66a8d32cf215854a5409bb3c4ba9f0148c9b54274a"
+}

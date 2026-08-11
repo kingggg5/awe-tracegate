@@ -1,0 +1,12 @@
+{
+  "maximum_infrastructure_failure_rate_bps": 0,
+  "maximum_judge_disagreement_bps": 0,
+  "maximum_missing_trial_rate_bps": 0,
+  "maximum_refusal_rate_bps": 10000,
+  "maximum_timeout_rate_bps": 0,
+  "minimum_human_calibration_samples": 20,
+  "minimum_human_judge_agreement_bps": 10000,
+  "minimum_judge_coverage_bps": 10000,
+  "require_complete_terminal_outcomes": true,
+  "schema_version": "awe.quality-policy.v1"
+}

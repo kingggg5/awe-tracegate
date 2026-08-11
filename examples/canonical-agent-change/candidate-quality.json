@@ -1,0 +1,807 @@
+{
+  "evidence_digest": "sha256:4f14f91a00ce7e6b412e3b703c22df6e36a8cbb16f9e6c7c3a9b98aade6e7e76",
+  "manifest_digest": "sha256:3e080da651e7be24cd93280cedb405087d71e07843ba8de8c808c1eb5bd5aede",
+  "schema_version": "awe.experiment-quality-evidence.v1",
+  "trials": [
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-1-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-1-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-10-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-10-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-11-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-11-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-12-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-12-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-13-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-13-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-14-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-14-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-15-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-15-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-16-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-16-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-17-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-17-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-18-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-18-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-19-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-19-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-2-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-2-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-20-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-20-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-3-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-3-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-4-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-4-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-5-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-5-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-6-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-6-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-7-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-7-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-8-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-8-seed-2"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-9-seed-1"
+    },
+    {
+      "human_verdict": {
+        "actor_id": "fixture_reviewer",
+        "verdict": "pass"
+      },
+      "judge_votes": [
+        {
+          "judge_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "judge_id": "fixture_judge_a",
+          "verdict": "pass"
+        },
+        {
+          "judge_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "judge_id": "fixture_judge_b",
+          "verdict": "pass"
+        }
+      ],
+      "terminal_outcome": "success",
+      "trial_id": "candidate-case-9-seed-2"
+    }
+  ]
+}

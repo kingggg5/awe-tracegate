@@ -1,0 +1,61 @@
+{
+  "baseline": {
+    "p95_latency_ms": 100,
+    "safety_violations": 0,
+    "success_count": 0,
+    "success_rate_bps": 0,
+    "total_cost_microusd": 40000,
+    "trial_count": 40
+  },
+  "baseline_dataset_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "baseline_dataset_split_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "baseline_manifest_digest": "sha256:0e8e3ab2395fdbfae27a008379ebb1c7cad919a412884d56f40930e7965ba3bc",
+  "baseline_subject_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "candidate": {
+    "p95_latency_ms": 100,
+    "safety_violations": 0,
+    "success_count": 40,
+    "success_rate_bps": 10000,
+    "total_cost_microusd": 40000,
+    "trial_count": 40
+  },
+  "candidate_dataset_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "candidate_dataset_split_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "candidate_manifest_digest": "sha256:3e080da651e7be24cd93280cedb405087d71e07843ba8de8c808c1eb5bd5aede",
+  "candidate_subject_digest": "sha256:4715249d4e3efbc7fc54d3959211b2877cc99a855c666cbbdda4ffe32a85eab8",
+  "comparator_version": "awe.comparator.v1",
+  "conclusion": "improvement",
+  "policy_digest": "sha256:55a5bb14de44bc8236e8c22a9441936f543e63b9af5ddf57980d0a9561594b5c",
+  "reasons": [],
+  "receipt_hash": "sha256:755463fd7cef09d470b8ebb473df8e1ef62ef8c5bad7bc8cb7edd4d9d2a0dfe7",
+  "reliability": {
+    "aggregation_method": "paired_case_macro_v1",
+    "baseline_flaky_case_count": 0,
+    "candidate_flaky_case_count": 0,
+    "confidence_interval_lower_bps": 10000,
+    "confidence_interval_upper_bps": 10000,
+    "confidence_level_bps": 9500,
+    "confidence_method": "paired_case_normal_95_v1",
+    "discordant_case_count": 20,
+    "estimand_scope": "frozen_paired_cases",
+    "evidence_strength": "high",
+    "flaky_case_count": 0,
+    "flaky_case_rate_bps": 0,
+    "improved_case_count": 20,
+    "observed_success_delta_bps": 10000,
+    "paired_case_count": 20,
+    "paired_delta_variance_bps_squared": 0,
+    "paired_trial_count": 40,
+    "regressed_case_count": 0,
+    "repeated_case_count": 20,
+    "sign_test_method": "exact_two_sided_sign_v1",
+    "sign_test_p_value_ppm": 2,
+    "tied_case_count": 0
+  },
+  "schema_version": "awe.comparison-receipt.v1",
+  "status": "pass",
+  "treatment_factors": [
+    "agent_commit"
+  ],
+  "treatment_scope": "single_factor"
+}

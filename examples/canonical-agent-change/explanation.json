@@ -1,0 +1,178 @@
+{
+  "decision": "PASS",
+  "edges": [
+    {
+      "relation": "assessed_by",
+      "source": "baseline_bundle",
+      "target": "evaluation"
+    },
+    {
+      "relation": "assessed_by",
+      "source": "baseline_manifest",
+      "target": "comparison"
+    },
+    {
+      "relation": "gated_by",
+      "source": "baseline_quality",
+      "target": "gate_v2"
+    },
+    {
+      "relation": "assessed_by",
+      "source": "candidate_bundle",
+      "target": "evaluation"
+    },
+    {
+      "relation": "assessed_by",
+      "source": "candidate_manifest",
+      "target": "comparison"
+    },
+    {
+      "relation": "gated_by",
+      "source": "candidate_quality",
+      "target": "gate_v2"
+    },
+    {
+      "relation": "verified_by",
+      "source": "comparison",
+      "target": "comparison_verification"
+    },
+    {
+      "relation": "gated_by",
+      "source": "comparison_policy",
+      "target": "comparison"
+    },
+    {
+      "relation": "gated_by",
+      "source": "comparison_verification",
+      "target": "gate_v2"
+    },
+    {
+      "relation": "verified_by",
+      "source": "compilation",
+      "target": "verification"
+    },
+    {
+      "relation": "gated_by",
+      "source": "evaluation",
+      "target": "gate_v1"
+    },
+    {
+      "relation": "gated_by",
+      "source": "gate_v1",
+      "target": "gate_v2"
+    },
+    {
+      "relation": "derived_from",
+      "source": "traces",
+      "target": "compilation"
+    },
+    {
+      "relation": "gated_by",
+      "source": "verification",
+      "target": "gate_v1"
+    }
+  ],
+  "explanation_hash": "sha256:a418df8b4f0451bcf7b38fe953e8c1be257274123737a00c3aba6f9f9df7277d",
+  "limitations": [
+    "comparison_is_not_unseen_task_generalization",
+    "frozen_inputs_only",
+    "judge_and_human_labels_are_asserted_evidence",
+    "no_live_model_or_tool_reconstruction"
+  ],
+  "nodes": [
+    {
+      "digest": "sha256:53e1786b5431c49d89459a34aca850396c92896c62e538cd9fa709cddb4699f5",
+      "kind": "evaluation_bundle",
+      "node_id": "baseline_bundle",
+      "status": "held"
+    },
+    {
+      "digest": "sha256:0e8e3ab2395fdbfae27a008379ebb1c7cad919a412884d56f40930e7965ba3bc",
+      "kind": "experiment_manifest",
+      "node_id": "baseline_manifest",
+      "status": "held"
+    },
+    {
+      "digest": "sha256:a80c34bf7938bc9bceff336d2006eb4c60ba56e567378e12c810780791b5053d",
+      "kind": "quality_receipt",
+      "node_id": "baseline_quality",
+      "status": "pass"
+    },
+    {
+      "digest": "sha256:10a5bbc433c7b85e8b49958f026bd06bbf741c9c18e707970ae47cb4552b9be0",
+      "kind": "evaluation_bundle",
+      "node_id": "candidate_bundle",
+      "status": "held"
+    },
+    {
+      "digest": "sha256:3e080da651e7be24cd93280cedb405087d71e07843ba8de8c808c1eb5bd5aede",
+      "kind": "experiment_manifest",
+      "node_id": "candidate_manifest",
+      "status": "held"
+    },
+    {
+      "digest": "sha256:7d1ad06c1bf241fa553f153dc6e3fda52d4b64b7d4f2b0170969161c57440a4a",
+      "kind": "quality_receipt",
+      "node_id": "candidate_quality",
+      "status": "pass"
+    },
+    {
+      "digest": "sha256:755463fd7cef09d470b8ebb473df8e1ef62ef8c5bad7bc8cb7edd4d9d2a0dfe7",
+      "kind": "comparison_receipt",
+      "node_id": "comparison",
+      "status": "pass"
+    },
+    {
+      "digest": "sha256:55a5bb14de44bc8236e8c22a9441936f543e63b9af5ddf57980d0a9561594b5c",
+      "kind": "comparison_policy",
+      "node_id": "comparison_policy",
+      "status": "held"
+    },
+    {
+      "digest": "sha256:0b026825bc9c5e427a0a7c66a8d32cf215854a5409bb3c4ba9f0148c9b54274a",
+      "kind": "comparison_verification",
+      "node_id": "comparison_verification",
+      "status": "valid"
+    },
+    {
+      "digest": "sha256:f4bab189f87c108abdd2ae12791391b24288056788865b099d017aaca0fe22ed",
+      "kind": "compilation_receipt",
+      "node_id": "compilation",
+      "status": "compiled"
+    },
+    {
+      "digest": "sha256:86dacfac91166861c3f6c9c982ad397cb34ab8849788b3aa2e9ac7bc446eebc7",
+      "kind": "evaluation_receipt",
+      "node_id": "evaluation",
+      "status": "pass"
+    },
+    {
+      "digest": "sha256:daaab527ec12051629ca42ead5abb1b2e6c69bff48cd0d5bdc77be1a13bc0b65",
+      "kind": "gate_receipt",
+      "node_id": "gate_v1",
+      "status": "PASS"
+    },
+    {
+      "digest": "sha256:3fb1b2edf5c34446865a915bb630362a95bb4a2fbd00bc70f8a932279a96344d",
+      "kind": "gate_receipt",
+      "node_id": "gate_v2",
+      "status": "PASS"
+    },
+    {
+      "digest": "sha256:351cc5ab98177204e0bbd25ae91ee6cab069bce54e626ad5093b3b384d053234",
+      "kind": "execution_traces",
+      "node_id": "traces",
+      "status": "held"
+    },
+    {
+      "digest": "sha256:ea9d3349e70baeae7796ba1db0ff14ac69ed7e52fc054160558bff56a9a7c767",
+      "kind": "receipt_verification",
+      "node_id": "verification",
+      "status": "valid"
+    }
+  ],
+  "reasons": [],
+  "receipt_hash": "sha256:3fb1b2edf5c34446865a915bb630362a95bb4a2fbd00bc70f8a932279a96344d",
+  "receipt_schema_version": "awe.gate-receipt.v2",
+  "schema_version": "awe.explanation-receipt.v1"
+}
