@@ -246,9 +246,8 @@ def _quality(
 def _write_json(path: Path, value: object) -> None:
     if hasattr(value, "model_dump"):
         value = value.model_dump(mode="json")
-    path.write_text(
-        json.dumps(value, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+    path.write_bytes(
+        (json.dumps(value, indent=2, sort_keys=True) + "\n").encode("utf-8")
     )
 
 

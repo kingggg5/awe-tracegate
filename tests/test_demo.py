@@ -17,6 +17,7 @@ def test_demo_generates_a_ready_exact_input_bundle(tmp_path: Path) -> None:
     replayed_report = inspect_review_bundle(bundle)
 
     assert len(generated) == 15
+    assert all(b"\r\n" not in path.read_bytes() for path in generated)
     assert report.status == "READY"
     assert report.gate_v2_status == "PASS"
     assert report.gate_v2_receipt_hash is not None

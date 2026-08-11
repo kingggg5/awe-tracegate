@@ -15,6 +15,7 @@ def test_exports_every_versioned_schema(tmp_path: Path) -> None:
     written = export_schemas(tmp_path)
 
     assert {path.name for path in written} == set(SCHEMA_MODELS)
+    assert all(b"\r\n" not in path.read_bytes() for path in written)
     for path in written:
         schema = json.loads(path.read_text(encoding="utf-8"))
         assert schema["$id"] == schema_identifier(path.name)

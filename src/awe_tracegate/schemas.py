@@ -97,9 +97,10 @@ def export_schemas(output_directory: Path) -> tuple[Path, ...]:
         schema = model.model_json_schema(mode="serialization")
         schema["$id"] = schema_identifier(filename)
         schema["$schema"] = JSON_SCHEMA_DIALECT
-        output_path.write_text(
-            json.dumps(schema, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
+        output_path.write_bytes(
+            (
+                json.dumps(schema, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+            ).encode("utf-8")
         )
         written.append(output_path)
     return tuple(written)

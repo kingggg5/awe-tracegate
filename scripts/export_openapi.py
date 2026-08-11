@@ -15,9 +15,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(
-        json.dumps(app.openapi(), ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+    args.out.write_bytes(
+        (
+            json.dumps(app.openapi(), ensure_ascii=False, indent=2, sort_keys=True)
+            + "\n"
+        ).encode("utf-8")
     )
     return 0
 

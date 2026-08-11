@@ -137,7 +137,7 @@ def _emit(value: Any, output: Path | None = None) -> None:
         print(rendered, end="")
     else:
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(rendered, encoding="utf-8")
+        output.write_bytes(rendered.encode("utf-8"))
         print(output)
 
 

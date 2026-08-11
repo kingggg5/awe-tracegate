@@ -206,6 +206,7 @@ def test_cli_runs_atomic_gate_and_exposes_capabilities(tmp_path: Path) -> None:
         == 0
     )
     payload = json.loads(receipt.read_text(encoding="utf-8"))
+    assert b"\r\n" not in receipt.read_bytes()
     assert payload["schema_version"] == "awe.gate-receipt.v1"
     assert payload["status"] == "PASS"
     assert payload["verification"]["traces_verified"] is True
