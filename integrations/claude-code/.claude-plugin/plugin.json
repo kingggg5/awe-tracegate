@@ -1,7 +1,7 @@
 {
   "name": "awe-tracegate",
   "version": "0.3.0",
-  "description": "Offline, keyless skills for comparing agent changes and verifying replayable evidence without trusting model output.",
+  "description": "Offline, keyless discovery and evidence skills for improving agent work without trusting model output as proof.",
   "author": {
     "name": "kingggg5",
     "url": "https://github.com/kingggg5"

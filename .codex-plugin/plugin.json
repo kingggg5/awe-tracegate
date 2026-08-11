@@ -1,7 +1,7 @@
 {
   "name": "awe-tracegate",
   "version": "0.3.0",
-  "description": "Offline, keyless skills for comparing agent changes and verifying evidence without trusting model output.",
+  "description": "Offline, keyless discovery and evidence skills for improving agent work without trusting model output as proof.",
   "author": {
     "name": "kingggg5",
     "url": "https://github.com/kingggg5"
@@ -21,12 +21,12 @@
   "interface": {
     "displayName": "AWE TraceGate",
     "shortDescription": "Verify agent changes with replayable evidence.",
-    "longDescription": "Five focused skills for checking TraceGate readiness, comparing one measurable change, verifying exact evidence, integrating evaluation exports, and preparing redacted evidence for human review. The skills only orchestrate the offline TraceGate CLI; model or skill output is never verification evidence.",
+    "longDescription": "Five focused skills for checking readiness, turning one agent goal into a measurable discovery cycle, verifying exact evidence, integrating evaluation exports, and preparing redacted evidence for human review. The skills only orchestrate the offline TraceGate CLI; model or skill output is never verification evidence.",
     "developerName": "kingggg5",
     "category": "Developer Tools",
     "capabilities": [
       "Readiness checks",
-      "Change comparison",
+      "Discovery planning and change comparison",
       "Evidence replay",
       "Adapter integration",
       "Redacted sharing"
@@ -34,7 +34,7 @@
     "websiteURL": "https://github.com/kingggg5/awe-tracegate",
     "defaultPrompt": [
       "Check whether this repository is ready for TraceGate.",
-      "Compare this agent change with its frozen baseline.",
+      "Turn this agent improvement goal into one measurable candidate.",
       "Verify these evidence artifacts without executing them."
     ],
     "brandColor": "#2563EB"

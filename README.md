@@ -17,6 +17,15 @@
 
 ![AWE turns captured agent experiments into a reviewable evidence decision](docs/assets/awe-evidence-loop.svg)
 
+### See the discovery loop run
+
+![Recorded AWE TraceGate CLI walkthrough: demo, doctor, and status](docs/assets/awe-discovery-loop-demo.svg)
+
+The walkthrough is rendered from the included synthetic CLI fixture. It shows
+the real `demo` -> `doctor` -> `status` contract, not an LLM session or a
+fabricated customer result. When SVG animation is disabled by a renderer, every
+step remains readable as a static image.
+
 AWE stands for **Agent Workflow Experimentation**:
 
 ```text
@@ -168,6 +177,35 @@ replays a compiled candidate, frozen paired experiment, terminal outcomes,
 asserted judge/human labels, comparison verification, Gate v2, and its evidence
 graph. It is intentionally **not** presented as a real benchmark or an
 independent external-adopter pilot.
+
+## Start a discovery loop from your existing AI host
+
+You can ask Codex, Claude Code, or another compatible host to help structure a
+discovery cycle. The host can use its configured tools and permissions to do
+the task; TraceGate gives the resulting change a reproducible decision path.
+This keeps AWE useful across coding, research, support, browser, and workflow
+agents without pretending that the verifier is another autonomous runtime.
+
+| Discovery mode | Ask the host | What AWE keeps honest |
+| --- | --- | --- |
+| Capability | “Compare this new code-review Skill against the frozen baseline.” | Case/seed pairing, declared treatment, success and safety outcomes |
+| Reliability | “Find why this workflow sometimes fails; preserve every timeout and refusal.” | Typed terminal outcomes, missing trials, counter-evidence, and replay |
+| Efficiency | “Test whether the new strategy reduces cost or p95 latency without hurting quality.” | Exact efficiency thresholds and a `REVIEW` instead of a false pass |
+| Safety | “Evaluate the safer prompt against the same adversarial cases.” | Frozen policy, safety sidecars, calibration claims, and fail-closed linkage |
+| Integration | “Map this OTLP or harness export into an evidence plan; do not invent fields.” | Strict adapter envelopes and explicit unknown fields |
+| Governance | “Prepare this evidence for review, redact it, and stop before publishing.” | Consent, redaction, signatures, and a separate human decision |
+
+Use the focused Skills as the command surface. For example:
+
+```text
+$tracegate-compare-change turn “make the incident-triage agent more reliable”
+into one measurable candidate. Freeze the cases, keep failures and timeouts,
+and stop before promotion.
+```
+
+The response can plan or explain the next experiment, but it cannot become
+evidence by itself. A `PASS` still requires independently captured artifacts,
+the deterministic gate, and a separate human decision before reuse.
 
 ## Install the Skills
 

@@ -1,7 +1,7 @@
 interface:
-  display_name: "TraceGate Compare Change"
-  short_description: "Compare one agent change against a baseline"
-  default_prompt: "Use $tracegate-compare-change to compare this candidate with its frozen baseline."
+  display_name: "TraceGate Discovery & Compare"
+  short_description: "Turn one agent improvement into a measurable comparison"
+  default_prompt: "Use $tracegate-compare-change to turn this goal into one measurable candidate and compare it with the frozen baseline."
 
 policy:
   allow_implicit_invocation: false

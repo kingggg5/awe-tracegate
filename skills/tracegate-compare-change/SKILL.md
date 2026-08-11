@@ -1,11 +1,30 @@
 ---
 name: tracegate-compare-change
-description: Compare one measurable change to an agent, prompt, skill, model, workflow, or tool sequence against a declared baseline using frozen cases, equivalent trials, replayable traces, and TraceGate receipts. Use for discovery loops, candidate evaluation, or regression diagnosis. Do not use for open-ended brainstorming, unrelated bundled changes, or autonomous production changes.
+description: Start a bounded discovery loop for one measurable agent, prompt, skill, model, workflow, or tool-sequence change. Turn a user goal into a falsifiable baseline/candidate plan, then compare captured evidence with frozen cases, equivalent trials, replayable traces, and TraceGate receipts. Use for discovery loops, candidate evaluation, or regression diagnosis. Do not use for open-ended brainstorming, unrelated bundled changes, or autonomous production changes.
 ---
 
-# TraceGate Compare Change
+# TraceGate Discovery & Compare
 
 Run one falsifiable comparison. An external harness may produce trials; TraceGate remains offline and requires no model credential.
+
+## Discovery mode
+
+When the user asks an AI host to improve a task, begin by turning the request
+into exactly one testable change. The host may use its already-authorized tools
+to perform the work or run a harness, but this Skill does not grant new tools,
+execute artifacts, or make the plan itself evidence.
+
+Examples of valid discovery requests:
+
+- “Make the PR-review agent catch more migration risks without adding latency.”
+- “Compare a cheaper research strategy without reducing citation quality.”
+- “Find why the support workflow refuses valid requests; retain every refusal.”
+- “Evaluate the safer browser-agent instruction on the same adversarial cases.”
+
+For each request, choose one declared treatment and one decision: capability,
+reliability, efficiency, safety, integration, or governance. If the request
+contains multiple changes, split it into separate experiments before any trial
+is run.
 
 ## Workflow
 

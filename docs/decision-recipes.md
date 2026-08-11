@@ -4,6 +4,12 @@ TraceGate recipes begin with a decision and the evidence already produced by a
 harness. They are not autonomous loops and never execute model, browser, shell,
 deployment, or project-code actions.
 
+An AI host can use the catalog as a **Discovery Loop** front door: turn one
+goal into one explicit decision, select the smallest recipe, then ask the
+user's existing harness to capture the required evidence. Planning language is
+never upgraded into a passing decision; TraceGate only assesses the separately
+held artifacts that follow.
+
 ## Catalog and safe scaffold
 
 ```bash
