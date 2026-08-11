@@ -6,6 +6,7 @@ import {
   WORKSPACE_SCHEMA_VERSION,
   WORKSPACE_STORE_SCHEMA_VERSION,
   RUNTIME_RUN_SCHEMA_VERSION,
+  TRACE_CAPTURE_CONSENT_SCHEMA_VERSION,
   type ApproveRuntimeRunInput,
   classifyGoal,
   type CreateGoalInput,
@@ -20,6 +21,7 @@ import {
   type RuntimePermission,
   type RuntimeRun,
   type RuntimeRunState,
+  type TraceCaptureConsent,
   type WorkspaceDatabase,
 } from "./contracts.js";
 
@@ -51,6 +53,7 @@ const RUNTIME_PERMISSIONS = new Set([
   "read_evidence_references",
   "write_checkpoint",
 ]);
+const TRACE_CONSENT_SCOPES = new Set(["capture_trace", "evaluate_migration"]);
 const RUNTIME_STATES = new Set<RuntimeRunState>([
   "awaiting_approval",
   "handoff_ready",
@@ -118,7 +121,34 @@ function isRuntimeApproval(value: unknown): value is RuntimeApproval {
   return (
     typeof item.approved_by === "string" &&
     isRuntimePermissions(item.granted_permissions) &&
-    typeof item.approved_at === "string"
+    typeof item.approved_at === "string" &&
+    (item.trace_consent === undefined || isTraceCaptureConsent(item.trace_consent))
+  );
+}
+
+function isTraceCaptureConsent(value: unknown): value is TraceCaptureConsent {
+  if (typeof value !== "object" || value === null) return false;
+  const item = value as Partial<TraceCaptureConsent>;
+  const scopes = item.scopes;
+  return (
+    item.schema_version === TRACE_CAPTURE_CONSENT_SCHEMA_VERSION &&
+    typeof item.consent_id === "string" &&
+    typeof item.run_id === "string" &&
+    typeof item.actor_id === "string" &&
+    typeof item.runner === "string" &&
+    RUNTIME_RUNNERS.has(item.runner) &&
+    Array.isArray(scopes) &&
+    scopes.length > 0 &&
+    scopes.length <= TRACE_CONSENT_SCOPES.size &&
+    scopes.every((scope) => typeof scope === "string" && TRACE_CONSENT_SCOPES.has(scope)) &&
+    scopes.join(",") === [...scopes].sort().join(",") &&
+    new Set(scopes).size === scopes.length &&
+    (item.status === "active" || item.status === "revoked") &&
+    typeof item.granted_at === "string" &&
+    (item.expires_at === undefined || typeof item.expires_at === "string") &&
+    (item.status === "active"
+      ? item.revoked_at === undefined
+      : typeof item.revoked_at === "string")
   );
 }
 
@@ -137,6 +167,7 @@ function isRuntimeRun(value: unknown): value is RuntimeRun {
   const item = value as Partial<RuntimeRun>;
   const requestedPermissions = item.requested_permissions;
   const approval = item.approval;
+  const consent = approval?.trace_consent;
   const hasApprovedState = item.state === "handoff_ready" || item.state === "checkpointed";
   return (
     item.schema_version === RUNTIME_RUN_SCHEMA_VERSION &&
@@ -149,7 +180,12 @@ function isRuntimeRun(value: unknown): value is RuntimeRun {
     RUNTIME_STATES.has(item.state as RuntimeRunState) &&
     (approval === undefined ||
       (isRuntimeApproval(approval) &&
-        samePermissions(requestedPermissions, approval.granted_permissions))) &&
+        samePermissions(requestedPermissions, approval.granted_permissions) &&
+        (consent === undefined ||
+          (consent.run_id === item.run_id &&
+            consent.runner === item.runner &&
+            consent.actor_id === approval.approved_by &&
+            consent.granted_at === approval.approved_at)))) &&
     Array.isArray(item.checkpoints) &&
     item.checkpoints.every(isRuntimeCheckpoint) &&
     (!hasApprovedState || approval !== undefined) &&
@@ -435,12 +471,64 @@ export class GoalStore {
         throw new TypeError("Granted permissions must exactly match the requested permissions.");
       }
       const timestamp = now.toISOString();
+      const traceConsentScopes = approval.trace_consent_scopes ?? [];
+      const traceConsent: TraceCaptureConsent | undefined =
+        traceConsentScopes.length > 0
+          ? {
+              schema_version: TRACE_CAPTURE_CONSENT_SCHEMA_VERSION,
+              consent_id: `consent_${randomUUID()}`,
+              run_id: existing.run_id,
+              actor_id: approval.approved_by,
+              runner: existing.runner,
+              scopes: traceConsentScopes,
+              status: "active",
+              granted_at: timestamp,
+            }
+          : undefined;
       updated = {
         ...existing,
         state: "handoff_ready",
-        approval: { ...approval, approved_at: timestamp },
+        approval: {
+          approved_by: approval.approved_by,
+          granted_permissions: approval.granted_permissions,
+          approved_at: timestamp,
+          ...(traceConsent ? { trace_consent: traceConsent } : {}),
+        },
         updated_at: timestamp,
         status_message: "Approved for external handoff. No tool has been executed by Workspace.",
+      };
+      await this.#write({
+        ...database,
+        runs: database.runs.map((run) => (run.run_id === runId ? updated! : run)),
+      });
+    });
+    return updated;
+  }
+
+  async revokeRuntimeTraceConsent(
+    runId: string,
+    now = new Date(),
+  ): Promise<RuntimeRun | undefined> {
+    let updated: RuntimeRun | undefined;
+    await this.#enqueue(async () => {
+      const database = await this.#read();
+      const existing = database.runs.find((run) => run.run_id === runId);
+      if (!existing) return;
+      const consent = existing.approval?.trace_consent;
+      if (!consent) throw new TypeError("This handoff has no trace consent to revoke.");
+      if (consent.status === "revoked") {
+        updated = existing;
+        return;
+      }
+      const timestamp = now.toISOString();
+      updated = {
+        ...existing,
+        approval: {
+          ...existing.approval!,
+          trace_consent: { ...consent, status: "revoked", revoked_at: timestamp },
+        },
+        updated_at: timestamp,
+        status_message: "Trace consent revoked. Previously exported data must be handled separately.",
       };
       await this.#write({
         ...database,
@@ -494,11 +582,25 @@ export class GoalStore {
         return;
       }
       const timestamp = now.toISOString();
+      const activeConsent = existing.approval?.trace_consent;
+      const approval =
+        activeConsent?.status === "active"
+          ? {
+              ...existing.approval!,
+              trace_consent: {
+                ...activeConsent,
+                status: "revoked" as const,
+                revoked_at: timestamp,
+              },
+            }
+          : existing.approval;
       updated = {
         ...existing,
         state: "cancelled",
+        ...(approval ? { approval } : {}),
         updated_at: timestamp,
-        status_message: "Runtime handoff cancelled locally. External work must be stopped separately.",
+        status_message:
+          "Runtime handoff cancelled and local trace consent revoked. External work and copies must be handled separately.",
       };
       await this.#write({
         ...database,

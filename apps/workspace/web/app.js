@@ -381,21 +381,47 @@ function runtimeApprovalForm(run) {
   const form = element("form", "runtime-approval-form");
   form.dataset.runtimeApproval = run.run_id;
   const approver = element("label", "");
-  approver.append(element("span", "", "Local reviewer"));
+  approver.append(element("span", "", "Reviewer ID"));
   const input = element("input", "");
   input.name = "approved_by";
   input.required = true;
-  input.maxLength = 200;
-  input.value = "local reviewer";
+  input.maxLength = 128;
+  input.pattern = "[A-Za-z0-9][A-Za-z0-9_.:@+\\-]*";
+  input.value = "local-reviewer";
   approver.append(input);
+  const consent = element("fieldset", "runtime-consent");
+  consent.append(element("legend", "", "Optional trace consent"));
+  const capture = element("label", "runtime-consent-option");
+  const captureInput = element("input", "");
+  captureInput.type = "checkbox";
+  captureInput.name = "trace_consent_scope";
+  captureInput.value = "capture_trace";
+  const captureCopy = element("span", "");
+  captureCopy.append(
+    element("strong", "", "Capture a redacted agent trace"),
+    element("small", "", "Allow the adapter to retain event types, outcomes, usage, and payload digests."),
+  );
+  capture.append(captureInput, captureCopy);
+  const evaluate = element("label", "runtime-consent-option");
+  const evaluateInput = element("input", "");
+  evaluateInput.type = "checkbox";
+  evaluateInput.name = "trace_consent_scope";
+  evaluateInput.value = "evaluate_migration";
+  const evaluateCopy = element("span", "");
+  evaluateCopy.append(
+    element("strong", "", "Evaluate PostgreSQL/Alembic evidence"),
+    element("small", "", "Allow forward, rollback, data-preservation, and test outcomes into a Discovery bundle."),
+  );
+  evaluate.append(evaluateInput, evaluateCopy);
+  consent.append(capture, evaluate);
   const disclosure = element(
     "p",
     "",
-    "The reviewer name is a local assertion, not an authenticated identity. Approval grants exactly the permissions shown above.",
+    "The reviewer and consent are local assertions, not authenticated identities. Raw prompts, commands, and outputs may contain secrets; the adapter keeps only allowlisted metadata and digests. Revoking consent does not delete copies already exported.",
   );
   const submit = element("button", "primary-action", "Approve handoff");
   submit.type = "submit";
-  form.append(approver, submit, disclosure);
+  form.append(approver, consent, submit, disclosure);
   details.append(form);
   return details;
 }
@@ -455,6 +481,14 @@ function runtimeItem(run) {
   for (const permission of run.requested_permissions) {
     permissions.append(element("span", "", permissionLabels[permission] ?? permission));
   }
+  const traceConsent = run.approval?.trace_consent;
+  if (traceConsent) {
+    const consentLabel =
+      traceConsent.status === "active" ? "Trace consent active" : "Trace consent revoked";
+    const consentBadge = element("span", "", consentLabel);
+    consentBadge.dataset.consentState = traceConsent.status;
+    permissions.append(consentBadge);
+  }
 
   const actions = element("div", "runtime-actions");
   if (run.state === "handoff_ready" || run.state === "checkpointed") {
@@ -465,6 +499,12 @@ function runtimeItem(run) {
     cancel.type = "button";
     cancel.dataset.runtimeCancel = run.run_id;
     actions.append(cancel);
+  }
+  if (traceConsent?.status === "active") {
+    const revoke = element("button", "revoke-consent", "Revoke trace consent");
+    revoke.type = "button";
+    revoke.dataset.runtimeConsentRevoke = run.run_id;
+    actions.append(revoke);
   }
   item.append(header, permissions, actions);
   if (run.state === "awaiting_approval") item.append(runtimeApprovalForm(run));
@@ -711,6 +751,7 @@ async function approveRuntimeRun(form) {
       body: JSON.stringify({
         approved_by: values.get("approved_by"),
         granted_permissions: run.requested_permissions,
+        trace_consent_scopes: values.getAll("trace_consent_scope"),
       }),
     });
     upsertRun(body.run);
@@ -721,6 +762,31 @@ async function approveRuntimeRun(form) {
     submit.disabled = false;
     elements.runtimeStatus.dataset.state = "error";
     elements.runtimeStatus.textContent = `Could not approve the handoff. ${error.message}`;
+  }
+}
+
+async function revokeRuntimeTraceConsent(button) {
+  const runId = button.dataset.runtimeConsentRevoke;
+  const run = state.runs.find((candidate) => candidate.run_id === runId);
+  if (!run?.approval?.trace_consent) return;
+  if (!window.confirm("Revoke trace consent? Existing external copies are not deleted.")) return;
+  button.disabled = true;
+  elements.runtimeStatus.dataset.state = "";
+  elements.runtimeStatus.textContent = "Revoking trace consent...";
+  try {
+    const body = await api(`/api/runs/${encodeURIComponent(runId)}/consent/revoke`, {
+      method: "POST",
+      body: JSON.stringify({}),
+    });
+    upsertRun(body.run);
+    elements.runtimeStatus.dataset.state = "success";
+    elements.runtimeStatus.textContent =
+      "Trace consent revoked. Previously exported copies require separate handling.";
+    document.querySelector("#runtimeTitle")?.focus();
+  } catch (error) {
+    button.disabled = false;
+    elements.runtimeStatus.dataset.state = "error";
+    elements.runtimeStatus.textContent = `Could not revoke trace consent. ${error.message}`;
   }
 }
 
@@ -811,6 +877,9 @@ document.addEventListener("click", (event) => {
 
   const cancel = event.target.closest("[data-runtime-cancel]");
   if (cancel) void cancelRuntimeRun(cancel);
+
+  const revokeConsent = event.target.closest("[data-runtime-consent-revoke]");
+  if (revokeConsent) void revokeRuntimeTraceConsent(revokeConsent);
 });
 
 document.addEventListener("submit", (event) => {

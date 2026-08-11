@@ -20,6 +20,8 @@ def describe_capabilities(package_version: str) -> CapabilitiesDocument:
                     "conformance",
                     "demo",
                     "doctor",
+                    "discovery.build-migration-bundle",
+                    "discovery.ingest-trace",
                     "evaluate",
                     "gate",
                     "gate-v2",
@@ -45,6 +47,7 @@ def describe_capabilities(package_version: str) -> CapabilitiesDocument:
             sorted(
                 (
                     "canonical_json",
+                    "consented_agent_trace_import",
                     "comparison_exact_input_replay",
                     "comparison_held_input_verification",
                     "content_addressed_receipts",
@@ -54,6 +57,7 @@ def describe_capabilities(package_version: str) -> CapabilitiesDocument:
                     "evidence_only_scaffolding",
                     "offline_keyless_gate",
                     "paired_experiment_comparison",
+                    "postgres_alembic_evidence_projection",
                     "review_bundle_exact_input_replay",
                     "typed_terminal_outcome_assessment",
                     "workspace_operational_status",
@@ -65,6 +69,7 @@ def describe_capabilities(package_version: str) -> CapabilitiesDocument:
             sorted(
                 (
                     "artifact_execution",
+                    "agent_execution",
                     "autonomous_promotion",
                     "deployment_runtime",
                     "llm_authority",

@@ -289,13 +289,23 @@ main { width: min(920px, 100%); margin: 0 auto; padding: 36px 28px 80px; }
 .runtime-state[data-state="cancelled"] { color: var(--muted); background: var(--neutral-soft); }
 .runtime-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; }
 .runtime-meta span { padding: 3px 7px; border-radius: 5px; color: var(--muted); background: var(--neutral-soft); font-size: 12px; }
+.runtime-meta span[data-consent-state="active"] { color: var(--green); background: var(--green-soft); }
+.runtime-meta span[data-consent-state="revoked"] { color: var(--amber); background: var(--amber-soft); }
 .runtime-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 10px; }
 .runtime-actions button { min-height: 44px; padding: 4px 0; border: 0; color: var(--blue-deep); background: transparent; font-weight: 650; cursor: pointer; }
 .runtime-actions button:hover, .runtime-actions a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .runtime-actions .cancel-runtime { color: #8c2f39; }
+.runtime-actions .revoke-consent { color: var(--amber); }
 .runtime-review-panel { margin-top: 8px; border-top: 1px dashed var(--line); }
 .runtime-review-panel summary { display: inline-flex; min-height: 44px; align-items: center; color: var(--blue-deep); font-weight: 650; cursor: pointer; }
 .runtime-approval-form, .runtime-checkpoint-form { display: grid; grid-template-columns: minmax(220px, 1fr) auto; align-items: end; gap: 12px 16px; padding: 8px 0 4px; }
+.runtime-consent { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; border: 0; }
+.runtime-consent legend { margin-bottom: 8px; color: var(--muted); font-size: 13px; font-weight: 650; }
+.runtime-consent-option { display: grid !important; grid-template-columns: 18px minmax(0, 1fr); gap: 8px !important; min-height: 70px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink) !important; cursor: pointer; }
+.runtime-consent-option input { width: 18px !important; min-height: 18px !important; height: 18px; margin: 2px 0 0; padding: 0 !important; accent-color: var(--blue); }
+.runtime-consent-option strong, .runtime-consent-option small { display: block; }
+.runtime-consent-option small { margin-top: 2px; color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.4; }
+.runtime-consent-option:has(input:checked) { border-color: #b9d3f2; background: var(--blue-soft); }
 .runtime-approval-form p, .runtime-checkpoint-form p { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 12px; }
 .runtime-checkpoint-form textarea { min-height: 72px; resize: vertical; }
 .runtime-checkpoint-form .checkpoint-summary { grid-column: 1 / -1; }
@@ -384,7 +394,7 @@ noscript { display: block; padding: 20px; color: #8c2f39; background: #fff1f2; t
   .goal-controls { align-items: flex-start; }
   .goal-state { justify-self: start; }
   .discovery-item-heading { align-items: flex-start; flex-direction: column; gap: 8px; }
-  .discovery-definitions, .evaluation-form, .runtime-field-grid, .runtime-permissions, .runtime-approval-form, .runtime-checkpoint-form { grid-template-columns: 1fr; }
+  .discovery-definitions, .evaluation-form, .runtime-field-grid, .runtime-permissions, .runtime-approval-form, .runtime-checkpoint-form, .runtime-consent { grid-template-columns: 1fr; }
   .evaluation-summary { grid-column: auto; }
   .runtime-form-footer { align-items: flex-start; flex-direction: column; }
   .runtime-form-footer .primary-action { width: 100%; }

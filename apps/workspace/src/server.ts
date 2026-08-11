@@ -135,7 +135,7 @@ async function capabilities(traceGateUrl: URL): Promise<readonly Capability[]> {
       id: "agent_runtime",
       name: "Agent runtime handoff",
       description:
-        "Create a local, human-approved handoff with bounded read/checkpoint permissions. Workspace does not execute tools.",
+        "Create a local, human-approved handoff with bounded permissions and optional trace consent. Workspace does not execute tools.",
       state: "available",
     },
   ];
@@ -216,7 +216,7 @@ export function createWorkspaceServer(options: WorkspaceServerOptions) {
         writeJson(response, 200, {
           status: "ok",
           mode: "local_first",
-          runtime: "permissioned_handoff_v1",
+          runtime: "permissioned_handoff_v2",
         });
         return;
       }
@@ -304,6 +304,21 @@ export function createWorkspaceServer(options: WorkspaceServerOptions) {
           checkpointRunId,
           parseRuntimeCheckpointInput(await readJsonBody(request)),
         );
+        if (!run) {
+          writeError(response, 404, "Runtime run not found.");
+          return;
+        }
+        writeJson(response, 200, { run });
+        return;
+      }
+
+      const revokeConsentRunId = parseRunSubresource(url.pathname, "/consent/revoke");
+      if (request.method === "POST" && revokeConsentRunId) {
+        if (!sameOriginMutation(request)) {
+          writeError(response, 403, "Origin does not match this workspace.");
+          return;
+        }
+        const run = await store.revokeRuntimeTraceConsent(revokeConsentRunId);
         if (!run) {
           writeError(response, 404, "Runtime run not found.");
           return;

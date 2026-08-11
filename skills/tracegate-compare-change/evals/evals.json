@@ -18,8 +18,8 @@
     },
     {
       "id": 4,
-      "prompt": "Continue the comparison: the candidate improved pass rate but doubled latency. Show the trade-off and one discriminating next test.",
-      "expected_output": "Preserves the frozen comparison, reports both benefit and regression, and proposes one controlled follow-up test."
+      "prompt": "Use our approved Codex handoff to test this Alembic migration. Upgrade passed, rollback failed, and the seeded row checksum changed. Build the Discovery evidence without hiding either failure.",
+      "expected_output": "Requires active capture and migration-evaluation consent, keeps the host runner external, emits typed rollback and data-preservation failures, and does not treat forward success as PASS."
     },
     {
       "id": 5,

@@ -5,15 +5,16 @@ Human-gated agent runtime coordination inside the
 
 Workspace turns a saved goal into a narrow, reviewable handoff for an external
 Codex, Claude Code, or other runner. It persists goals and discovery briefs,
-requires an explicit local approval, exports a typed handoff, and can record
-checkpoints. It does **not** invoke a model, run a tool, or issue a TraceGate
-decision.
+requires an explicit local approval, records optional trace/evaluation consent,
+exports a typed handoff, and can record checkpoints. It does **not** invoke a
+model, run a tool, or issue a TraceGate decision.
 
 ```text
 Goal -> Discovery brief -> Select runner and permissions -> Human approval
+                                                         -> Optional consent
                                                          |
                                                          v
-                                       awe.runtime-handoff.v1
+                                       awe.runtime-handoff.v2
                                                          |
                                                          v
                                       External agent host runs the work
@@ -61,7 +62,9 @@ Configuration is deliberately small:
   `write_checkpoint`.
 - States: `awaiting_approval`, `handoff_ready`, `checkpointed`, and
   `cancelled`.
-- Handoff schema: `awe.runtime-handoff.v1`.
+- Optional consent scopes: `capture_trace` and `evaluate_migration`; neither is
+  selected by default.
+- Handoff schema: `awe.runtime-handoff.v2`.
 - Store schema: `awe.workspace-store.v3`, with migration from the earlier local
   v1/v2 formats.
 
@@ -80,6 +83,7 @@ model.
 | `GET` | `/api/goals/{id}/export` | Export a discovery brief |
 | `GET/POST` | `/api/runs`, `/api/goals/{id}/runs` | List or prepare runtime handoffs |
 | `POST` | `/api/runs/{id}/approval` | Approve the exact requested permissions |
+| `POST` | `/api/runs/{id}/consent/revoke` | Revoke asserted local trace consent |
 | `GET` | `/api/runs/{id}/handoff` | Export the approved typed handoff |
 | `PATCH` | `/api/runs/{id}/checkpoint` | Record an approved local checkpoint |
 | `POST` | `/api/runs/{id}/cancel` | Cancel the local handoff record |
@@ -88,6 +92,15 @@ Mutations require a same-origin request. Host and TraceGate URLs are restricted
 to loopback addresses, JSON bodies are bounded, and the store uses restrictive
 permissions where supported. This is still a single-user local process, not a
 multi-tenant identity or authorization service.
+
+The reviewer ID and consent record are asserted local metadata, not an
+authenticated identity. Revocation updates future Workspace exports, but an
+already exported active handoff is a stale external copy that the offline
+adapter cannot discover or delete. Cancelling a handoff also revokes its active
+consent in the local record. Raw
+agent streams may contain secrets, PII, customer data, source code, and tool
+arguments. Keep them outside the Workspace store and pass them through the
+consented `awe-discovery` adapter before TraceGate review.
 
 ## Trust boundary
 

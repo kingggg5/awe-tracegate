@@ -1,0 +1,5 @@
+{"type":"thread.started","thread_id":"thread-postgres-example"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item-upgrade","type":"command_execution","command":"alembic upgrade head","status":"completed","exit_code":0}}
+{"type":"item.completed","item":{"id":"item-tests","type":"command_execution","command":"pytest tests/migrations","status":"completed","exit_code":0}}
+{"type":"turn.completed","usage":{"input_tokens":160,"cached_input_tokens":40,"output_tokens":55}}
