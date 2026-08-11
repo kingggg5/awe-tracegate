@@ -3,6 +3,7 @@
 import { parseArgs } from "node:util";
 import {
   InstallError,
+  PACKAGE_VERSION,
   availableSkills,
   checkSkills,
   installSkills,
@@ -15,6 +16,7 @@ Usage:
   awe-tracegate install --target <repository> [--skill <name>] [--dry-run]
   awe-tracegate check --target <repository> [--skill <name>]
   awe-tracegate list
+  awe-tracegate --version
 
 This command only copies packaged skill files. It does not install Python,
 run lifecycle scripts, fetch dependencies, start services, or execute agent code.`;
@@ -30,6 +32,7 @@ function parseOptions(args) {
       skill: { type: "string", short: "s", multiple: true, default: [] },
       "dry-run": { type: "boolean", default: false },
       help: { type: "boolean", short: "h", default: false },
+      version: { type: "boolean", short: "v", default: false },
     },
   });
   return { command: positionals[0], extra: positionals.slice(1), values };
@@ -46,6 +49,13 @@ async function main(args) {
   }
 
   const { command, extra, values } = parsed;
+  if (values.version) {
+    if (command || extra.length) {
+      throw new InstallError("--version cannot be combined with a command");
+    }
+    console.log(`awe-tracegate ${PACKAGE_VERSION}`);
+    return 0;
+  }
   if (values.help || !command) {
     console.log(usage());
     return values.help ? 0 : 1;

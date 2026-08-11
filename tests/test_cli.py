@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 from unittest.mock import patch
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+from awe_tracegate.adapters import import_generic_evaluation
 from awe_tracegate.cli import main
 from awe_tracegate.schemas import SCHEMA_MODELS
 
@@ -260,6 +262,41 @@ def test_cli_imports_generic_experiment_evidence(tmp_path: Path) -> None:
         "awe.generic-evaluation"
     )
     assert len(json.loads(evaluation.read_text(encoding="utf-8"))["trials"]) == 3
+
+
+def test_cli_compare_emits_a_typed_fail_closed_receipt(tmp_path: Path) -> None:
+    baseline_payload = json.loads(
+        (ROOT / "examples/evaluation/experiment.json").read_text(encoding="utf-8")
+    )
+    candidate_payload = deepcopy(baseline_payload)
+    candidate_payload["experiment_id"] = "synthetic-comparison-candidate"
+    candidate_payload["commit_sha"] = "b" * 40
+    candidate_payload["subject_digest"] = "sha256:" + "6" * 64
+    baseline = import_generic_evaluation(baseline_payload)
+    candidate = import_generic_evaluation(candidate_payload)
+    baseline_path = tmp_path / "baseline-manifest.json"
+    candidate_path = tmp_path / "candidate-manifest.json"
+    receipt_path = tmp_path / "comparison-receipt.json"
+    baseline_path.write_text(baseline.model_dump_json(indent=2), encoding="utf-8")
+    candidate_path.write_text(candidate.model_dump_json(indent=2), encoding="utf-8")
+
+    exit_code = main(
+        [
+            "compare",
+            "--baseline",
+            str(baseline_path),
+            "--candidate",
+            str(candidate_path),
+            "--out",
+            str(receipt_path),
+        ]
+    )
+
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert exit_code == 2
+    assert receipt["schema_version"] == "awe.comparison-receipt.v1"
+    assert receipt["status"] == "review"
+    assert "insufficient_paired_cases" in receipt["reasons"]
 
 
 def test_cli_signs_and_verifies_against_trusted_key(tmp_path: Path) -> None:

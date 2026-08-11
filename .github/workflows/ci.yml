@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_call:
   push:
     branches: [main]
   pull_request:
@@ -138,6 +139,9 @@ jobs:
           npm install --ignore-scripts --no-audit --no-fund \
             --prefix "${install_root}" "${NPM_ARCHIVE}"
           cli="${install_root}/node_modules/.bin/awe-tracegate"
+          expected_version="$(node --input-type=module -e \
+            "import packageJson from './package.json' with { type: 'json' }; console.log(packageJson.version)")"
+          test "$("${cli}" --version)" = "awe-tracegate ${expected_version}"
           "${cli}" list
           "${cli}" install --target "${target_root}"
           "${cli}" check --target "${target_root}"
@@ -152,6 +156,9 @@ jobs:
             --prefix "${install_root}" \
             "git+file://${GITHUB_WORKSPACE}#${GITHUB_SHA}"
           cli="${install_root}/node_modules/.bin/awe-tracegate"
+          expected_version="$(node --input-type=module -e \
+            "import packageJson from './package.json' with { type: 'json' }; console.log(packageJson.version)")"
+          test "$("${cli}" --version)" = "awe-tracegate ${expected_version}"
           "${cli}" list
           "${cli}" install --target "${target_root}"
           "${cli}" check --target "${target_root}"

@@ -7,7 +7,7 @@ import html
 import os
 from pathlib import Path
 
-from awe_tracegate.contracts import GateReceipt
+from awe_tracegate.contracts import GateReceipt, GateReceiptV2
 
 MAX_RECEIPT_BYTES = 16 * 1024 * 1024
 MAX_OUTPUT_PATH_CHARS = 4_096
@@ -24,10 +24,14 @@ def _safe_path_text(path: str | Path, *, label: str) -> str:
     return value
 
 
-def _load(path: Path) -> GateReceipt:
+def _load(path: Path) -> GateReceipt | GateReceiptV2:
     if path.stat().st_size > MAX_RECEIPT_BYTES:
         raise ValueError(f"{path} exceeds the {MAX_RECEIPT_BYTES}-byte receipt limit")
-    return GateReceipt.model_validate_json(path.read_text(encoding="utf-8"))
+    payload = path.read_text(encoding="utf-8")
+    try:
+        return GateReceipt.model_validate_json(payload)
+    except ValueError:
+        return GateReceiptV2.model_validate_json(payload)
 
 
 def _append(path: str | None, text: str) -> None:
@@ -41,7 +45,7 @@ def _code(value: object) -> str:
     return f"<code>{html.escape(str(value), quote=True)}</code>"
 
 
-def render(receipt: GateReceipt, receipt_path: Path) -> str:
+def _render_v1(receipt: GateReceipt, receipt_path: Path) -> str:
     reasons = "<br>".join(_code(reason) for reason in receipt.reasons)
     if not reasons:
         reasons = "No blocking or review reasons."
@@ -67,6 +71,46 @@ def render(receipt: GateReceipt, receipt_path: Path) -> str:
         f"| Gate receipt | {_code(receipt.receipt_hash)} |\n"
         f"| Receipt path | {_code(receipt_path)} |\n\n"
         f"{reasons}\n"
+    )
+
+
+def _render_v2(receipt: GateReceiptV2, receipt_path: Path) -> str:
+    reasons = "<br>".join(_code(reason) for reason in receipt.reasons)
+    if not reasons:
+        reasons = "No blocking or review reasons."
+    baseline_quality = (
+        receipt.baseline_quality.status if receipt.baseline_quality else "not supplied"
+    )
+    candidate_quality = (
+        receipt.candidate_quality.status
+        if receipt.candidate_quality
+        else "not supplied"
+    )
+    quality = f"baseline={baseline_quality}; candidate={candidate_quality}"
+    comparison = f"{receipt.comparison.status}: {receipt.comparison.conclusion}"
+    comparison_replay = _code(receipt.comparison_verification.status)
+    return (
+        "## AWE TraceGate\n\n"
+        f"**Decision: {receipt.status}**\n\n"
+        "| Evidence | Result |\n"
+        "| --- | --- |\n"
+        f"| Gate v1 | {_code(receipt.v1_gate.status)} |\n"
+        f"| Held-input comparison replay | {comparison_replay} |\n"
+        f"| Frozen experiment comparison | {_code(comparison)} |\n"
+        f"| Typed outcomes and judge calibration | {_code(quality)} |\n"
+        f"| Gate v2 receipt | {_code(receipt.receipt_hash)} |\n"
+        f"| Receipt path | {_code(receipt_path)} |\n\n"
+        f"{reasons}\n"
+    )
+
+
+def render(receipt: GateReceipt | GateReceiptV2, receipt_path: Path) -> str:
+    """Render only receipts whose complete typed decision chain has validated."""
+
+    return (
+        _render_v2(receipt, receipt_path)
+        if isinstance(receipt, GateReceiptV2)
+        else _render_v1(receipt, receipt_path)
     )
 
 

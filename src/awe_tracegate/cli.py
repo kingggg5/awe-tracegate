@@ -22,6 +22,8 @@ from .adapters import (
 from .capabilities import describe_capabilities
 from .compiler import compile_traces
 from .contracts import (
+    ComparisonPolicy,
+    ComparisonReceipt,
     CompilationReceipt,
     CompileRequest,
     DatasetConsentRecord,
@@ -30,21 +32,36 @@ from .contracts import (
     EvaluationReceipt,
     EvidencePackage,
     ExecutionTrace,
+    ExperimentManifest,
+    ExperimentQualityEvidence,
+    ExperimentQualityReceipt,
+    GateReceipt,
+    GateReceiptV2,
     GitCommitSha,
     GovernedRedactionSummary,
+    QualityPolicy,
     ReceiptVerification,
     RedactionPolicy,
     RedactionSummary,
     RepositoryUri,
+    SensitivityPolicy,
+    SensitivityReceipt,
     SignedReceiptBundle,
     SkillBom,
 )
-from .evaluation import evaluate_candidate
+from .evaluation import (
+    compare_experiments,
+    evaluate_candidate,
+    verify_comparison_receipt_inputs,
+)
 from .evidence import validate_evidence_envelope
-from .gate import gate_evidence
+from .explain import ExplainableReceipt, explain_receipt
+from .gate import gate_evidence, gate_evidence_v2
 from .promotion import create_promotion_receipt
+from .quality import assess_experiment_quality
 from .redaction import redact_governed_json, redact_json
 from .schemas import export_schemas
+from .sensitivity import assess_sensitivity
 from .skill_bom import inspect_skill
 from .verifier import verify_compilation_receipt
 
@@ -79,6 +96,26 @@ def _load_json(path: Path) -> Any:
 
 def _load_model(path: Path, model: type[ModelT]) -> ModelT:
     return model.model_validate(_load_json(path))
+
+
+def _load_explainable_receipt(path: Path) -> ExplainableReceipt:
+    """Load one known receipt type without accepting an untyped JSON blob."""
+
+    payload = _load_json(path)
+    schema_version = (
+        payload.get("schema_version") if isinstance(payload, dict) else None
+    )
+    models: dict[str, type[BaseModel]] = {
+        "awe.comparison-receipt.v1": ComparisonReceipt,
+        "awe.experiment-quality-receipt.v1": ExperimentQualityReceipt,
+        "awe.gate-receipt.v1": GateReceipt,
+        "awe.gate-receipt.v2": GateReceiptV2,
+        "awe.sensitivity-receipt.v1": SensitivityReceipt,
+    }
+    model = models.get(schema_version) if isinstance(schema_version, str) else None
+    if model is None:
+        raise ValueError("unsupported receipt schema for explain")
+    return model.model_validate(payload)  # type: ignore[return-value]
 
 
 def _serialize(value: Any) -> str:
@@ -226,6 +263,77 @@ def _build_parser() -> argparse.ArgumentParser:
     evaluate_parser.add_argument("--candidate", type=Path, required=True)
     evaluate_parser.add_argument("--policy", type=Path)
     _add_output(evaluate_parser)
+
+    compare_parser = subcommands.add_parser(
+        "compare",
+        help="assess success evidence on controlled frozen paired cases",
+    )
+    compare_parser.add_argument("--baseline", type=Path, required=True)
+    compare_parser.add_argument("--candidate", type=Path, required=True)
+    compare_parser.add_argument("--policy", type=Path)
+    _add_output(compare_parser)
+
+    verify_comparison_parser = subcommands.add_parser(
+        "verify-comparison",
+        help="replay a comparison receipt against explicit held experiment inputs",
+    )
+    verify_comparison_parser.add_argument("--receipt", type=Path, required=True)
+    verify_comparison_parser.add_argument("--baseline", type=Path, required=True)
+    verify_comparison_parser.add_argument("--candidate", type=Path, required=True)
+    verify_comparison_parser.add_argument("--policy", type=Path)
+    _add_output(verify_comparison_parser)
+
+    quality_parser = subcommands.add_parser(
+        "assess-quality",
+        help="assess typed terminal outcomes and asserted judge calibration",
+    )
+    quality_parser.add_argument("--experiment", type=Path, required=True)
+    quality_parser.add_argument("--evidence", type=Path, required=True)
+    quality_parser.add_argument("--policy", type=Path)
+    _add_output(quality_parser)
+
+    sensitivity_parser = subcommands.add_parser(
+        "sensitivity",
+        help="measure supplied environment and seed sensitivity without execution",
+    )
+    sensitivity_parser.add_argument(
+        "--experiment", type=Path, required=True, action="append"
+    )
+    sensitivity_parser.add_argument("--policy", type=Path)
+    _add_output(sensitivity_parser)
+
+    gate_v2_parser = subcommands.add_parser(
+        "gate-v2",
+        help="combine Gate v1, held-input comparison replay, and quality evidence",
+    )
+    gate_v2_parser.add_argument("--traces", type=Path, required=True)
+    gate_v2_parser.add_argument("--baseline", type=Path, required=True)
+    gate_v2_parser.add_argument("--candidate", type=Path, required=True)
+    gate_v2_parser.add_argument("--evaluation-policy", type=Path)
+    gate_v2_parser.add_argument("--comparison", type=Path, required=True)
+    gate_v2_parser.add_argument("--baseline-experiment", type=Path, required=True)
+    gate_v2_parser.add_argument("--candidate-experiment", type=Path, required=True)
+    gate_v2_parser.add_argument("--comparison-policy", type=Path)
+    gate_v2_parser.add_argument("--baseline-quality", type=Path)
+    gate_v2_parser.add_argument("--candidate-quality", type=Path)
+    gate_v2_parser.add_argument("--quality-policy", type=Path)
+    gate_v2_parser.add_argument("--skill-bom", type=Path)
+    gate_v2_parser.add_argument("--evidence-package", type=Path)
+    gate_v2_parser.add_argument("--repository")
+    gate_v2_parser.add_argument("--commit-sha")
+    gate_v2_parser.add_argument("--max-age-seconds", type=int)
+    gate_v2_parser.add_argument("--minimum-provenance", choices=("asserted",))
+    gate_v2_parser.add_argument("--evaluated-at")
+    _add_output(gate_v2_parser)
+
+    explain_parser = subcommands.add_parser(
+        "explain", help="emit a deterministic evidence graph for a parsed receipt"
+    )
+    explain_parser.add_argument(
+        "receipt_path", type=Path, nargs="?", help="receipt path shorthand"
+    )
+    explain_parser.add_argument("--receipt", type=Path, help="receipt path")
+    _add_output(explain_parser)
 
     promote_parser = subcommands.add_parser(
         "promote", help="record a human decision from a replayed evidence chain"
@@ -428,6 +536,153 @@ def _evaluate(args: argparse.Namespace) -> int:
     return 0 if receipt.status == "pass" else 2
 
 
+def _compare(args: argparse.Namespace) -> int:
+    baseline = _load_model(args.baseline, ExperimentManifest)
+    candidate = _load_model(args.candidate, ExperimentManifest)
+    policy = (
+        _load_model(args.policy, ComparisonPolicy)
+        if args.policy
+        else ComparisonPolicy()
+    )
+    receipt = compare_experiments(baseline, candidate, policy)
+    _emit(receipt, args.out)
+    return 0 if receipt.status == "pass" else 2
+
+
+def _verify_comparison(args: argparse.Namespace) -> int:
+    policy = (
+        _load_model(args.policy, ComparisonPolicy)
+        if args.policy
+        else ComparisonPolicy()
+    )
+    result = verify_comparison_receipt_inputs(
+        _load_model(args.receipt, ComparisonReceipt),
+        _load_model(args.baseline, ExperimentManifest),
+        _load_model(args.candidate, ExperimentManifest),
+        policy,
+    )
+    _emit(result, args.out)
+    return 0 if result.status == "valid" else 2
+
+
+def _assess_quality(args: argparse.Namespace) -> int:
+    policy = _load_model(args.policy, QualityPolicy) if args.policy else QualityPolicy()
+    receipt = assess_experiment_quality(
+        _load_model(args.experiment, ExperimentManifest),
+        _load_model(args.evidence, ExperimentQualityEvidence),
+        policy,
+    )
+    _emit(receipt, args.out)
+    return 0 if receipt.status == "pass" else 2
+
+
+def _sensitivity(args: argparse.Namespace) -> int:
+    policy = (
+        _load_model(args.policy, SensitivityPolicy)
+        if args.policy
+        else SensitivityPolicy()
+    )
+    receipt = assess_sensitivity(
+        tuple(_load_model(path, ExperimentManifest) for path in args.experiment),
+        policy,
+    )
+    _emit(receipt, args.out)
+    return 0 if receipt.status == "pass" else 2
+
+
+def _gate_v2(args: argparse.Namespace) -> int:
+    evaluation_policy = (
+        _load_model(args.evaluation_policy, EvaluationPolicy)
+        if args.evaluation_policy
+        else EvaluationPolicy()
+    )
+    comparison_policy = (
+        _load_model(args.comparison_policy, ComparisonPolicy)
+        if args.comparison_policy
+        else ComparisonPolicy()
+    )
+    quality_policy = (
+        _load_model(args.quality_policy, QualityPolicy)
+        if args.quality_policy
+        else QualityPolicy()
+    )
+    evidence_package = (
+        _load_model(args.evidence_package, EvidencePackage)
+        if args.evidence_package
+        else None
+    )
+    skill_bom = _load_model(args.skill_bom, SkillBom) if args.skill_bom else None
+    provenance_requested = any(
+        value is not None
+        for value in (
+            args.repository,
+            args.commit_sha,
+            args.evaluated_at,
+            args.max_age_seconds,
+            args.minimum_provenance,
+        )
+    )
+    if evidence_package is None and provenance_requested:
+        raise ValueError("repository, commit, and age checks require evidence package")
+    evaluated_at = (
+        datetime.fromisoformat(args.evaluated_at.replace("Z", "+00:00"))
+        if args.evaluated_at
+        else None
+    )
+    receipt = gate_evidence_v2(
+        _load_jsonl(args.traces),
+        _load_model(args.baseline, EvaluationBundle),
+        _load_model(args.candidate, EvaluationBundle),
+        evaluation_policy,
+        _load_model(args.comparison, ComparisonReceipt),
+        _load_model(args.baseline_experiment, ExperimentManifest),
+        _load_model(args.candidate_experiment, ExperimentManifest),
+        comparison_policy,
+        baseline_quality_evidence=(
+            _load_model(args.baseline_quality, ExperimentQualityEvidence)
+            if args.baseline_quality
+            else None
+        ),
+        candidate_quality_evidence=(
+            _load_model(args.candidate_quality, ExperimentQualityEvidence)
+            if args.candidate_quality
+            else None
+        ),
+        quality_policy=quality_policy,
+        evidence_package=evidence_package,
+        expected_repository=(
+            TypeAdapter(RepositoryUri).validate_python(args.repository)
+            if args.repository
+            else None
+        ),
+        expected_commit_sha=(
+            TypeAdapter(GitCommitSha).validate_python(args.commit_sha)
+            if args.commit_sha
+            else None
+        ),
+        evaluated_at=evaluated_at,
+        maximum_age_seconds=args.max_age_seconds,
+        minimum_provenance_level=args.minimum_provenance,
+        skill_bom=skill_bom,
+    )
+    _emit(receipt, args.out)
+    if receipt.status == "PASS":
+        return 0
+    if receipt.status in ("REVIEW", "BLOCK"):
+        return 2
+    return 1
+
+
+def _explain(args: argparse.Namespace) -> int:
+    if args.receipt is not None and args.receipt_path is not None:
+        raise ValueError("explain accepts either a receipt path or --receipt, not both")
+    receipt_path = args.receipt or args.receipt_path
+    if receipt_path is None:
+        raise ValueError("explain requires a receipt path")
+    _emit(explain_receipt(_load_explainable_receipt(receipt_path)), args.out)
+    return 0
+
+
 def _promote(args: argparse.Namespace) -> int:
     compilation = _load_model(args.compilation, CompilationReceipt)
     verification = _load_model(args.verification, ReceiptVerification)
@@ -530,19 +785,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         args = _build_parser().parse_args(argv)
         handlers = {
             "capabilities": _capabilities,
+            "assess-quality": _assess_quality,
+            "compare": _compare,
             "compile": _compile,
             "conformance": _conformance,
             "evaluate": _evaluate,
             "gate": _gate,
+            "gate-v2": _gate_v2,
             "import-experiment": _import_experiment,
             "promote": _promote,
             "redact": _redact,
             "schema": _schema,
             "serve": _serve,
             "sign": _sign,
+            "sensitivity": _sensitivity,
             "skill": _skill,
             "verify": _verify,
+            "verify-comparison": _verify_comparison,
             "verify-signature": _verify_signature,
+            "explain": _explain,
         }
         return handlers[args.command](args)
     except (

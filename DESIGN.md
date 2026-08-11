@@ -114,9 +114,9 @@ terminal or filling the screen with dashboard cards.
 
 - **AWE TraceGate** is the deterministic evidence gate.
 - **TraceGate Review** is the local review UI shipped by this repository.
-- **AWE Workspace** is a separate companion application for goals, tools, task
-  sessions, and future agent runtimes. Do not use that name for TraceGate
-  Review or imply that the verifier can execute work.
+- An external agent host or workspace may produce evidence, but it is outside
+  this product's trusted boundary. Do not use TraceGate Review as a goal
+  composer or imply that the verifier can execute work.
 
 ## Colors
 
@@ -180,8 +180,8 @@ tags are pill-shaped only when their compact form communicates one state.
 ### Status Chips
 
 - Pair semantic tint and text; never rely on color alone.
-- Use explicit vocabulary: Compiled, Exact replay valid, Pass, Review, Block,
-  Approved, Rejected, or Waiting.
+- Use explicit vocabulary: Compiled, Source inputs revalidated, Pass, Review,
+  Block, Approved, Rejected, or Waiting.
 
 ### Evidence Trajectory
 
@@ -215,8 +215,8 @@ tags are pill-shaped only when their compact form communicates one state.
   validating evidence, exporting artifacts, and recording a decision.
 - Keep primary actions near the evidence they affect. Do not use a fixed bottom
   composer that can cover form controls or validation feedback.
-- TraceGate Review never impersonates a model conversation. AWE Workspace owns
-  the separate goal and command composer for agent work.
+- TraceGate Review never impersonates a model conversation. The user's external
+  agent host owns goals, commands, execution permissions, and model credentials.
 
 ## Do's and Don'ts
 

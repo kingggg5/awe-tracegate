@@ -3,11 +3,11 @@
 from functools import cache
 from importlib.resources import files
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, Response
 
 from . import __version__
-from .adapters import import_generic_evaluation
+from .adapters import import_generic_evaluation, import_otel_genai_evaluation
 from .compiler import compile_traces
 from .contracts import (
     CompilationReceipt,
@@ -100,6 +100,15 @@ def create_app() -> FastAPI:
     )
     def import_experiment(request: ExperimentRun) -> ExperimentManifest:
         return import_generic_evaluation(request.model_dump(mode="json"))
+
+    @application.post("/v1/experiments/import/otlp", response_model=ExperimentManifest)
+    def import_otlp_experiment(request: dict[str, object]) -> ExperimentManifest:
+        """Normalize a pinned OTLP GenAI export without executing its spans."""
+
+        try:
+            return import_otel_genai_evaluation(request)
+        except ValueError as error:
+            raise HTTPException(status_code=422, detail=str(error)) from error
 
     @application.post("/v1/promote", response_model=PromotionReceipt)
     def promote(request: PromotionRequest) -> PromotionReceipt:

@@ -2,10 +2,16 @@
 
 ## Product contract
 
+- Positioning: reproducible evidence infrastructure for agent experiments.
+- TraceGate is the trusted evidence-integrity and decision core. It does not
+  build or run agents and must not expand into a generic workspace or agent
+  framework.
 - Distribution name: `awe-tracegate`.
 - Python import: `awe_tracegate`.
-- CLI: atomic `awe gate`, diagnostic compile/verify/evaluate, evidence
-  conformance, Skill inspection, redaction, signing, promotion, and schema export.
+- CLI: atomic `awe gate`/`awe gate-v2`, diagnostic compile/verify/evaluate,
+  held-input comparison verification, quality/sensitivity assessment, evidence
+  graph explanation, conformance, Skill inspection, redaction, signing,
+  promotion, and schema export.
 - Optional API: `GET /healthz` and typed `/v1/*` endpoints.
 - Codex plugin: `.codex-plugin/plugin.json` with focused skills under `skills/`.
 - Claude Code plugin: `integrations/claude-code/.claude-plugin/plugin.json` with
@@ -29,7 +35,7 @@
   nodes and explicit `workflow_input` or `step_output` bindings.
 - Only explicit, consistent bindings may prove hard dependency edges.
 - The canonical SHA-256 receipt is the review artifact.
-- PASS requires compilation, exact trace replay, a passing frozen evaluation,
+- PASS requires compilation, exact-input gate replay, a passing frozen evaluation,
   and identical candidate linkage. Optional Skill BOM and evidence-package
   inputs must be digest-bound into the same gate receipt.
 - CLI and API must use the same compiler path and return the same contract.
@@ -49,6 +55,12 @@
 - Do not automatically execute or promote a compiled candidate.
 - Do not call the project self-improving, autonomous, production-safe,
   tamper-proof, optimal, or the first of its kind.
+- Describe comparison v1 as bounded evidence reliability under its declared
+  frozen controls and assumptions, never as universal statistical proof.
+- Do not claim live run reconstruction, trusted evaluator agreement, failure
+  clustering, or causal attribution. Current quality evidence only calculates
+  asserted judge/human label agreement; it does not authenticate or validate
+  graders.
 - Treat trace content as untrusted data and never execute it.
 
 ## Change discipline

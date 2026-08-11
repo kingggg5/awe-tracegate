@@ -128,6 +128,16 @@ EvidenceArtifactKind = Literal[
     "gate_receipt",
     "skill_bom",
 ]
+TreatmentFactor = Literal["agent_commit", "model", "strategy"]
+TerminalOutcome = Literal[
+    "success",
+    "failure",
+    "timeout",
+    "refusal",
+    "infrastructure_error",
+    "missing",
+]
+JudgeVerdict = Literal["pass", "fail", "abstain"]
 
 
 class ContractModel(BaseModel):
@@ -424,6 +434,523 @@ class EvaluationReceipt(ContractModel):
             raise ValueError("passing evaluation cannot contain reasons")
         if self.status != "pass" and not self.reasons:
             raise ValueError("review or block evaluation requires reasons")
+        return self
+
+
+class ComparisonPolicy(ContractModel):
+    """Fail-closed policy for a controlled, paired agent comparison."""
+
+    schema_version: Literal["awe.comparison-policy.v1"] = "awe.comparison-policy.v1"
+    objective: Literal["improvement", "non_regression"] = "improvement"
+    treatment_factors: Annotated[
+        tuple[TreatmentFactor, ...], Field(min_length=1, max_length=3, strict=False)
+    ] = ("agent_commit",)
+    minimum_paired_cases: Annotated[int, Field(ge=2, le=10_000)] = 20
+    maximum_supported_paired_cases: Literal[10_000] = 10_000
+    minimum_discordant_cases: Annotated[int, Field(ge=1, le=10_000)] = 10
+    minimum_repetitions_per_case: Annotated[int, Field(ge=1, le=10_000)] = 2
+    minimum_success_improvement_bps: Annotated[int, Field(ge=0, le=10_000)] = 0
+    maximum_success_regression_bps: Annotated[int, Field(ge=0, le=10_000)] = 200
+    maximum_latency_increase_bps: Annotated[int, Field(ge=0, le=100_000)] = 2_500
+    maximum_cost_increase_bps: Annotated[int, Field(ge=0, le=100_000)] = 2_500
+    significance_level_bps: Literal[500] = 500
+    maximum_confidence_interval_width_bps: Annotated[int, Field(ge=0, le=20_000)] = (
+        3_000
+    )
+    maximum_flaky_case_rate_bps: Annotated[int, Field(ge=0, le=10_000)] = 1_000
+    require_zero_safety_violations: bool = True
+
+    @model_validator(mode="after")
+    def validate_treatment_factors(self) -> Self:
+        if self.treatment_factors != tuple(sorted(set(self.treatment_factors))):
+            raise ValueError("treatment factors must be unique and sorted")
+        return self
+
+
+class ComparisonReliability(ContractModel):
+    """Reliability evidence scoped to the supplied frozen paired cases."""
+
+    estimand_scope: Literal["frozen_paired_cases"] = "frozen_paired_cases"
+    aggregation_method: Literal["paired_case_macro_v1"] = "paired_case_macro_v1"
+    paired_trial_count: Annotated[int, Field(ge=1, le=100_000)]
+    paired_case_count: Annotated[int, Field(ge=1, le=100_000)]
+    repeated_case_count: Annotated[int, Field(ge=0, le=100_000)]
+    improved_case_count: Annotated[int, Field(ge=0, le=100_000)]
+    regressed_case_count: Annotated[int, Field(ge=0, le=100_000)]
+    tied_case_count: Annotated[int, Field(ge=0, le=100_000)]
+    discordant_case_count: Annotated[int, Field(ge=0, le=100_000)]
+    observed_success_delta_bps: Annotated[int, Field(ge=-10_000, le=10_000)]
+    sign_test_method: Literal["exact_two_sided_sign_v1"] = "exact_two_sided_sign_v1"
+    sign_test_p_value_ppm: Annotated[int, Field(ge=0, le=1_000_000)]
+    confidence_method: Literal["paired_case_normal_95_v1"] = "paired_case_normal_95_v1"
+    confidence_level_bps: Literal[9_500] = 9_500
+    confidence_interval_lower_bps: Annotated[int, Field(ge=-10_000, le=10_000)]
+    confidence_interval_upper_bps: Annotated[int, Field(ge=-10_000, le=10_000)]
+    paired_delta_variance_bps_squared: Annotated[int, Field(ge=0, le=200_000_000)]
+    baseline_flaky_case_count: Annotated[int, Field(ge=0, le=100_000)]
+    candidate_flaky_case_count: Annotated[int, Field(ge=0, le=100_000)]
+    flaky_case_count: Annotated[int, Field(ge=0, le=100_000)]
+    flaky_case_rate_bps: Annotated[int, Field(ge=0, le=10_000)]
+    evidence_strength: Literal["low", "moderate", "high"]
+
+    @model_validator(mode="after")
+    def validate_counts_and_interval(self) -> Self:
+        if self.repeated_case_count > self.paired_case_count:
+            raise ValueError("repeated case count cannot exceed case count")
+        if self.baseline_flaky_case_count > self.paired_case_count:
+            raise ValueError("baseline flaky case count cannot exceed case count")
+        if self.candidate_flaky_case_count > self.paired_case_count:
+            raise ValueError("candidate flaky case count cannot exceed case count")
+        if self.flaky_case_count > self.paired_case_count:
+            raise ValueError("flaky case count cannot exceed case count")
+        if (
+            self.improved_case_count + self.regressed_case_count + self.tied_case_count
+            != self.paired_case_count
+        ):
+            raise ValueError("case direction counts must cover every paired case")
+        if self.discordant_case_count != (
+            self.improved_case_count + self.regressed_case_count
+        ):
+            raise ValueError("discordant case count is inconsistent")
+        if self.confidence_interval_lower_bps > self.confidence_interval_upper_bps:
+            raise ValueError("confidence interval lower bound exceeds upper bound")
+        return self
+
+
+class ComparisonReceipt(ContractModel):
+    """Content-addressed success conclusion for one controlled frozen suite."""
+
+    schema_version: Literal["awe.comparison-receipt.v1"] = "awe.comparison-receipt.v1"
+    comparator_version: Literal["awe.comparator.v1"] = "awe.comparator.v1"
+    baseline_subject_digest: Sha256Digest
+    candidate_subject_digest: Sha256Digest
+    baseline_manifest_digest: Sha256Digest
+    candidate_manifest_digest: Sha256Digest
+    baseline_dataset_digest: Sha256Digest
+    candidate_dataset_digest: Sha256Digest
+    baseline_dataset_split_digest: Sha256Digest
+    candidate_dataset_split_digest: Sha256Digest
+    treatment_factors: Annotated[
+        tuple[TreatmentFactor, ...], Field(min_length=1, max_length=3, strict=False)
+    ]
+    treatment_scope: Literal["single_factor", "joint_effect"]
+    policy_digest: Sha256Digest
+    status: Literal["pass", "review", "block"]
+    conclusion: Literal[
+        "improvement",
+        "non_regression",
+        "regression",
+        "uncertain",
+        "incomparable",
+    ]
+    reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()
+    baseline: EvaluationMetrics
+    candidate: EvaluationMetrics
+    reliability: ComparisonReliability | None
+    receipt_hash: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_comparison(self) -> Self:
+        if self.treatment_factors != tuple(sorted(set(self.treatment_factors))):
+            raise ValueError("comparison treatment factors must be unique and sorted")
+        expected_scope = (
+            "single_factor" if len(self.treatment_factors) == 1 else "joint_effect"
+        )
+        if self.treatment_scope != expected_scope:
+            raise ValueError("comparison treatment scope is inconsistent")
+        if self.status == "pass" and self.reasons:
+            raise ValueError("passing comparison cannot contain reasons")
+        if self.status != "pass" and not self.reasons:
+            raise ValueError("review or block comparison requires reasons")
+        if self.status == "pass" and self.reliability is None:
+            raise ValueError("passing comparison requires reliability evidence")
+        if self.status == "pass" and self.conclusion not in (
+            "improvement",
+            "non_regression",
+        ):
+            raise ValueError("passing comparison requires a favorable conclusion")
+        if (
+            self.status == "pass"
+            and self.reliability is not None
+            and self.reliability.evidence_strength != "high"
+        ):
+            raise ValueError("passing comparison requires high-strength evidence")
+        if self.conclusion in ("regression", "incomparable") and self.status != "block":
+            raise ValueError("regression or incomparable evidence must block")
+        if self.conclusion == "incomparable" and self.reliability is not None:
+            raise ValueError("incomparable evidence cannot contain paired statistics")
+        if self.conclusion != "incomparable" and self.reliability is None:
+            raise ValueError("comparable evidence requires paired statistics")
+        expected_receipt_hash = canonical_digest(
+            self.model_dump(mode="json", exclude={"receipt_hash"})
+        )
+        if self.receipt_hash != expected_receipt_hash:
+            raise ValueError("comparison receipt hash is invalid")
+        return self
+
+
+class ComparisonVerification(ContractModel):
+    """Result of replaying one comparison against explicit held inputs.
+
+    A content hash only proves that a receipt is internally self-consistent.
+    This record proves whether the receipt was reproduced from the supplied
+    baseline, candidate, and policy artifacts without running a model or tool.
+    """
+
+    schema_version: Literal["awe.comparison-verification.v1"] = (
+        "awe.comparison-verification.v1"
+    )
+    status: Literal["valid", "invalid"]
+    receipt_hash: Sha256Digest
+    baseline_manifest_digest: Sha256Digest
+    candidate_manifest_digest: Sha256Digest
+    policy_digest: Sha256Digest
+    reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()
+    verification_hash: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_verification(self) -> Self:
+        if self.status == "valid" and self.reasons:
+            raise ValueError("valid comparison verification cannot contain reasons")
+        if self.status == "invalid" and not self.reasons:
+            raise ValueError("invalid comparison verification requires reasons")
+        expected = canonical_digest(
+            self.model_dump(mode="json", exclude={"verification_hash"})
+        )
+        if self.verification_hash != expected:
+            raise ValueError("comparison verification hash is invalid")
+        return self
+
+
+class JudgeVote(ContractModel):
+    """One asserted grader decision, bound to a versioned grader artifact."""
+
+    judge_id: ActorIdentifier
+    judge_digest: Sha256Digest
+    verdict: JudgeVerdict
+
+
+class HumanVerdict(ContractModel):
+    """One asserted human adjudication used only for calibration evidence."""
+
+    actor_id: ActorIdentifier
+    verdict: JudgeVerdict
+
+
+class TrialQualityEvidence(ContractModel):
+    """Typed terminal outcome and optional adjudication for one frozen trial."""
+
+    trial_id: TraceIdentifier
+    terminal_outcome: TerminalOutcome
+    judge_votes: Annotated[
+        tuple[JudgeVote, ...], Field(max_length=32, strict=False)
+    ] = ()
+    human_verdict: HumanVerdict | None = None
+
+    @model_validator(mode="after")
+    def validate_judges(self) -> Self:
+        judge_ids = tuple(vote.judge_id for vote in self.judge_votes)
+        if judge_ids != tuple(sorted(set(judge_ids))):
+            raise ValueError("judge votes must have unique, sorted judge ids")
+        return self
+
+
+class ExperimentQualityEvidence(ContractModel):
+    """Sidecar quality evidence that extends, but never mutates, manifest v1."""
+
+    schema_version: Literal["awe.experiment-quality-evidence.v1"] = (
+        "awe.experiment-quality-evidence.v1"
+    )
+    manifest_digest: Sha256Digest
+    trials: Annotated[
+        tuple[TrialQualityEvidence, ...],
+        Field(min_length=1, max_length=100_000, strict=False),
+    ]
+    evidence_digest: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_evidence(self) -> Self:
+        trial_ids = tuple(trial.trial_id for trial in self.trials)
+        if trial_ids != tuple(sorted(set(trial_ids))):
+            raise ValueError("quality evidence trial ids must be unique and sorted")
+        expected = canonical_digest(
+            self.model_dump(mode="json", exclude={"evidence_digest"})
+        )
+        if self.evidence_digest != expected:
+            raise ValueError("experiment quality evidence digest is invalid")
+        return self
+
+
+class QualityPolicy(ContractModel):
+    """Fail-closed thresholds for terminal outcomes and judge calibration."""
+
+    schema_version: Literal["awe.quality-policy.v1"] = "awe.quality-policy.v1"
+    require_complete_terminal_outcomes: bool = True
+    maximum_timeout_rate_bps: Annotated[int, Field(ge=0, le=10_000)] = 0
+    maximum_refusal_rate_bps: Annotated[int, Field(ge=0, le=10_000)] = 10_000
+    maximum_infrastructure_failure_rate_bps: Annotated[int, Field(ge=0, le=10_000)] = 0
+    maximum_missing_trial_rate_bps: Annotated[int, Field(ge=0, le=10_000)] = 0
+    minimum_judge_coverage_bps: Annotated[int, Field(ge=0, le=10_000)] = 0
+    maximum_judge_disagreement_bps: Annotated[int, Field(ge=0, le=10_000)] = 10_000
+    minimum_human_calibration_samples: Annotated[int, Field(ge=0, le=100_000)] = 0
+    minimum_human_judge_agreement_bps: Annotated[int, Field(ge=0, le=10_000)] = 0
+
+
+class TerminalOutcomeSummary(ContractModel):
+    """Complete, countable terminal-state distribution for a frozen run."""
+
+    trial_count: Annotated[int, Field(ge=1, le=100_000)]
+    success_count: Annotated[int, Field(ge=0)]
+    failure_count: Annotated[int, Field(ge=0)]
+    timeout_count: Annotated[int, Field(ge=0)]
+    refusal_count: Annotated[int, Field(ge=0)]
+    infrastructure_failure_count: Annotated[int, Field(ge=0)]
+    missing_trial_count: Annotated[int, Field(ge=0)]
+    unreported_trial_count: Annotated[int, Field(ge=0)]
+
+    @model_validator(mode="after")
+    def validate_total(self) -> Self:
+        observed = (
+            self.success_count
+            + self.failure_count
+            + self.timeout_count
+            + self.refusal_count
+            + self.infrastructure_failure_count
+            + self.missing_trial_count
+            + self.unreported_trial_count
+        )
+        if observed != self.trial_count:
+            raise ValueError("terminal outcome counts must cover every trial")
+        return self
+
+
+class JudgeCalibration(ContractModel):
+    """Coverage and agreement metrics calculated from supplied frozen labels."""
+
+    trial_count: Annotated[int, Field(ge=1, le=100_000)]
+    judge_covered_trial_count: Annotated[int, Field(ge=0)]
+    multi_judge_trial_count: Annotated[int, Field(ge=0)]
+    disagreeing_trial_count: Annotated[int, Field(ge=0)]
+    abstaining_vote_count: Annotated[int, Field(ge=0)]
+    human_calibration_sample_count: Annotated[int, Field(ge=0)]
+    human_judge_agree_count: Annotated[int, Field(ge=0)]
+    judge_coverage_bps: Annotated[int, Field(ge=0, le=10_000)]
+    judge_disagreement_bps: Annotated[int, Field(ge=0, le=10_000)]
+    human_judge_agreement_bps: Annotated[int, Field(ge=0, le=10_000)] | None
+
+    @model_validator(mode="after")
+    def validate_counts(self) -> Self:
+        if self.judge_covered_trial_count > self.trial_count:
+            raise ValueError("judge coverage exceeds trial count")
+        if self.multi_judge_trial_count > self.judge_covered_trial_count:
+            raise ValueError("multi-judge count exceeds judge coverage")
+        if self.disagreeing_trial_count > self.multi_judge_trial_count:
+            raise ValueError("judge disagreement exceeds multi-judge count")
+        if self.human_judge_agree_count > self.human_calibration_sample_count:
+            raise ValueError("human agreement exceeds calibration sample count")
+        if (
+            self.human_calibration_sample_count == 0
+            and self.human_judge_agreement_bps is not None
+        ):
+            raise ValueError("empty calibration cannot have an agreement rate")
+        if (
+            self.human_calibration_sample_count > 0
+            and self.human_judge_agreement_bps is None
+        ):
+            raise ValueError("calibration samples require an agreement rate")
+        return self
+
+
+class ExperimentQualityReceipt(ContractModel):
+    """Assessment of typed outcomes and grader calibration for one manifest."""
+
+    schema_version: Literal["awe.experiment-quality-receipt.v1"] = (
+        "awe.experiment-quality-receipt.v1"
+    )
+    manifest_digest: Sha256Digest
+    quality_evidence_digest: Sha256Digest
+    policy_digest: Sha256Digest
+    status: Literal["pass", "review", "block"]
+    reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()
+    terminal_outcomes: TerminalOutcomeSummary
+    judge_calibration: JudgeCalibration
+    receipt_hash: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_receipt(self) -> Self:
+        if self.status == "pass" and self.reasons:
+            raise ValueError("passing quality receipt cannot contain reasons")
+        if self.status != "pass" and not self.reasons:
+            raise ValueError("review or block quality receipt requires reasons")
+        expected = canonical_digest(
+            self.model_dump(mode="json", exclude={"receipt_hash"})
+        )
+        if self.receipt_hash != expected:
+            raise ValueError("experiment quality receipt hash is invalid")
+        return self
+
+
+class GateReceiptV2(ContractModel):
+    """Gate v2 composes the immutable v1 decision with a held-input comparison."""
+
+    schema_version: Literal["awe.gate-receipt.v2"] = "awe.gate-receipt.v2"
+    gate_version: Literal["awe.gate.v2"] = "awe.gate.v2"
+    status: GateStatus
+    reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()
+    v1_gate: GateReceipt
+    comparison: ComparisonReceipt
+    comparison_verification: ComparisonVerification
+    baseline_quality: ExperimentQualityReceipt | None = None
+    candidate_quality: ExperimentQualityReceipt | None = None
+    receipt_hash: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_chain(self) -> Self:
+        if self.status == "PASS" and self.reasons:
+            raise ValueError("passing Gate v2 receipt cannot contain reasons")
+        if self.status != "PASS" and not self.reasons:
+            raise ValueError("non-passing Gate v2 receipt requires reasons")
+        if self.comparison_verification.receipt_hash != self.comparison.receipt_hash:
+            raise ValueError("Gate v2 verification does not bind comparison receipt")
+        if self.v1_gate.candidate_digest != self.comparison.candidate_subject_digest:
+            raise ValueError("Gate v2 candidate does not bind comparison subject")
+        if self.baseline_quality is not None and (
+            self.baseline_quality.manifest_digest
+            != self.comparison.baseline_manifest_digest
+        ):
+            raise ValueError("Gate v2 baseline quality targets another manifest")
+        if self.candidate_quality is not None and (
+            self.candidate_quality.manifest_digest
+            != self.comparison.candidate_manifest_digest
+        ):
+            raise ValueError("Gate v2 candidate quality targets another manifest")
+        if self.status == "PASS":
+            if self.v1_gate.status != "PASS":
+                raise ValueError("passing Gate v2 requires passing Gate v1")
+            if self.comparison.status != "pass":
+                raise ValueError("passing Gate v2 requires passing comparison")
+            if self.comparison_verification.status != "valid":
+                raise ValueError(
+                    "passing Gate v2 requires held-input comparison replay"
+                )
+            if (
+                self.candidate_quality is None
+                or self.candidate_quality.status != "pass"
+            ):
+                raise ValueError("passing Gate v2 requires candidate quality evidence")
+        expected = canonical_digest(
+            self.model_dump(mode="json", exclude={"receipt_hash"})
+        )
+        if self.receipt_hash != expected:
+            raise ValueError("Gate v2 receipt hash is invalid")
+        return self
+
+
+class SensitivityPolicy(ContractModel):
+    """Bounded checks for environment and seed sensitivity in frozen runs."""
+
+    schema_version: Literal["awe.sensitivity-policy.v1"] = "awe.sensitivity-policy.v1"
+    minimum_environment_count: Annotated[int, Field(ge=2, le=100)] = 2
+    minimum_seed_count: Annotated[int, Field(ge=2, le=10_000)] = 2
+    maximum_environment_success_range_bps: Annotated[int, Field(ge=0, le=10_000)] = (
+        1_000
+    )
+    maximum_seed_success_range_bps: Annotated[int, Field(ge=0, le=10_000)] = 1_000
+
+
+class SensitivityReceipt(ContractModel):
+    """Deterministic stability assessment across frozen environments and seeds."""
+
+    schema_version: Literal["awe.sensitivity-receipt.v1"] = "awe.sensitivity-receipt.v1"
+    subject_digest: Sha256Digest
+    dataset_digest: Sha256Digest
+    dataset_split_digest: Sha256Digest
+    manifest_digests: Annotated[
+        tuple[Sha256Digest, ...], Field(min_length=2, max_length=100, strict=False)
+    ]
+    environment_digests: Annotated[
+        tuple[Sha256Digest, ...], Field(min_length=1, max_length=100, strict=False)
+    ]
+    policy_digest: Sha256Digest
+    status: Literal["pass", "review", "block"]
+    reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()
+    environment_success_range_bps: Annotated[int, Field(ge=0, le=10_000)] | None
+    seed_success_range_bps: Annotated[int, Field(ge=0, le=10_000)] | None
+    receipt_hash: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_receipt(self) -> Self:
+        if self.manifest_digests != tuple(sorted(set(self.manifest_digests))):
+            raise ValueError("sensitivity manifest digests must be unique and sorted")
+        if self.environment_digests != tuple(sorted(set(self.environment_digests))):
+            raise ValueError(
+                "sensitivity environment digests must be unique and sorted"
+            )
+        if self.status == "pass" and self.reasons:
+            raise ValueError("passing sensitivity receipt cannot contain reasons")
+        if self.status != "pass" and not self.reasons:
+            raise ValueError("review or block sensitivity receipt requires reasons")
+        expected = canonical_digest(
+            self.model_dump(mode="json", exclude={"receipt_hash"})
+        )
+        if self.receipt_hash != expected:
+            raise ValueError("sensitivity receipt hash is invalid")
+        return self
+
+
+class EvidenceGraphNode(ContractModel):
+    """A compact, content-addressed node in an explainable receipt graph."""
+
+    node_id: TraceIdentifier
+    kind: ToolName
+    digest: Sha256Digest
+    status: DisplayName
+
+
+class EvidenceGraphEdge(ContractModel):
+    """A directed dependency edge; its endpoints are local graph node IDs."""
+
+    source: TraceIdentifier
+    target: TraceIdentifier
+    relation: Literal["derived_from", "verified_by", "assessed_by", "gated_by"]
+
+
+class ExplanationReceipt(ContractModel):
+    """Offline explanation graph for a parsed AWE receipt; it is not an LLM summary."""
+
+    schema_version: Literal["awe.explanation-receipt.v1"] = "awe.explanation-receipt.v1"
+    receipt_schema_version: DisplayName
+    receipt_hash: Sha256Digest
+    decision: DisplayName
+    reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()
+    nodes: Annotated[
+        tuple[EvidenceGraphNode, ...], Field(min_length=1, max_length=128, strict=False)
+    ]
+    edges: Annotated[tuple[EvidenceGraphEdge, ...], Field(max_length=256, strict=False)]
+    limitations: Annotated[tuple[Reason, ...], Field(min_length=1, strict=False)]
+    explanation_hash: Sha256Digest
+
+    @model_validator(mode="after")
+    def validate_graph(self) -> Self:
+        node_ids = tuple(node.node_id for node in self.nodes)
+        if node_ids != tuple(sorted(set(node_ids))):
+            raise ValueError("explanation graph node ids must be unique and sorted")
+        if self.edges != tuple(
+            sorted(
+                self.edges, key=lambda edge: (edge.source, edge.target, edge.relation)
+            )
+        ):
+            raise ValueError("explanation graph edges must be sorted")
+        if any(
+            edge.source not in node_ids or edge.target not in node_ids
+            for edge in self.edges
+        ):
+            raise ValueError("explanation edge refers to an unknown node")
+        expected = canonical_digest(
+            self.model_dump(mode="json", exclude={"explanation_hash"})
+        )
+        if self.explanation_hash != expected:
+            raise ValueError("explanation receipt hash is invalid")
         return self
 
 

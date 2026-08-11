@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import re
@@ -17,6 +18,11 @@ from urllib.parse import quote
 FIXED_ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
 IGNORED_NAMES = {".DS_Store", "Thumbs.db"}
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+SEMVER_PATTERN = re.compile(
+    r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)"
+    r"(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+    r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$"
+)
 MAX_ARCHIVE_FILES = 10_000
 MAX_ARCHIVE_BYTES = 256 * 1024 * 1024
 
@@ -38,11 +44,102 @@ def _write_json(path: Path, value: Any) -> None:
     )
 
 
+def _read_json(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"release metadata must be a JSON object: {path}")
+    return payload
+
+
+def _read_string_assignment(path: Path, name: str) -> str:
+    module = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    for statement in module.body:
+        if not isinstance(statement, (ast.Assign, ast.AnnAssign)):
+            continue
+        targets = (
+            statement.targets
+            if isinstance(statement, ast.Assign)
+            else [statement.target]
+        )
+        if not any(
+            isinstance(target, ast.Name) and target.id == name for target in targets
+        ):
+            continue
+        value = statement.value
+        if isinstance(value, ast.Constant) and isinstance(value.value, str):
+            return value.value
+    raise ValueError(f"{path} must declare a string {name}")
+
+
+def release_versions(root: Path) -> dict[str, str]:
+    """Read every public distribution version without importing project code."""
+
+    root = root.resolve(strict=True)
+    python_project = tomllib.loads(
+        (root / "pyproject.toml").read_text(encoding="utf-8")
+    )
+    npm = _read_json(root / "package.json")
+    npm_lock = _read_json(root / "package-lock.json")
+    codex = _read_json(root / ".codex-plugin" / "plugin.json")
+    claude = _read_json(
+        root / "integrations" / "claude-code" / ".claude-plugin" / "plugin.json"
+    )
+    claude_marketplace = _read_json(root / ".claude-plugin" / "marketplace.json")
+    typescript = _read_json(root / "sdk" / "typescript" / "package.json")
+    typescript_lock = _read_json(root / "sdk" / "typescript" / "package-lock.json")
+
+    try:
+        marketplace_plugin = claude_marketplace["plugins"][0]
+        npm_lock_root = npm_lock["packages"][""]
+        typescript_lock_root = typescript_lock["packages"][""]
+        versions = {
+            "python-project": python_project["project"]["version"],
+            "python-runtime": _read_string_assignment(
+                root / "src" / "awe_tracegate" / "__init__.py", "__version__"
+            ),
+            "python-installer": _read_string_assignment(
+                root / "scripts" / "install_skills.py", "PACKAGE_VERSION"
+            ),
+            "npm-package": npm["version"],
+            "npm-lock": npm_lock["version"],
+            "npm-lock-root": npm_lock_root["version"],
+            "codex-plugin": codex["version"],
+            "claude-plugin": claude["version"],
+            "claude-marketplace": claude_marketplace["version"],
+            "claude-marketplace-plugin": marketplace_plugin["version"],
+            "typescript-package": typescript["version"],
+            "typescript-lock": typescript_lock["version"],
+            "typescript-lock-root": typescript_lock_root["version"],
+        }
+    except (IndexError, KeyError, TypeError) as error:
+        raise ValueError("a release manifest is missing a version field") from error
+    if not all(isinstance(version, str) for version in versions.values()):
+        raise ValueError("every release version must be a string")
+    return versions
+
+
+def verify_release_version(root: Path, tag: str | None = None) -> str:
+    """Require one SemVer across every public package and an exact SemVer tag."""
+
+    versions = release_versions(root)
+    unique = set(versions.values())
+    if len(unique) != 1:
+        details = ", ".join(f"{name}={value}" for name, value in versions.items())
+        raise ValueError(f"release versions do not match: {details}")
+    version = unique.pop()
+    if not SEMVER_PATTERN.fullmatch(version):
+        raise ValueError(f"release version is not SemVer: {version}")
+    if tag is not None and tag != f"v{version}":
+        raise ValueError(f"release tag {tag!r} must equal 'v{version}'")
+    return version
+
+
 def _plugin_files(root: Path) -> tuple[Path, ...]:
     claude_root = root / "integrations" / "claude-code"
     if claude_root.is_symlink():
         raise ValueError(f"plugin bundle refuses symbolic link: {claude_root}")
     required = (
+        root / "LICENSE",
         root / ".codex-plugin" / "plugin.json",
         root / ".claude-plugin" / "marketplace.json",
         claude_root / ".claude-plugin" / "plugin.json",
@@ -82,6 +179,36 @@ def build_plugin_bundle(root: Path, output: Path) -> str:
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
         for path in files:
             relative = path.relative_to(root).as_posix()
+            info = zipfile.ZipInfo(relative, date_time=FIXED_ZIP_TIMESTAMP)
+            info.create_system = 3
+            info.external_attr = (0o100644 & 0xFFFF) << 16
+            archive.writestr(info, path.read_bytes())
+    return _sha256(output)
+
+
+def build_schema_bundle(source: Path, output: Path) -> str:
+    """Build a byte-reproducible ZIP from exported JSON Schemas."""
+
+    if source.is_symlink():
+        raise ValueError(f"schema source must not be a symbolic link: {source}")
+    source = source.resolve(strict=True)
+    if not source.is_dir():
+        raise ValueError(f"schema source must be a real directory: {source}")
+    files = []
+    for path in source.rglob("*.json"):
+        if path.is_symlink():
+            raise ValueError(f"schema bundle refuses symbolic link: {path}")
+        if path.is_file():
+            files.append(path)
+    files.sort(key=lambda item: item.relative_to(source).as_posix())
+    if not files:
+        raise ValueError(f"schema bundle requires at least one JSON Schema: {source}")
+    if output.is_symlink():
+        raise ValueError(f"schema output must not be a symbolic link: {output}")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
+        for path in files:
+            relative = path.relative_to(source).as_posix()
             info = zipfile.ZipInfo(relative, date_time=FIXED_ZIP_TIMESTAMP)
             info.create_system = 3
             info.external_attr = (0o100644 & 0xFFFF) << 16
@@ -267,22 +394,11 @@ def write_release_metadata(
             raise ValueError(f"{label} output must be directly inside {dist}")
         if path.is_symlink():
             raise ValueError(f"{label} output must not be a symbolic link: {path}")
-    project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
-    plugin = json.loads(
-        (root / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
-    )
-    claude_plugin = json.loads(
-        (
-            root / "integrations" / "claude-code" / ".claude-plugin" / "plugin.json"
-        ).read_text(encoding="utf-8")
-    )
-    if claude_plugin["version"] != plugin["version"]:
-        raise ValueError("Codex and Claude plugin versions must match")
-    npm = json.loads((root / "package.json").read_text(encoding="utf-8"))
+    version = verify_release_version(root)
     versions = {
-        "npm": str(npm["version"]),
-        "plugin": str(plugin["version"]),
-        "project": str(project["project"]["version"]),
+        "npm": version,
+        "plugin": version,
+        "project": version,
     }
     artifacts, relationships, files = _artifact_packages(dist, versions)
     dependencies = _npm_dependencies(root / "package-lock.json")
@@ -404,6 +520,14 @@ def _build_parser() -> argparse.ArgumentParser:
     plugin.add_argument("--root", type=Path, default=Path.cwd())
     plugin.add_argument("--out", type=Path, required=True)
 
+    schemas = subcommands.add_parser("schemas")
+    schemas.add_argument("--source", type=Path, required=True)
+    schemas.add_argument("--out", type=Path, required=True)
+
+    version = subcommands.add_parser("version")
+    version.add_argument("--root", type=Path, default=Path.cwd())
+    version.add_argument("--tag")
+
     metadata = subcommands.add_parser("metadata")
     metadata.add_argument("--root", type=Path, default=Path.cwd())
     metadata.add_argument("--dist", type=Path, required=True)
@@ -431,6 +555,11 @@ def main() -> int:
         if not SHA256_PATTERN.fullmatch(digest):
             raise AssertionError("invalid plugin SHA-256")
         print(f"sha256:{digest}  {args.out}")
+    elif args.command == "schemas":
+        digest = build_schema_bundle(args.source, args.out)
+        print(f"sha256:{digest}  {args.out}")
+    elif args.command == "version":
+        print(verify_release_version(args.root, args.tag))
     elif args.command == "metadata":
         write_release_metadata(
             args.root,

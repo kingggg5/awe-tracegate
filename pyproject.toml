@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "awe-tracegate"
 version = "0.3.0"
-description = "Evidence-gated trace-to-workflow compiler and reviewer"
+description = "Reproducible evidence gate for controlled AI agent experiments"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
@@ -13,7 +13,7 @@ keywords = [
   "ai-agents",
   "evaluation",
   "provenance",
-  "workflow",
+  "reproducibility",
 ]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
@@ -39,6 +39,7 @@ dev = [
   "build>=1.2,<2",
   "cryptography>=49,<50",
   "httpx2>=2,<3",
+  "jsonschema>=4.25,<5",
   "mypy>=1.15,<2",
   "pytest>=8,<9",
   "ruff>=0.11,<1",
@@ -46,6 +47,7 @@ dev = [
 test = [
   "cryptography>=49,<50",
   "httpx2>=2,<3",
+  "jsonschema>=4.25,<5",
   "pytest>=8,<9",
 ]
 

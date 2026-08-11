@@ -14,7 +14,7 @@ from scripts.github_action_summary import main as summary_main
 ROOT = Path(__file__).parents[1]
 
 
-def test_action_invokes_only_the_atomic_evaluation_gate() -> None:
+def test_action_keeps_v1_and_exposes_opt_in_held_input_gate_v2() -> None:
     action = (ROOT / "action.yml").read_text(encoding="utf-8")
 
     assert (
@@ -27,7 +27,11 @@ def test_action_invokes_only_the_atomic_evaluation_gate() -> None:
         "    description: Path to the candidate evaluation bundle.\n"
         "    required: true"
     ) in action
-    assert "args=(\n          gate" in action
+    assert "args=(\n            gate" in action
+    assert "comparison-receipt:" in action
+    assert "baseline-experiment:" in action
+    assert "candidate-experiment:" in action
+    assert "gate-v2" in action
     assert 'awe "${args[@]}"' in action
     assert "awe compile" not in action
     assert "awe verify" not in action

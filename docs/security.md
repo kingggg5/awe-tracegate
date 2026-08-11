@@ -18,6 +18,8 @@ Treat all of the following as untrusted:
 - requests to the optional HTTP API;
 - JSONL and JSON files selected in the local TraceGate Review UI;
 - generic experiment exports and OTLP span attributes;
+- comparison receipts, quality sidecars, terminal outcomes, judge votes, and
+  human calibration labels;
 - Agent Skill folders, Skill BOMs, evidence envelopes, and evidence packages;
 - signed bundles, embedded public keys, signer labels, and consent records.
 
@@ -49,6 +51,13 @@ policy, grant a capability, approve a step, or change an effect class.
   environment digests, capture time, provenance level, and every supplied gate
   input. Signed or attested labels require a separate verification-artifact
   digest rather than a bare string assertion.
+- Gate v2 cannot pass without the full v1 chain, a comparison receipt that
+  replays from held manifests and policy, evaluator-projection linkage, and
+  passing baseline/candidate quality sidecars. Missing quality evidence is
+  `REVIEW`, not an implicit success.
+- Terminal state, judge coverage/disagreement, human calibration, and
+  environment/seed sensitivity are deterministic computations over supplied
+  sidecars and manifests. They never invoke a model, grader, or provider.
 - Approval requires a compiled receipt, locally replayed exact traces, a valid
   verification receipt, and a passing evaluation for the identical candidate.
   The promotion receipt records every linked digest plus the actor and exact
@@ -71,12 +80,20 @@ policy, grant a capability, approve a step, or change an effect class.
   coverage. Compilation does not create missing branches or counterexamples.
 - Freshness is enforced only when a valid evidence package, an explicit UTC
   evaluation time, and a maximum age are supplied to the gate. A receipt without
-  those fields proves no freshness, even when exact replay succeeds.
+  those fields proves no freshness, even when exact-input gate replay succeeds.
 - A `signature_verified` or `attested` provenance label plus a verification
   artifact digest does not establish trust by itself. The caller must verify the
   external signature or attestation against an operator-owned policy before
   constructing that envelope. TraceGate v0.3 therefore records those labels but
   refuses to use them as an enforceable minimum; only `asserted` is supported.
+- Judge IDs, judge digests, judge votes, and human verdicts in quality sidecars
+  are asserted evidence. Their agreement metric does not authenticate a reviewer,
+  establish that a judge is independent, or prove label correctness.
+- `awe explain` is a dependency graph over parsed receipt fields. It is not a
+  root-cause analysis, causal explanation, or natural-language model judgement.
+- Sensitivity receipts cover only the frozen environments and seeds supplied to
+  the CLI. They do not establish reproducibility for unsupplied infrastructure
+  or a hosted model provider.
 - The local API is not an internet-facing deployment profile. It does not imply
   authentication, tenant isolation, rate limiting, or denial-of-service
   protection.
@@ -138,11 +155,11 @@ It has no natural-language composer and does not evaluate prompt text, call a
 model, run shell commands, or load arbitrary plugins. The tools view is an
 inventory, not an OAuth or secret storage surface.
 
-AWE Workspace owns the separate goal/command composer and is a different
-application and process boundary. Connecting it to TraceGate does not give
-Workspace permission to change gate policy, authenticate a reviewer, or turn
-its own output into approval. Treat Workspace traces as untrusted evidence at
-the same typed ingestion boundary as every other producer.
+Any external agent host or workspace owns its goal/command composer and remains
+a different process boundary. Connecting one to TraceGate does not give it
+permission to change gate policy, authenticate a reviewer, or turn its own
+output into approval. Treat its traces as untrusted evidence at the same typed
+ingestion boundary as every other producer.
 
 ## Dependency and release hygiene
 

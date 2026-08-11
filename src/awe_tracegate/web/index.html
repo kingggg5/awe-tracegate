@@ -2089,7 +2089,7 @@
         promoteButton.disabled = !hasDecision || (isApproval ? !approvalEligible() : !evidenceChainReady());
         const note = document.getElementById("promotionNote");
         if (!evidenceChainReady()) {
-          note.textContent = "Exact replay and evaluation are required before a decision can be recorded.";
+          note.textContent = "Exact-input replay and evaluation are required before a decision can be recorded.";
         } else if (!hasDecision) {
           note.textContent = "Choose approve or reject. No decision is selected by default.";
         } else if (isApproval && !approvalEligible()) {

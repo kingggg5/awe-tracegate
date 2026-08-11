@@ -17,7 +17,11 @@ from awe_tracegate.contracts import (
     canonical_digest,
 )
 from awe_tracegate.evidence import create_evidence_envelope, create_evidence_package
-from awe_tracegate.gate import gate_evidence
+from awe_tracegate.gate import (
+    GateReplayExpectations,
+    gate_evidence,
+    validate_gate_receipt_inputs,
+)
 
 ROOT = Path(__file__).parents[1]
 REPOSITORY = "https://github.com/example/synthetic-agent"
@@ -301,6 +305,208 @@ def test_gate_blocks_expired_package() -> None:
 
     assert receipt.status == "BLOCK"
     assert "evidence_package_expired" in receipt.reasons
+
+
+def test_gate_enforces_inclusive_age_and_future_timestamp_boundaries() -> None:
+    traces, baseline, candidate, policy, package = _package(age_days=1)
+    evaluated_at = datetime(2026, 8, 9, tzinfo=UTC)
+
+    exact_boundary = gate_evidence(
+        traces,
+        baseline,
+        candidate,
+        policy,
+        evidence_package=package,
+        evaluated_at=evaluated_at,
+        maximum_age_seconds=86_400,
+    )
+    one_microsecond_stale = gate_evidence(
+        traces,
+        baseline,
+        candidate,
+        policy,
+        evidence_package=package,
+        evaluated_at=evaluated_at + timedelta(microseconds=1),
+        maximum_age_seconds=86_400,
+    )
+    future_inputs = _package(age_days=-1)
+    future = gate_evidence(
+        *future_inputs[:4],
+        evidence_package=future_inputs[4],
+        evaluated_at=evaluated_at,
+        maximum_age_seconds=86_400,
+    )
+
+    assert exact_boundary.status == "PASS"
+    assert "evidence_package_expired" in one_microsecond_stale.reasons
+    assert "evidence_timestamp_in_future" in future.reasons
+
+
+def test_gate_blocks_expected_repository_and_commit_mismatches() -> None:
+    traces, baseline, candidate, policy, package = _package()
+
+    receipt = gate_evidence(
+        traces,
+        baseline,
+        candidate,
+        policy,
+        evidence_package=package,
+        expected_repository="https://github.com/example/other-agent",
+        expected_commit_sha="b" * 40,
+    )
+
+    assert receipt.status == "BLOCK"
+    assert "evidence_package_repository_mismatch" in receipt.reasons
+    assert "evidence_package_commit_mismatch" in receipt.reasons
+    assert (
+        validate_gate_receipt_inputs(
+            receipt,
+            traces,
+            baseline,
+            candidate,
+            policy,
+            evidence_package=package,
+            expectations=GateReplayExpectations(
+                repository_uri="https://github.com/example/other-agent",
+                commit_sha="b" * 40,
+                evaluated_at=None,
+                maximum_evidence_age_seconds=None,
+                minimum_provenance_level=None,
+            ),
+        )
+        == receipt
+    )
+
+
+def test_package_replay_requires_consumer_owned_controls() -> None:
+    traces, baseline, candidate, policy, package = _package()
+    receipt = gate_evidence(
+        traces,
+        baseline,
+        candidate,
+        policy,
+        evidence_package=package,
+    )
+
+    with pytest.raises(ValueError, match="consumer-owned identity and policy"):
+        validate_gate_receipt_inputs(
+            receipt,
+            traces,
+            baseline,
+            candidate,
+            policy,
+            evidence_package=package,
+        )
+
+    assert (
+        validate_gate_receipt_inputs(
+            receipt,
+            traces,
+            baseline,
+            candidate,
+            policy,
+            evidence_package=package,
+            expectations=GateReplayExpectations(
+                repository_uri=package.repository_uri,
+                commit_sha=package.commit_sha,
+                evaluated_at=None,
+                maximum_evidence_age_seconds=None,
+                minimum_provenance_level=None,
+            ),
+        )
+        == receipt
+    )
+
+
+@pytest.mark.parametrize("changed_control", ["repository", "commit"])
+def test_package_replay_rejects_protected_identity_mismatch(
+    changed_control: str,
+) -> None:
+    traces, baseline, candidate, policy, package = _package()
+    receipt = gate_evidence(
+        traces,
+        baseline,
+        candidate,
+        policy,
+        evidence_package=package,
+    )
+    expectations = GateReplayExpectations(
+        repository_uri=(
+            "https://github.com/example/protected-agent"
+            if changed_control == "repository"
+            else package.repository_uri
+        ),
+        commit_sha="b" * 40 if changed_control == "commit" else package.commit_sha,
+        evaluated_at=None,
+        maximum_evidence_age_seconds=None,
+        minimum_provenance_level=None,
+    )
+
+    with pytest.raises(ValueError, match="does not match exact input replay"):
+        validate_gate_receipt_inputs(
+            receipt,
+            traces,
+            baseline,
+            candidate,
+            policy,
+            evidence_package=package,
+            expectations=expectations,
+        )
+
+
+def test_package_replay_rejects_rehashed_freshness_policy_downgrade() -> None:
+    traces, baseline, candidate, policy, package = _package(age_days=2)
+    evaluated_at = datetime(2026, 8, 9, tzinfo=UTC)
+    receipt = gate_evidence(
+        traces,
+        baseline,
+        candidate,
+        policy,
+        evidence_package=package,
+        evaluated_at=evaluated_at,
+        maximum_age_seconds=86_400,
+    )
+    assert receipt.status == "BLOCK"
+
+    forged = receipt.model_dump(mode="json")
+    forged["status"] = "PASS"
+    forged["reasons"] = []
+    forged["maximum_evidence_age_seconds"] = 200_000
+    forged["receipt_hash"] = canonical_digest(
+        {key: value for key, value in forged.items() if key != "receipt_hash"}
+    )
+    structurally_valid = GateReceipt.model_validate(forged)
+
+    expectations = GateReplayExpectations(
+        repository_uri=package.repository_uri,
+        commit_sha=package.commit_sha,
+        evaluated_at=evaluated_at,
+        maximum_evidence_age_seconds=86_400,
+        minimum_provenance_level=None,
+    )
+    with pytest.raises(ValueError, match="consumer-owned controls"):
+        validate_gate_receipt_inputs(
+            structurally_valid,
+            traces,
+            baseline,
+            candidate,
+            policy,
+            evidence_package=package,
+            expectations=expectations,
+        )
+
+    assert (
+        validate_gate_receipt_inputs(
+            receipt,
+            traces,
+            baseline,
+            candidate,
+            policy,
+            evidence_package=package,
+            expectations=expectations,
+        )
+        == receipt
+    )
 
 
 def test_gate_receipt_rejects_tampered_nested_evaluation() -> None:

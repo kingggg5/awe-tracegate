@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from fastapi.testclient import TestClient
 
@@ -13,6 +14,78 @@ EXAMPLE_TRACES = (
 )
 CLIENT = TestClient(app)
 EVALUATION_DIRECTORY = Path(__file__).parents[1] / "examples" / "evaluation"
+
+
+def _otlp_attribute(key: str, value: Any) -> dict[str, Any]:
+    if isinstance(value, bool):
+        encoded = {"boolValue": value}
+    elif isinstance(value, int):
+        encoded = {"intValue": str(value)}
+    else:
+        encoded = {"stringValue": value}
+    return {"key": key, "value": encoded}
+
+
+def otlp_request_payload() -> dict[str, Any]:
+    def digest(character: str) -> str:
+        return f"sha256:{character * 64}"
+
+    common = {
+        "awe.eval.experiment.id": "api-otlp-experiment",
+        "awe.eval.repository.uri": "https://github.com/example/api-agent",
+        "awe.eval.commit.sha": "a" * 40,
+        "awe.eval.subject.digest": digest("a"),
+        "awe.eval.dataset.digest": digest("b"),
+        "awe.eval.dataset_split.digest": digest("c"),
+        "awe.eval.harness.name": "api.harness",
+        "awe.eval.harness.version": "1.0.0",
+        "awe.eval.harness.digest": digest("d"),
+        "awe.eval.strategy.name": "api.strategy",
+        "awe.eval.strategy.digest": digest("e"),
+        "awe.eval.model_config.digest": digest("f"),
+        "awe.eval.environment.digest": digest("1"),
+        "awe.eval.grader.digest": digest("2"),
+        "gen_ai.provider.name": "example.provider",
+        "gen_ai.response.model": "example-model",
+    }
+    trial = {
+        "gen_ai.operation.name": "invoke_agent",
+        "awe.eval.trial.id": "api-trial-1",
+        "awe.eval.case.id": "api-case-1",
+        "awe.eval.succeeded": True,
+        "awe.eval.safety_violations": 0,
+        "awe.eval.cost.microusd": 100,
+        "gen_ai.usage.input_tokens": 10,
+        "gen_ai.usage.output_tokens": 5,
+        "awe.eval.grader_result.digest": digest("3"),
+    }
+    return {
+        "resourceSpans": [
+            {
+                "resource": {
+                    "attributes": [
+                        _otlp_attribute(key, value) for key, value in common.items()
+                    ]
+                },
+                "scopeSpans": [
+                    {
+                        "spans": [
+                            {
+                                "traceId": "0" * 32,
+                                "spanId": "1" * 16,
+                                "startTimeUnixNano": "1000000000",
+                                "endTimeUnixNano": "1120000000",
+                                "attributes": [
+                                    _otlp_attribute(key, value)
+                                    for key, value in trial.items()
+                                ],
+                            }
+                        ]
+                    }
+                ],
+            }
+        ]
+    }
 
 
 def request_payload() -> dict[str, object]:
@@ -66,6 +139,7 @@ def test_openapi_uses_the_package_version() -> None:
 
     assert response.status_code == 200
     assert response.json()["info"]["version"] == __version__
+    assert "/v1/experiments/import/otlp" in response.json()["paths"]
 
 
 def test_review_workspace_uses_the_real_api_pipeline() -> None:
@@ -159,6 +233,28 @@ def test_import_experiment_endpoint_returns_content_addressed_manifest() -> None
     assert response.status_code == 200
     assert response.json()["source_format"] == "awe.generic-evaluation"
     assert response.json()["manifest_digest"].startswith("sha256:")
+
+
+def test_import_otlp_endpoint_returns_content_addressed_manifest() -> None:
+    response = CLIENT.post("/v1/experiments/import/otlp", json=otlp_request_payload())
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["source_format"] == "otel.genai.otlp-json"
+    assert body["source_revision"]
+    assert body["trials"][0]["latency_ms"] == 120
+    assert body["manifest_digest"].startswith("sha256:")
+
+
+def test_import_otlp_endpoint_rejects_unannotated_spans() -> None:
+    payload = otlp_request_payload()
+    attributes = payload["resourceSpans"][0]["scopeSpans"][0]["spans"][0]["attributes"]
+    attributes[:] = [item for item in attributes if item["key"] != "awe.eval.succeeded"]
+
+    response = CLIENT.post("/v1/experiments/import/otlp", json=payload)
+
+    assert response.status_code == 422
+    assert "awe.eval.succeeded" in response.json()["detail"]
 
 
 def test_promote_endpoint_requires_a_replayable_evidence_chain() -> None:

@@ -5,6 +5,27 @@ trace mining, workflow compilation, agent skills, replay, evaluation, or durable
 execution. This page records the closest primary sources and makes the project
 boundary explicit.
 
+## Experiment and observability platforms
+
+- [Braintrust experiments](https://www.braintrust.dev/docs/evaluate/run-evaluations)
+  provide immutable evaluation snapshots, comparison, sharing, and CI/CD use.
+- [LangSmith evaluation](https://docs.langchain.com/langsmith/evaluation-concepts)
+  connects datasets, experiments, evaluator scores, and execution traces across
+  pre-deployment and production workflows.
+- [Arize Phoenix](https://arize.com/docs/phoenix) is an open-source platform for
+  tracing, evaluation, datasets, experiments, and troubleshooting.
+
+These systems already cover much of the trace, experiment, comparison, and CI
+workflow. TraceGate is not presented as a feature-complete replacement. Its
+narrow contribution is a portable offline decision boundary: content-addressed
+evidence linkage, consumer-owned replay expectations, fail-closed policy, and a
+separate human decision. AWE's next research focus is the reliability of the
+conclusion itself. Experimental comparison v1 adds paired-case uncertainty and
+flakiness under exact declared controls. Gate v2 adds asserted judge-
+calibration sidecars and bounded supplied environment/seed sensitivity; causal
+attribution, grader trust, and extrapolation beyond supplied runs remain roadmap
+items.
+
 ## Trace-to-procedure and skill work
 
 - [Agent Workflow Optimization (AWO)](https://www.microsoft.com/en-us/research/publication/optimizing-agentic-workflows-using-meta-tools/)
@@ -70,8 +91,8 @@ token savings are experiment input, not verification evidence by themselves.
   counterfactual intervention over stochastic agent trajectories.
 
 TraceGate is not a durable runtime, observability backend, experiment tracker,
-or causal debugger. AWE Workspace is a separate companion application; its
-runtime responsibilities are outside this verifier.
+or causal debugger. External workspaces and harnesses may produce its evidence,
+but their runtime responsibilities remain outside this verifier.
 
 ## Process and observability standards
 
@@ -100,3 +121,8 @@ new algorithm:
 This combination should be judged by reproducibility, refusal correctness, and
 usefulness in real reviews—not by the number of features or by claims that no
 other project overlaps it.
+
+The longer-term AWE thesis is equally narrow: **do not merely observe an agent;
+determine whether the evidence justifies trusting the change.** That thesis is
+an integration and reliability goal, not a claim that TraceGate invented replay,
+evaluation, provenance, or causal analysis.

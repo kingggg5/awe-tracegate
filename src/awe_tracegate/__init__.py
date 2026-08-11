@@ -7,6 +7,9 @@ from .compiler import compile_traces
 from .contracts import (
     AdapterConformanceReceipt,
     CapabilitiesDocument,
+    ComparisonPolicy,
+    ComparisonReceipt,
+    ComparisonVerification,
     CompilationCandidate,
     CompilationReceipt,
     CompileRequest,
@@ -15,24 +18,48 @@ from .contracts import (
     EvidencePackage,
     ExecutionTrace,
     ExperimentManifest,
+    ExperimentQualityEvidence,
+    ExperimentQualityReceipt,
+    ExplanationReceipt,
     GateReceipt,
+    GateReceiptV2,
     PromotionReceipt,
+    QualityPolicy,
     ReceiptVerification,
+    SensitivityPolicy,
+    SensitivityReceipt,
     SkillBom,
 )
-from .evaluation import evaluate_candidate
+from .evaluation import (
+    compare_experiments,
+    evaluate_candidate,
+    validate_comparison_receipt_inputs,
+    verify_comparison_receipt_inputs,
+)
 from .evidence import (
     create_evidence_envelope,
     create_evidence_package,
     validate_evidence_envelope,
 )
-from .gate import gate_evidence
+from .explain import explain_receipt
+from .gate import (
+    GateReplayExpectations,
+    gate_evidence,
+    gate_evidence_v2,
+    validate_gate_receipt_inputs,
+    validate_gate_v2_receipt_inputs,
+)
+from .quality import assess_experiment_quality
+from .sensitivity import assess_sensitivity
 from .skill_bom import inspect_skill
 from .verifier import verify_compilation_receipt
 
 __all__ = [
     "AdapterConformanceReceipt",
     "CapabilitiesDocument",
+    "ComparisonPolicy",
+    "ComparisonReceipt",
+    "ComparisonVerification",
     "CompilationCandidate",
     "CompilationReceipt",
     "CompileRequest",
@@ -41,18 +68,35 @@ __all__ = [
     "EvidencePackage",
     "ExecutionTrace",
     "ExperimentManifest",
+    "ExperimentQualityEvidence",
+    "ExperimentQualityReceipt",
+    "ExplanationReceipt",
     "GateReceipt",
+    "GateReceiptV2",
+    "GateReplayExpectations",
     "PromotionReceipt",
+    "QualityPolicy",
     "ReceiptVerification",
+    "SensitivityPolicy",
+    "SensitivityReceipt",
     "SkillBom",
+    "assess_experiment_quality",
+    "assess_sensitivity",
+    "compare_experiments",
     "compile_traces",
     "create_evidence_envelope",
     "create_evidence_package",
     "evaluate_candidate",
+    "explain_receipt",
     "gate_evidence",
+    "gate_evidence_v2",
     "import_generic_evaluation",
     "import_otel_genai_evaluation",
     "inspect_skill",
+    "validate_comparison_receipt_inputs",
     "validate_evidence_envelope",
+    "validate_gate_receipt_inputs",
+    "validate_gate_v2_receipt_inputs",
+    "verify_comparison_receipt_inputs",
     "verify_compilation_receipt",
 ]

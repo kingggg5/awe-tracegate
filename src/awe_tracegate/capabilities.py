@@ -14,19 +14,25 @@ def describe_capabilities(package_version: str) -> CapabilitiesDocument:
             sorted(
                 (
                     "capabilities",
+                    "assess-quality",
+                    "compare",
                     "compile",
                     "conformance",
                     "evaluate",
                     "gate",
+                    "gate-v2",
                     "import-experiment",
                     "promote",
                     "redact",
                     "schema",
                     "serve",
                     "sign",
+                    "sensitivity",
                     "skill.inspect",
                     "verify",
+                    "verify-comparison",
                     "verify-signature",
+                    "explain",
                 )
             )
         ),
@@ -34,9 +40,14 @@ def describe_capabilities(package_version: str) -> CapabilitiesDocument:
             sorted(
                 (
                     "canonical_json",
+                    "comparison_exact_input_replay",
+                    "comparison_held_input_verification",
                     "content_addressed_receipts",
-                    "exact_trace_replay",
+                    "deterministic_evidence_graphs",
+                    "exact_input_gate_replay",
                     "offline_keyless_gate",
+                    "paired_experiment_comparison",
+                    "typed_terminal_outcome_assessment",
                     "strict_typed_contracts",
                 )
             )
