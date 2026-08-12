@@ -71,7 +71,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - name: Check out source
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -115,7 +115,7 @@ jobs:
 
           root = Path("cross-platform-artifacts")
           platform_dirs = sorted(path for path in root.iterdir() if path.is_dir())
-          assert len(platform_dirs) == 2, platform_dirs
+          assert len(platform_dirs) == 3, platform_dirs
           names = ("gate-v2.json", "explanation.json", "comparison.json", "fixture.json")
           for name in names:
               payloads = [

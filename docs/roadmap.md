@@ -55,9 +55,9 @@ The pre-alpha source currently provides:
 - a disposable PostgreSQL/Alembic runner reference implementation with a
   PostgreSQL 16 CI job; it emits four typed lanes and destroys its schema after
   each run.
-- a CI cross-platform fixture job that generates the canonical demo on Ubuntu
-  and Windows and compares the receipt, comparison, explanation, and metadata
-  bytes before accepting the workflow.
+- a CI cross-platform fixture job that generates the canonical demo on Ubuntu,
+  Windows, and macOS and compares the receipt, comparison, explanation, and
+  metadata bytes before accepting the workflow.
 - consent-bound Discovery intervention, independent human approval, and
   external replay handoff contracts; the trusted core never starts the runner.
 - an Ed25519 evidence-package verification bridge that can raise package
@@ -93,8 +93,7 @@ the immutable release tag and independent pilot exist.
 Exit criteria:
 
 - identical supported inputs produce byte-identical receipts across supported
-  operating systems (the current CI proof covers Ubuntu and Windows; macOS is
-  still an unverified release target);
+  operating systems (the current CI proof covers Ubuntu, Windows, and macOS);
 - every seeded digest, revision, freshness, dataset, identity, and candidate
   mismatch fails closed;
 - no false `PASS` in the adversarial corpus;
