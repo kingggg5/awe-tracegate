@@ -65,6 +65,68 @@ jobs:
           path: dist/
           if-no-files-found: error
 
+  cross-platform-demo:
+    name: Cross-platform receipt fixture (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Check out source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install project
+        run: python -m pip install -e .
+      - name: Generate the canonical demo
+        run: python -m awe_tracegate.cli demo --out "${{ runner.temp }}/awe-demo"
+      - name: Upload canonical receipts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: awe-cross-platform-${{ matrix.os }}
+          path: |
+            ${{ runner.temp }}/awe-demo/gate-v2.json
+            ${{ runner.temp }}/awe-demo/explanation.json
+            ${{ runner.temp }}/awe-demo/comparison.json
+            ${{ runner.temp }}/awe-demo/fixture.json
+          if-no-files-found: error
+
+  cross-platform-demo-compare:
+    name: Compare cross-platform receipt bytes
+    runs-on: ubuntu-latest
+    needs: cross-platform-demo
+    steps:
+      - name: Download platform receipts
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          pattern: awe-cross-platform-*
+          path: cross-platform-artifacts
+      - name: Require byte-identical receipts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from hashlib import sha256
+          from pathlib import Path
+
+          root = Path("cross-platform-artifacts")
+          platform_dirs = sorted(path for path in root.iterdir() if path.is_dir())
+          assert len(platform_dirs) == 3, platform_dirs
+          names = ("gate-v2.json", "explanation.json", "comparison.json", "fixture.json")
+          for name in names:
+              payloads = [
+                  (platform / name).read_bytes()
+                  for platform in platform_dirs
+              ]
+              digests = [sha256(payload).hexdigest() for payload in payloads]
+              assert payloads[0] == payloads[1], f"{name}: {digests}"
+              print(f"{name}: sha256:{digests[0]}")
+          PY
+
   plugin-package:
     name: npm package and Git install smoke
     runs-on: ubuntu-latest
