@@ -33,11 +33,11 @@ api = [
   "uvicorn>=0.34,<1",
 ]
 signing = [
-  "cryptography>=49,<50",
+  "cryptography>=49,<51",
 ]
 dev = [
   "build>=1.2,<2",
-  "cryptography>=49,<50",
+  "cryptography>=49,<51",
   "httpx2>=2,<3",
   "jsonschema>=4.25,<5",
   "mypy>=1.15,<2",
@@ -45,7 +45,7 @@ dev = [
   "ruff>=0.11,<1",
 ]
 test = [
-  "cryptography>=49,<50",
+  "cryptography>=49,<51",
   "httpx2>=2,<3",
   "jsonschema>=4.25,<5",
   "pytest>=8,<10",
