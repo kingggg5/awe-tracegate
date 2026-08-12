@@ -66,3 +66,13 @@ def test_readme_workspace_loop_is_present_and_readable() -> None:
     assert "does not execute tools" in payload
     assert payload.count("<animate") >= 4
     ElementTree.fromstring(payload)
+
+
+def test_readme_review_preview_is_vector_and_readable() -> None:
+    readme = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    asset = PROJECT_ROOT / "docs" / "assets" / "awe-tracegate-review-demo.svg"
+    payload = asset.read_text(encoding="utf-8")
+    assert "docs/assets/awe-tracegate-review-demo.svg" in readme
+    assert "Review a workflow candidate" in payload
+    assert "Validate evidence" in payload
+    ElementTree.fromstring(payload)

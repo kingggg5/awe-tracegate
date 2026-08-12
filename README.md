@@ -842,7 +842,7 @@ TraceGate Review loads local JSON/JSONL evidence and uses the same typed engine.
 It is a review surface—not an AI chat, agent runtime, identity provider, or
 production control plane.
 
-![TraceGate Review after validating the included evidence](docs/assets/awe-tracegate-review-demo.png)
+![TraceGate Review after validating the included evidence](docs/assets/awe-tracegate-review-demo.svg)
 
 ## Project status
 

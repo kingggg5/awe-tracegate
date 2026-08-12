@@ -1,48 +1,60 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="title desc">
   <title id="title">AWE evidence loop</title>
-  <desc id="desc">An external harness captures trials. TraceGate compares, verifies, and explains the supplied evidence before a separate human decision.</desc>
-  <rect width="1200" height="320" rx="24" fill="#f6f8fa"/>
-  <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
-    <text x="60" y="58" font-size="22" font-weight="700" fill="#1f2328">From an agent change to a reviewable decision</text>
-    <text x="60" y="86" font-size="14" fill="#59636e">The harness runs the experiment. TraceGate re-checks the evidence. A human remains accountable.</text>
-    <g transform="translate(60 126)">
-      <rect width="170" height="104" rx="14" fill="#ffffff" stroke="#d0d7de"/>
-      <circle cx="28" cy="30" r="10" fill="#ddf4ff" stroke="#0969da"/>
-      <text x="48" y="35" font-size="16" font-weight="650" fill="#1f2328">Change</text>
-      <text x="20" y="65" font-size="13" fill="#59636e">Prompt · Skill · model</text>
-      <text x="20" y="85" font-size="13" fill="#59636e">or strategy</text>
+  <desc id="desc">An external harness captures trials. TraceGate checks the supplied evidence, then a human reviews the receipt. The animated route is optional and the labels remain readable when motion is disabled.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#24314f" flood-opacity=".12"/></filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0 8 4 0 8" fill="none" stroke="#7b86a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+  <rect width="1200" height="430" rx="28" fill="#f7f8fc"/>
+  <g font-family="Atkinson Hyperlegible Next, Segoe UI, Noto Sans Thai, Leelawadee UI, Arial, sans-serif" fill="#17203a">
+    <text x="56" y="56" font-size="30" font-weight="760" letter-spacing="-.02em">From a change to a reviewable decision</text>
+    <text x="56" y="89" font-size="16" fill="#52607a">The harness runs trials. TraceGate checks the evidence. A human remains accountable.</text>
+
+    <g transform="translate(48 132)" filter="url(#shadow)">
+      <rect width="1104" height="220" rx="20" fill="#ffffff" stroke="#dfe3ef"/>
+      <g transform="translate(28 24)">
+        <rect width="238" height="172" rx="14" fill="#fbfbfe" stroke="#dfe3ef"/>
+        <circle cx="28" cy="32" r="12" fill="#eaf4ff" stroke="#3d83d1" stroke-width="2"/>
+        <text x="52" y="39" font-size="20" font-weight="720">Change</text>
+        <text x="20" y="82" font-size="16" fill="#52607a">Prompt, Skill, model</text>
+        <text x="20" y="108" font-size="16" fill="#52607a">or strategy</text>
+        <text x="20" y="150" font-size="14" font-weight="700" fill="#687391">01  DEFINE</text>
+      </g>
+      <path d="M284 110h42" fill="none" stroke="#a7afc3" stroke-width="2" marker-end="url(#arrow)"/>
+      <path d="M284 110h42" fill="none" stroke="#7564e8" stroke-width="2" stroke-dasharray="5 9"><animate attributeName="stroke-dashoffset" from="0" to="-28" dur="1.4s" repeatCount="indefinite"/></path>
+
+      <g transform="translate(340 24)">
+        <rect width="238" height="172" rx="14" fill="#fbfbfe" stroke="#dfe3ef"/>
+        <circle cx="28" cy="32" r="12" fill="#fff5d6" stroke="#b17a00" stroke-width="2"/>
+        <text x="52" y="39" font-size="20" font-weight="720">Capture</text>
+        <text x="20" y="82" font-size="16" fill="#52607a">Frozen cases and seeds</text>
+        <text x="20" y="108" font-size="16" fill="#52607a">traces and outcomes</text>
+        <text x="20" y="150" font-size="14" font-weight="700" fill="#687391">02  HOLD</text>
+      </g>
+      <path d="M596 110h42" fill="none" stroke="#a7afc3" stroke-width="2" marker-end="url(#arrow)"/>
+      <path d="M596 110h42" fill="none" stroke="#7564e8" stroke-width="2" stroke-dasharray="5 9"><animate attributeName="stroke-dashoffset" from="0" to="-28" dur="1.4s" begin=".7s" repeatCount="indefinite"/></path>
+
+      <g transform="translate(652 24)">
+        <rect width="238" height="172" rx="14" fill="#fbfbfe" stroke="#7564e8" stroke-width="2"/>
+        <circle cx="28" cy="32" r="12" fill="#eeeaff" stroke="#7564e8" stroke-width="2"><animate attributeName="r" values="12;15;12" dur="3.6s" repeatCount="indefinite"/></circle>
+        <text x="52" y="39" font-size="20" font-weight="720">TraceGate</text>
+        <text x="20" y="82" font-size="16" fill="#52607a">Compare, verify, explain</text>
+        <rect x="20" y="108" width="65" height="28" rx="14" fill="#e7f7ef"/><text x="39" y="128" font-size="13" font-weight="760" fill="#1c7548">PASS</text>
+        <rect x="94" y="108" width="75" height="28" rx="14" fill="#fff5d6"/><text x="108" y="128" font-size="13" font-weight="760" fill="#815b00">REVIEW</text>
+        <rect x="178" y="108" width="60" height="28" rx="14" fill="#ffebe9"/><text x="193" y="128" font-size="13" font-weight="760" fill="#a40e26">BLOCK</text>
+      </g>
+      <path d="M908 110h42" fill="none" stroke="#a7afc3" stroke-width="2" marker-end="url(#arrow)"/>
+      <path d="M908 110h42" fill="none" stroke="#7564e8" stroke-width="2" stroke-dasharray="5 9"><animate attributeName="stroke-dashoffset" from="0" to="-28" dur="1.4s" begin="1.4s" repeatCount="indefinite"/></path>
+
+      <g transform="translate(964 24)">
+        <rect width="112" height="172" rx="14" fill="#fbfbfe" stroke="#dfe3ef"/>
+        <circle cx="28" cy="32" r="12" fill="#f1eaff" stroke="#8250df" stroke-width="2"/>
+        <text x="52" y="39" font-size="20" font-weight="720">Review</text>
+        <text x="20" y="82" font-size="15" fill="#52607a">Receipt</text>
+        <text x="20" y="106" font-size="15" fill="#52607a">Evidence graph</text>
+        <text x="20" y="150" font-size="14" font-weight="700" fill="#687391">03  DECIDE</text>
+      </g>
     </g>
-    <path d="M238 178h42" stroke="#8c959f" stroke-width="2"/>
-    <path d="m276 172 8 6-8 6" fill="none" stroke="#8c959f" stroke-width="2"/>
-    <g transform="translate(292 126)">
-      <rect width="190" height="104" rx="14" fill="#ffffff" stroke="#d0d7de"/>
-      <circle cx="28" cy="30" r="10" fill="#fff8c5" stroke="#9a6700"/>
-      <text x="48" y="35" font-size="16" font-weight="650" fill="#1f2328">Capture</text>
-      <text x="20" y="65" font-size="13" fill="#59636e">Frozen cases · seeds</text>
-      <text x="20" y="85" font-size="13" fill="#59636e">traces · outcomes</text>
-    </g>
-    <path d="M490 178h42" stroke="#8c959f" stroke-width="2"/>
-    <path d="m528 172 8 6-8 6" fill="none" stroke="#8c959f" stroke-width="2"/>
-    <g transform="translate(544 112)">
-      <rect width="286" height="132" rx="16" fill="#ffffff" stroke="#0969da" stroke-width="2"/>
-      <text x="22" y="34" font-size="12" font-weight="700" letter-spacing="1.2" fill="#0969da">TRACEGATE</text>
-      <text x="22" y="62" font-size="17" font-weight="650" fill="#1f2328">Compare · verify · explain</text>
-      <rect x="22" y="80" width="66" height="28" rx="14" fill="#dafbe1"/>
-      <text x="42" y="99" font-size="12" font-weight="700" fill="#116329">PASS</text>
-      <rect x="98" y="80" width="76" height="28" rx="14" fill="#fff8c5"/>
-      <text x="113" y="99" font-size="12" font-weight="700" fill="#7d4e00">REVIEW</text>
-      <rect x="184" y="80" width="72" height="28" rx="14" fill="#ffebe9"/>
-      <text x="201" y="99" font-size="12" font-weight="700" fill="#a40e26">BLOCK</text>
-    </g>
-    <path d="M838 178h42" stroke="#8c959f" stroke-width="2"/>
-    <path d="m876 172 8 6-8 6" fill="none" stroke="#8c959f" stroke-width="2"/>
-    <g transform="translate(892 126)">
-      <rect width="248" height="104" rx="14" fill="#ffffff" stroke="#d0d7de"/>
-      <circle cx="28" cy="30" r="10" fill="#fbefff" stroke="#8250df"/>
-      <text x="48" y="35" font-size="16" font-weight="650" fill="#1f2328">Human review</text>
-      <text x="20" y="65" font-size="13" fill="#59636e">Receipt + evidence graph</text>
-      <text x="20" y="85" font-size="13" fill="#59636e">separate accountable decision</text>
-    </g>
-    <text x="60" y="282" font-size="13" fill="#59636e">Offline · keyless verifier · content-addressed receipts · no model execution · no autonomous promotion</text>
+    <text x="56" y="393" font-size="15" fill="#687391">Offline  ·  keyless  ·  content-addressed receipts  ·  no model execution  ·  no autonomous promotion</text>
   </g>
 </svg>

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="840" viewBox="0 0 1400 840" role="img" aria-labelledby="title desc">
+  <title id="title">TraceGate Review evidence surface</title>
+  <desc id="desc">A crisp vector preview of the TraceGate Review surface: navigation, review progress, evidence files, and a compiled workflow. This image is illustrative and uses the included sample dataset.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#273451" flood-opacity=".12"/></filter>
+  </defs>
+  <rect width="1400" height="840" fill="#f7f8fc"/>
+  <g font-family="Segoe UI, Segoe UI Variable Text, Noto Sans Thai, Leelawadee UI, Arial, sans-serif" fill="#17203a">
+    <rect x="32" y="32" width="1336" height="776" rx="24" fill="#ffffff" stroke="#dfe3ef" filter="url(#shadow)"/>
+    <rect x="32" y="32" width="244" height="776" rx="24" fill="#eaf2fb"/>
+    <rect x="32" y="32" width="244" height="776" rx="24" fill="none" stroke="#d7e2ef"/>
+
+    <rect x="56" y="60" width="196" height="50" rx="10" fill="#ffffff" stroke="#d9e1ed"/>
+    <text x="84" y="91" font-size="18" font-weight="700" fill="#17203a">+  New review</text>
+    <text x="56" y="154" font-size="13" font-weight="700" letter-spacing="1.1" fill="#687391">TRACEGATE</text>
+    <rect x="56" y="174" width="196" height="68" rx="10" fill="#ffffff" stroke="#d9e1ed"/>
+    <circle cx="80" cy="199" r="9" fill="#e7f7ef" stroke="#319467" stroke-width="2"/>
+    <text x="105" y="204" font-size="17" font-weight="720">Review</text>
+    <text x="105" y="225" font-size="13" fill="#52607a">Validate one chain</text>
+    <text x="56" y="282" font-size="13" font-weight="700" letter-spacing="1.1" fill="#687391">CURRENT REVIEW</text>
+    <text x="80" y="326" font-size="17" font-weight="720">Sample evidence</text>
+    <text x="80" y="350" font-size="13" fill="#52607a">PASS  ·  review required</text>
+    <rect x="56" y="700" width="196" height="1" fill="#d1dce9"/>
+    <text x="56" y="746" font-size="13" fill="#52607a">Local, offline review</text>
+
+    <text x="318" y="92" font-size="34" font-weight="760" letter-spacing="-.03em">Review a workflow candidate</text>
+    <text x="318" y="126" font-size="17" fill="#52607a">Validate repeated traces, replay exact evidence, and record a decision.</text>
+    <rect x="1184" y="66" width="142" height="32" rx="16" fill="#fff5d6"/>
+    <text x="1210" y="87" font-size="13" font-weight="750" fill="#815b00">SAMPLE DATA</text>
+
+    <rect x="318" y="160" width="1008" height="142" rx="14" fill="#ffffff" stroke="#dfe3ef"/>
+    <text x="346" y="196" font-size="17" font-weight="720">Review status</text>
+    <text x="346" y="222" font-size="14" fill="#52607a">Each stage must finish before a decision is recorded.</text>
+    <path d="M390 260H1256" stroke="#cbd3e0" stroke-width="2"/>
+    <g font-size="14" font-weight="720">
+      <circle cx="390" cy="260" r="16" fill="#2c9b61"/><text x="385" y="265" fill="#fff">1</text><text x="418" y="265">Inputs</text>
+      <circle cx="600" cy="260" r="16" fill="#2c9b61"/><text x="595" y="265" fill="#fff">2</text><text x="628" y="265">Compile</text>
+      <circle cx="820" cy="260" r="16" fill="#2c9b61"/><text x="815" y="265" fill="#fff">3</text><text x="848" y="265">Verify</text>
+      <circle cx="1040" cy="260" r="16" fill="#2c9b61"/><text x="1035" y="265" fill="#fff">4</text><text x="1068" y="265">Evaluate</text>
+      <circle cx="1256" cy="260" r="16" fill="#fff5d6" stroke="#b17a00" stroke-width="2"/><text x="1251" y="265" fill="#815b00">5</text><text x="1284" y="265">Decide</text>
+    </g>
+
+    <g transform="translate(318 332)">
+      <text x="0" y="32" font-size="22" font-weight="760">Evidence review</text>
+      <text x="0" y="60" font-size="15" fill="#52607a">2 traces  ·  3 nodes  ·  3 evaluation trials</text>
+      <rect x="790" y="0" width="150" height="46" rx="9" fill="#ffffff" stroke="#b7c1d1"/><text x="820" y="29" font-size="15" font-weight="700">Export review</text>
+      <rect x="950" y="0" width="176" height="46" rx="9" fill="#285f9e"/><text x="977" y="29" font-size="15" font-weight="700" fill="#fff">Validate evidence</text>
+      <path d="M0 84h1008" stroke="#dfe3ef"/>
+      <rect x="0" y="108" width="1008" height="50" rx="10" fill="#e7f7ef" stroke="#b8e4cc"/>
+      <text x="20" y="139" font-size="14" fill="#1c7548">Validation finished. Review the results before recording a decision.</text>
+      <text x="0" y="204" font-size="18" font-weight="720">Evidence files</text>
+      <text x="790" y="204" font-size="14" fill="#52607a">Included sample dataset</text>
+      <path d="M0 226h1008" stroke="#dfe3ef"/>
+      <text x="0" y="274" font-size="18" font-weight="720">Compiled workflow</text>
+      <rect x="868" y="247" width="140" height="32" rx="16" fill="#e7f7ef"/><text x="903" y="268" font-size="14" font-weight="750" fill="#1c7548">COMPILED</text>
+      <g transform="translate(0 300)">
+        <rect width="300" height="120" rx="12" fill="#ffffff" stroke="#dfe3ef"/>
+        <text x="18" y="28" font-size="13" font-weight="700" fill="#285f9e">READ  ·  v1.0.0</text><text x="18" y="60" font-size="17" font-weight="720">repo.read_diff</text><text x="18" y="88" font-size="14" fill="#52607a">read_diff</text>
+        <rect x="354" width="300" height="120" rx="12" fill="#ffffff" stroke="#dfe3ef"/>
+        <text x="372" y="28" font-size="13" font-weight="700" fill="#285f9e">READ  ·  v1.0.0</text><text x="372" y="60" font-size="17" font-weight="720">repo.detect_dependencies</text><text x="372" y="88" font-size="14" fill="#52607a">detect_dependencies</text>
+        <rect x="708" width="300" height="120" rx="12" fill="#ffffff" stroke="#dfe3ef"/>
+        <text x="726" y="28" font-size="13" font-weight="700" fill="#1c7548">PURE  ·  v1.0.0</text><text x="726" y="60" font-size="17" font-weight="720">risk.score</text><text x="726" y="88" font-size="14" fill="#52607a">score_release_risk</text>
+      </g>
+    </g>
+  </g>
+</svg>

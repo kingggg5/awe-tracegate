@@ -11,7 +11,7 @@
   </defs>
 
   <rect width="1200" height="620" rx="28" fill="#f7f8fc"/>
-  <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+  <g font-family="Segoe UI, Segoe UI Variable Text, Noto Sans Thai, Leelawadee UI, Arial, sans-serif">
     <text x="56" y="62" font-size="28" font-weight="720" letter-spacing="-.5" fill="#17203a">Discovery loop, made visible.</text>
     <text x="56" y="92" font-size="15" fill="#52607a">A synthetic offline walkthrough: create &#x2192; replay &#x2192; inspect. The external harness still owns agent execution.</text>
 
@@ -26,15 +26,15 @@
       <g transform="translate(34 96)">
         <rect width="302" height="228" rx="16" fill="#fbfbfe" stroke="#dfe3ef"/>
         <circle cx="30" cy="34" r="15" fill="#ebe8ff" stroke="#7564e8"/>
-        <text x="25" y="39" font-size="12" font-weight="750" fill="#4f42a0">01</text>
-        <text x="58" y="30" font-size="12" font-weight="750" letter-spacing="1.1" fill="#687391">BUILD</text>
+        <text x="25" y="39" font-size="13" font-weight="750" fill="#4f42a0">01</text>
+        <text x="58" y="30" font-size="13" font-weight="750" letter-spacing="1.1" fill="#687391">BUILD</text>
         <text x="22" y="78" font-size="17" font-weight="700" fill="#17203a">Create the bundle</text>
         <rect x="22" y="96" width="258" height="34" rx="8" fill="#f0edff"/>
-        <text x="36" y="118" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#403773">awe demo --out awe-demo</text>
+        <text x="36" y="118" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="13" fill="#403773">awe demo --out awe-demo</text>
         <text x="22" y="158" font-size="13" fill="#52607a">Builds a complete Gate v2 fixture.</text>
         <text x="22" y="180" font-size="13" fill="#52607a">No model calls. No network calls.</text>
         <rect x="22" y="196" width="68" height="24" rx="12" fill="#e7f7ef"/>
-        <text x="42" y="212" font-size="11" font-weight="750" fill="#1c7548">PASS</text>
+        <text x="42" y="212" font-size="12" font-weight="750" fill="#1c7548">PASS</text>
         <circle class="motion" cx="270" cy="34" r="4" fill="#7564e8">
           <animate attributeName="r" values="4;7;4" dur="3.6s" repeatCount="indefinite"/>
           <animate attributeName="opacity" values="1;.35;1" dur="3.6s" repeatCount="indefinite"/>
@@ -44,15 +44,15 @@
       <g transform="translate(393 96)">
         <rect width="302" height="228" rx="16" fill="#fbfbfe" stroke="#dfe3ef"/>
         <circle cx="30" cy="34" r="15" fill="#e5f2ff" stroke="#4e8ed8"/>
-        <text x="25" y="39" font-size="12" font-weight="750" fill="#285d9e">02</text>
-        <text x="58" y="30" font-size="12" font-weight="750" letter-spacing="1.1" fill="#687391">REPLAY</text>
+        <text x="25" y="39" font-size="13" font-weight="750" fill="#285d9e">02</text>
+        <text x="58" y="30" font-size="13" font-weight="750" letter-spacing="1.1" fill="#687391">REPLAY</text>
         <text x="22" y="78" font-size="17" font-weight="700" fill="#17203a">Check every link</text>
         <rect x="22" y="96" width="258" height="34" rx="8" fill="#eaf4ff"/>
-        <text x="36" y="118" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#285d9e">awe doctor awe-demo</text>
+        <text x="36" y="118" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="13" fill="#285d9e">awe doctor awe-demo</text>
         <text x="22" y="158" font-size="13" fill="#52607a">Reloads held inputs independently.</text>
         <text x="22" y="180" font-size="13" fill="#52607a">Comparison, gate, and contracts.</text>
         <rect x="22" y="196" width="88" height="24" rx="12" fill="#eaf4ff"/>
-        <text x="39" y="212" font-size="11" font-weight="750" fill="#285d9e">4 / 4 CHECKS</text>
+        <text x="39" y="212" font-size="12" font-weight="750" fill="#285d9e">4 / 4 CHECKS</text>
         <circle class="motion" cx="270" cy="34" r="4" fill="#4e8ed8">
           <animate attributeName="r" values="4;7;4" dur="3.6s" begin="1.2s" repeatCount="indefinite"/>
           <animate attributeName="opacity" values=".35;1;.35" dur="3.6s" begin="1.2s" repeatCount="indefinite"/>
@@ -62,15 +62,15 @@
       <g transform="translate(752 96)">
         <rect width="302" height="228" rx="16" fill="#fbfbfe" stroke="#dfe3ef"/>
         <circle cx="30" cy="34" r="15" fill="#e7f7ef" stroke="#43a878"/>
-        <text x="25" y="39" font-size="12" font-weight="750" fill="#1c7548">03</text>
-        <text x="58" y="30" font-size="12" font-weight="750" letter-spacing="1.1" fill="#687391">DECIDE</text>
+        <text x="25" y="39" font-size="13" font-weight="750" fill="#1c7548">03</text>
+        <text x="58" y="30" font-size="13" font-weight="750" letter-spacing="1.1" fill="#687391">DECIDE</text>
         <text x="22" y="78" font-size="17" font-weight="700" fill="#17203a">Inspect the receipt</text>
         <rect x="22" y="96" width="258" height="34" rx="8" fill="#e7f7ef"/>
-        <text x="36" y="118" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#1c7548">awe status awe-demo --json</text>
+        <text x="36" y="118" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="13" fill="#1c7548">awe status awe-demo --json</text>
         <text x="22" y="158" font-size="13" fill="#52607a">state: READY  &#xB7;  decision: PASS</text>
         <text x="22" y="180" font-size="13" fill="#52607a">receipt: sha256:3fb1b2ed...96344d</text>
         <rect x="22" y="196" width="68" height="24" rx="12" fill="#e7f7ef"/>
-        <text x="42" y="212" font-size="11" font-weight="750" fill="#1c7548">READY</text>
+        <text x="42" y="212" font-size="12" font-weight="750" fill="#1c7548">READY</text>
         <circle class="motion" cx="270" cy="34" r="4" fill="#43a878">
           <animate attributeName="r" values="4;7;4" dur="3.6s" begin="2.4s" repeatCount="indefinite"/>
           <animate attributeName="opacity" values=".35;1;.35" dur="3.6s" begin="2.4s" repeatCount="indefinite"/>
