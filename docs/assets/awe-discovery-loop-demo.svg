@@ -84,11 +84,12 @@
         <path d="M695 210h48"><animate attributeName="stroke-dashoffset" from="0" to="-28" dur="1.4s" begin=".7s" repeatCount="indefinite"/></path>
       </g>
 
-      <path d="M905 340c0 30-84 48-362 48S182 370 182 340" fill="none" stroke="#c4c9d8" stroke-dasharray="4 8" stroke-linecap="round" marker-end="url(#arrow)"/>
-      <path class="motion" d="M905 340c0 30-84 48-362 48S182 370 182 340" fill="none" stroke="#7564e8" stroke-dasharray="4 8" stroke-linecap="round" stroke-width="2">
+      <path d="M905 340c0 18-84 34-362 34S182 358 182 340" fill="none" stroke="#c4c9d8" stroke-dasharray="4 8" stroke-linecap="round" marker-end="url(#arrow)"/>
+      <path class="motion" d="M905 340c0 18-84 34-362 34S182 358 182 340" fill="none" stroke="#7564e8" stroke-dasharray="4 8" stroke-linecap="round" stroke-width="2">
         <animate attributeName="stroke-dashoffset" from="0" to="-48" dur="2.8s" repeatCount="indefinite"/>
       </path>
-      <text x="446" y="393" font-size="12" fill="#687391">Repeat with a real, consented change</text>
+      <rect x="410" y="385" width="274" height="26" rx="13" fill="#ffffff" stroke="#e1e5ef"/>
+      <text x="547" y="402" text-anchor="middle" font-size="12" fill="#687391">Repeat with a real, consented change</text>
     </g>
 
     <text x="56" y="586" font-size="13" fill="#687391">Synthetic fixture  &#xB7;  offline  &#xB7;  keyless  &#xB7;  no agent execution  &#xB7;  every step stays readable without motion</text>
