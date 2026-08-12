@@ -1,80 +1,97 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
   <title id="title">AWE TraceGate discovery loop walkthrough</title>
-  <desc id="desc">A recorded offline synthetic walkthrough: generate a review bundle, independently replay it, then inspect its READY PASS status. Animated highlights move through the three steps when the renderer supports SVG animation.</desc>
+  <desc id="desc">A recorded offline synthetic walkthrough: build a review bundle, replay its held inputs, and inspect the resulting PASS decision. The external harness owns agent execution.</desc>
   <defs>
-    <linearGradient id="background" x1="0" x2="1" y1="0" y2="1">
-      <stop stop-color="#0d1117"/>
-      <stop offset="1" stop-color="#161b22"/>
-    </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
-      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#010409" flood-opacity=".45"/>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#27304d" flood-opacity=".12"/>
     </filter>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
-      <path d="M0 0 8 3 0 6z" fill="#8b949e"/>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
+      <path d="M0 0 8 4 0 8" fill="none" stroke="#687391" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/>
     </marker>
   </defs>
 
-  <rect width="1200" height="620" rx="24" fill="url(#background)"/>
-  <g font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace">
-    <text x="56" y="58" font-size="22" font-weight="700" fill="#f0f6fc">Discovery Loop: prove the next reusable change</text>
-    <text x="56" y="88" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" fill="#8b949e">Recorded from the included synthetic demo. The verifier runs offline; an external harness owns agent execution.</text>
+  <rect width="1200" height="620" rx="28" fill="#f7f8fc"/>
+  <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <text x="56" y="62" font-size="28" font-weight="720" letter-spacing="-.5" fill="#17203a">Discovery loop, made visible.</text>
+    <text x="56" y="92" font-size="15" fill="#52607a">A synthetic offline walkthrough: create &#x2192; replay &#x2192; inspect. The external harness still owns agent execution.</text>
 
     <g transform="translate(56 126)" filter="url(#shadow)">
-      <rect width="1088" height="418" rx="16" fill="#010409" stroke="#30363d"/>
-      <path d="M0 54h1088" stroke="#30363d"/>
-      <circle cx="27" cy="27" r="6" fill="#ff7b72"/>
-      <circle cx="49" cy="27" r="6" fill="#d29922"/>
-      <circle cx="71" cy="27" r="6" fill="#3fb950"/>
-      <text x="101" y="33" font-size="14" fill="#8b949e">awe — offline evidence decision</text>
+      <rect width="1088" height="414" rx="22" fill="#ffffff" stroke="#dfe3ef"/>
+      <path d="M0 62h1088" stroke="#e8ebf3"/>
+      <circle cx="30" cy="31" r="5" fill="#8c78ff"/>
+      <text x="50" y="36" font-size="12" font-weight="700" letter-spacing="1.5" fill="#687391">AWE TRACEGATE  /  OFFLINE DEMO</text>
+      <rect x="874" y="17" width="174" height="28" rx="14" fill="#f0edff"/>
+      <text x="900" y="35" font-size="12" font-weight="700" fill="#5849a5">SYNTHETIC FIXTURE</text>
 
-      <g transform="translate(34 76)">
-        <rect width="1008" height="72" rx="10" fill="#0d1117" stroke="#21262d"/>
-        <circle cx="25" cy="36" r="9" fill="#1f6feb">
-          <animate attributeName="opacity" values="1;.35;1" dur="3.6s" begin="0s" repeatCount="indefinite"/>
+      <g transform="translate(34 96)">
+        <rect width="302" height="228" rx="16" fill="#fbfbfe" stroke="#dfe3ef"/>
+        <circle cx="30" cy="34" r="15" fill="#ebe8ff" stroke="#7564e8"/>
+        <text x="25" y="39" font-size="12" font-weight="750" fill="#4f42a0">01</text>
+        <text x="58" y="30" font-size="12" font-weight="750" letter-spacing="1.1" fill="#687391">BUILD</text>
+        <text x="22" y="78" font-size="17" font-weight="700" fill="#17203a">Create the bundle</text>
+        <rect x="22" y="96" width="258" height="34" rx="8" fill="#f0edff"/>
+        <text x="36" y="118" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#403773">awe demo --out awe-demo</text>
+        <text x="22" y="158" font-size="13" fill="#52607a">Builds a complete Gate v2 fixture.</text>
+        <text x="22" y="180" font-size="13" fill="#52607a">No model calls. No network calls.</text>
+        <rect x="22" y="196" width="68" height="24" rx="12" fill="#e7f7ef"/>
+        <text x="42" y="212" font-size="11" font-weight="750" fill="#1c7548">PASS</text>
+        <circle class="motion" cx="270" cy="34" r="4" fill="#7564e8">
+          <animate attributeName="r" values="4;7;4" dur="3.6s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="1;.35;1" dur="3.6s" repeatCount="indefinite"/>
         </circle>
-        <text x="20" y="41" font-family="ui-sans-serif, system-ui, sans-serif" font-size="12" font-weight="700" fill="white">1</text>
-        <text x="55" y="33" font-size="15" fill="#c9d1d9">$ awe demo --out awe-demo</text>
-        <text x="55" y="57" font-size="13" fill="#8b949e">Generate a complete, visibly synthetic Gate v2 review bundle. No model or network calls.</text>
-        <rect x="856" y="19" width="118" height="34" rx="17" fill="#143d2a" stroke="#238636"/>
-        <text x="883" y="41" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="700" fill="#3fb950">PASS</text>
       </g>
 
-      <path d="M538 158v18" stroke="#8b949e" stroke-width="2" marker-end="url(#arrow)">
-        <animate attributeName="stroke" values="#8b949e;#58a6ff;#8b949e" dur="3.6s" begin=".8s" repeatCount="indefinite"/>
-      </path>
-
-      <g transform="translate(34 190)">
-        <rect width="1008" height="86" rx="10" fill="#0d1117" stroke="#21262d"/>
-        <circle cx="25" cy="43" r="9" fill="#8250df">
+      <g transform="translate(393 96)">
+        <rect width="302" height="228" rx="16" fill="#fbfbfe" stroke="#dfe3ef"/>
+        <circle cx="30" cy="34" r="15" fill="#e5f2ff" stroke="#4e8ed8"/>
+        <text x="25" y="39" font-size="12" font-weight="750" fill="#285d9e">02</text>
+        <text x="58" y="30" font-size="12" font-weight="750" letter-spacing="1.1" fill="#687391">REPLAY</text>
+        <text x="22" y="78" font-size="17" font-weight="700" fill="#17203a">Check every link</text>
+        <rect x="22" y="96" width="258" height="34" rx="8" fill="#eaf4ff"/>
+        <text x="36" y="118" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#285d9e">awe doctor awe-demo</text>
+        <text x="22" y="158" font-size="13" fill="#52607a">Reloads held inputs independently.</text>
+        <text x="22" y="180" font-size="13" fill="#52607a">Comparison, gate, and contracts.</text>
+        <rect x="22" y="196" width="88" height="24" rx="12" fill="#eaf4ff"/>
+        <text x="39" y="212" font-size="11" font-weight="750" fill="#285d9e">4 / 4 CHECKS</text>
+        <circle class="motion" cx="270" cy="34" r="4" fill="#4e8ed8">
+          <animate attributeName="r" values="4;7;4" dur="3.6s" begin="1.2s" repeatCount="indefinite"/>
           <animate attributeName="opacity" values=".35;1;.35" dur="3.6s" begin="1.2s" repeatCount="indefinite"/>
         </circle>
-        <text x="20" y="48" font-family="ui-sans-serif, system-ui, sans-serif" font-size="12" font-weight="700" fill="white">2</text>
-        <text x="55" y="33" font-size="15" fill="#c9d1d9">$ awe doctor awe-demo</text>
-        <text x="55" y="59" font-size="13" fill="#8b949e">[PASS] comparison replay  ·  [PASS] gate replay  ·  [PASS] typed contracts</text>
-        <text x="55" y="79" font-size="13" fill="#8b949e">Independent exact-input replay checks the complete evidence chain before review.</text>
-        <rect x="802" y="25" width="172" height="36" rx="18" fill="#1f2937" stroke="#444c56"/>
-        <text x="827" y="48" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="700" fill="#c9d1d9">4 / 4 checks</text>
       </g>
 
-      <path d="M538 286v18" stroke="#8b949e" stroke-width="2" marker-end="url(#arrow)">
-        <animate attributeName="stroke" values="#8b949e;#58a6ff;#8b949e" dur="3.6s" begin="2s" repeatCount="indefinite"/>
-      </path>
-
-      <g transform="translate(34 320)">
-        <rect width="1008" height="72" rx="10" fill="#0d1117" stroke="#21262d"/>
-        <circle cx="25" cy="36" r="9" fill="#238636">
+      <g transform="translate(752 96)">
+        <rect width="302" height="228" rx="16" fill="#fbfbfe" stroke="#dfe3ef"/>
+        <circle cx="30" cy="34" r="15" fill="#e7f7ef" stroke="#43a878"/>
+        <text x="25" y="39" font-size="12" font-weight="750" fill="#1c7548">03</text>
+        <text x="58" y="30" font-size="12" font-weight="750" letter-spacing="1.1" fill="#687391">DECIDE</text>
+        <text x="22" y="78" font-size="17" font-weight="700" fill="#17203a">Inspect the receipt</text>
+        <rect x="22" y="96" width="258" height="34" rx="8" fill="#e7f7ef"/>
+        <text x="36" y="118" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" fill="#1c7548">awe status awe-demo --json</text>
+        <text x="22" y="158" font-size="13" fill="#52607a">state: READY  &#xB7;  decision: PASS</text>
+        <text x="22" y="180" font-size="13" fill="#52607a">receipt: sha256:3fb1b2ed...96344d</text>
+        <rect x="22" y="196" width="68" height="24" rx="12" fill="#e7f7ef"/>
+        <text x="42" y="212" font-size="11" font-weight="750" fill="#1c7548">READY</text>
+        <circle class="motion" cx="270" cy="34" r="4" fill="#43a878">
+          <animate attributeName="r" values="4;7;4" dur="3.6s" begin="2.4s" repeatCount="indefinite"/>
           <animate attributeName="opacity" values=".35;1;.35" dur="3.6s" begin="2.4s" repeatCount="indefinite"/>
         </circle>
-        <text x="20" y="41" font-family="ui-sans-serif, system-ui, sans-serif" font-size="12" font-weight="700" fill="white">3</text>
-        <text x="55" y="33" font-size="15" fill="#c9d1d9">$ awe status awe-demo --json</text>
-        <text x="55" y="57" font-size="13" fill="#8b949e">state: READY  ·  decision: PASS  ·  receipt: sha256:3fb1b2ed...96344d</text>
-        <rect x="812" y="19" width="162" height="34" rx="17" fill="#143d2a" stroke="#238636">
-          <animate attributeName="stroke" values="#238636;#7ee787;#238636" dur="3.6s" begin="2.4s" repeatCount="indefinite"/>
-        </rect>
-        <text x="843" y="41" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="700" fill="#3fb950">READY</text>
       </g>
+
+      <path d="M336 210h48" fill="none" stroke="#a7afc3" stroke-linecap="round" stroke-width="2" marker-end="url(#arrow)"/>
+      <path d="M695 210h48" fill="none" stroke="#a7afc3" stroke-linecap="round" stroke-width="2" marker-end="url(#arrow)"/>
+      <g class="motion" fill="none" stroke="#7564e8" stroke-linecap="round" stroke-width="2" stroke-dasharray="5 9">
+        <path d="M336 210h48"><animate attributeName="stroke-dashoffset" from="0" to="-28" dur="1.4s" repeatCount="indefinite"/></path>
+        <path d="M695 210h48"><animate attributeName="stroke-dashoffset" from="0" to="-28" dur="1.4s" begin=".7s" repeatCount="indefinite"/></path>
+      </g>
+
+      <path d="M905 340c0 18-84 34-362 34S182 358 182 340" fill="none" stroke="#c4c9d8" stroke-dasharray="4 8" stroke-linecap="round" marker-end="url(#arrow)"/>
+      <path class="motion" d="M905 340c0 18-84 34-362 34S182 358 182 340" fill="none" stroke="#7564e8" stroke-dasharray="4 8" stroke-linecap="round" stroke-width="2">
+        <animate attributeName="stroke-dashoffset" from="0" to="-48" dur="2.8s" repeatCount="indefinite"/>
+      </path>
+      <rect x="410" y="385" width="274" height="26" rx="13" fill="#ffffff" stroke="#e1e5ef"/>
+      <text x="547" y="402" text-anchor="middle" font-size="12" fill="#687391">Repeat with a real, consented change</text>
     </g>
 
-    <text x="56" y="586" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#8b949e">For a real change: run your own harness, freeze the captured artifacts, then use the same replay and decision path.</text>
+    <text x="56" y="586" font-size="13" fill="#687391">Synthetic fixture  &#xB7;  offline  &#xB7;  keyless  &#xB7;  no agent execution  &#xB7;  every step stays readable without motion</text>
   </g>
 </svg>

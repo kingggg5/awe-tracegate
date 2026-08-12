@@ -22,7 +22,7 @@ def test_readme_discovery_walkthrough_is_present_and_valid_svg() -> None:
 
 
 def test_readme_discovery_walkthrough_steps_stay_inside_the_panel() -> None:
-    """Prevent the final walkthrough step from overlapping the panel footer."""
+    """Keep the three readable cards inside the refreshed visual frame."""
 
     asset = PROJECT_ROOT / "docs" / "assets" / "awe-discovery-loop-demo.svg"
     root = ElementTree.fromstring(asset.read_text(encoding="utf-8"))
@@ -36,16 +36,26 @@ def test_readme_discovery_walkthrough_steps_stay_inside_the_panel() -> None:
     panel_height = int(panel_rect.get("height", "0"))
     step_bounds = []
     for group in panel.findall(f"{namespace}g"):
-        match = re.fullmatch(r"translate\(34 (\d+)\)", group.get("transform", ""))
+        match = re.fullmatch(r"translate\((\d+) (\d+)\)", group.get("transform", ""))
         if not match:
             continue
         step = next((child for child in group if child.tag == f"{namespace}rect"), None)
-        if step is None or step.get("width") != "1008":
+        if step is None or step.get("width") != "302":
             continue
-        step_bounds.append((int(match.group(1)), int(step.get("height", "0"))))
+        step_bounds.append(
+            (
+                int(match.group(1)),
+                int(match.group(2)),
+                int(step.get("width", "0")),
+                int(step.get("height", "0")),
+            )
+        )
 
-    assert step_bounds == [(76, 72), (190, 86), (320, 72)]
-    assert all(offset + height <= panel_height - 20 for offset, height in step_bounds)
+    assert step_bounds == [(34, 96, 302, 228), (393, 96, 302, 228), (752, 96, 302, 228)]
+    assert all(
+        offset_y + height <= panel_height - 20 for _, offset_y, _, height in step_bounds
+    )
+    assert all(offset_x + width <= 1088 - 34 for offset_x, _, width, _ in step_bounds)
 
 
 def test_readme_workspace_loop_is_present_and_readable() -> None:
