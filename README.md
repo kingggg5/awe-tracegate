@@ -109,6 +109,13 @@ The monorepo includes [`apps/workspace`](apps/workspace), a dependency-light
 TypeScript app for coordinating agent work without moving execution authority
 into TraceGate. It supports this local flow:
 
+![Animated AWE Workspace flow: goal, Discovery brief, consented permissions, and typed handoff](docs/assets/awe-workspace-loop.svg)
+
+The SVG is intentionally self-contained and readable as a static image when a
+renderer disables animation. It reflects the current Workspace boundary: the
+external runner executes work, while Workspace only coordinates and records
+the approved handoff.
+
 ```text
 Save goal -> Define discovery brief -> Select external runner and permissions
           -> Human approval + optional trace consent -> Export typed handoff
