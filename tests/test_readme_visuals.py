@@ -46,3 +46,13 @@ def test_readme_discovery_walkthrough_steps_stay_inside_the_panel() -> None:
 
     assert step_bounds == [(104, 112), (270, 136), (460, 112)]
     assert all(offset + height <= panel_height - 20 for offset, height in step_bounds)
+
+
+def test_readme_workspace_loop_is_present_and_readable() -> None:
+    readme = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    asset = PROJECT_ROOT / "docs" / "assets" / "awe-workspace-loop.svg"
+    payload = asset.read_text(encoding="utf-8")
+    assert "docs/assets/awe-workspace-loop.svg" in readme
+    assert "does not execute tools" in payload
+    assert payload.count("<animate") >= 4
+    ElementTree.fromstring(payload)
