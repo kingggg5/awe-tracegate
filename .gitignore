@@ -18,3 +18,4 @@ node_modules/
 .impeccable/
 .plugin-scaffold/
 .codex-*-tmp/
+.pytest-temp-*/
