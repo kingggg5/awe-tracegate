@@ -1,7 +1,7 @@
 # AWE TraceGate implementation plan
 
-**Snapshot:** PR #14 current branch (implementation checkpoint `0149a50`)  
-**Updated:** 2026-08-12  
+**Snapshot:** PR #14 current branch (implementation checkpoint `0149a50`)
+**Updated:** 2026-08-12
 **Positioning:** reproducible evidence infrastructure for agent experiments;
 TraceGate is the offline decision core and external hosts remain responsible
 for execution.
