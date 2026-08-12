@@ -12,6 +12,10 @@
 [GitHub Action](#github-action) · [Skills](#install-the-skills) ·
 [Architecture](docs/architecture.md) · [Roadmap](docs/roadmap.md)
 
+Implementation plan: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) ·
+[External pilot runbook](docs/EXTERNAL_PILOT_RUNBOOK.md) ·
+[Release runbook](docs/RELEASE_RUNBOOK.md)
+
 > Don't merely observe an agent. Determine whether the supplied evidence
 > supports the change.
 
@@ -34,9 +38,11 @@ Discover → Experiment → Evaluate → Verify → Improve
                               TraceGate
 ```
 
-AWE does not build or run your agent. It focuses on a narrower engineering
-question: **did this controlled agent, strategy, or model change improve the
-result—and is the supplied evidence strong enough to act on?**
+The trusted TraceGate core does not build or run your agent. It focuses on a
+narrower engineering question: **did this controlled agent, strategy, or model
+change improve the result—and is the supplied evidence strong enough to act
+on?** The same repository also includes AWE Workspace, a separate local process
+for human-approved handoffs to external agent hosts.
 
 **TraceGate is AWE's trusted evidence-integrity and decision core.** It is a
 portable Agent Skills plugin for Codex and Claude Code plus an offline
@@ -80,6 +86,8 @@ and can require typed terminal outcomes plus asserted judge-calibration evidence
 | Connect an eval harness | Strict evidence envelopes and conformance checks |
 | Share results | Consent-aware redaction, signing, and a local disclosure workflow |
 | Work across agent hosts | The same focused Skills for Codex, Claude Code, npm, or Git installs |
+| Coordinate agent work locally | AWE Workspace saves goals and exports explicitly approved, narrowly permissioned handoffs |
+| Learn from real coding-agent runs | A consented external adapter normalizes Codex, Claude Code, or generic JSONL into redacted trace receipts and PostgreSQL/Alembic evidence bundles |
 | Avoid another model credential | The verifier is offline and needs no LLM-provider key |
 | Re-check a decision later | Re-run Gate v1 or comparison verification from separately held inputs and compare receipt hashes |
 | Operate the workflow after setup | `awe status` summarizes scaffold integrity, missing real inputs, bundle replay, decision, and next action |
@@ -94,6 +102,104 @@ In the current release, **exact-input replay** means re-running the deterministi
 gate from the original JSON/JSONL inputs and requiring the same canonical
 receipt. It does not replay a live model backend, reproduce network responses,
 or claim that a stochastic agent run can be reconstructed bit-for-bit.
+
+## Agent runtime workspace
+
+The monorepo includes [`apps/workspace`](apps/workspace), a dependency-light
+TypeScript app for coordinating agent work without moving execution authority
+into TraceGate. It supports this local flow:
+
+```text
+Save goal -> Define discovery brief -> Select external runner and permissions
+          -> Human approval + optional trace consent -> Export typed handoff
+          -> External agent + isolated harness -> Discovery adapter
+          -> Validate resulting held evidence with TraceGate
+```
+
+Workspace currently supports Codex, Claude Code, or another external runner and
+only three grants: read the selected goal, read stored evidence references, and
+write a local checkpoint. Trace capture and PostgreSQL/Alembic evaluation are
+separate, optional consent scopes and are off by default. Consent can be revoked
+locally, but already exported copies require separate handling. Workspace does
+not invoke the runner, execute a shell or browser, install connectors, hold
+provider credentials, or convert a checkpoint into evidence. This keeps the
+Python decision core offline, keyless, and fail-closed.
+
+```bash
+npm run workspace:install
+npm run workspace:test
+npm run workspace:start
+```
+
+Then open <http://127.0.0.1:8787>. See the
+[Workspace package README](apps/workspace/README.md) for its API, schemas, and
+security boundary.
+
+## PostgreSQL/Alembic agent reliability
+
+The first implemented external Discovery adapter deliberately targets one
+domain: coding-agent changes to PostgreSQL/Alembic migrations. It connects the
+three AWE boundaries without turning TraceGate into an agent runtime:
+
+```text
+Workspace: goal -> permissions -> human approval -> optional trace consent
+External host: Codex / Claude Code / other runner -> raw JSONL trace
+Isolated harness: forward -> rollback -> data preservation -> tests
+Discovery adapter: redact -> bind exact repo/SHA -> group typed failures
+TraceGate: compare -> exact held-input replay -> Gate v2 -> explain
+```
+
+`awe-discovery ingest-trace` accepts Codex `exec --json`, Claude Code
+`--output-format stream-json`, or the documented generic JSONL shape. It keeps
+event types, allowlisted operation names, typed outcomes, usage counters, and
+payload digests; it does not retain raw prompts, commands, or outputs. The
+repository/SHA binding is explicitly caller-asserted until a trusted runner
+attestation is supplied. Payload digests prove integrity, not anonymity, so
+capture-side secret/PII controls are still required.
+
+`awe-discovery build-migration-bundle` requires separate
+`evaluate_migration` consent and exactly four sorted evidence lanes for every
+frozen case: forward migration, rollback, data preservation, and tests. A
+successful `alembic upgrade head` cannot hide missing rollback evidence or data
+loss. The adapter emits an `ExperimentManifest`, typed quality evidence, a
+deterministic failure-cluster report, and one content-addressed bundle ready for
+the existing comparison flow.
+
+```bash
+awe-discovery ingest-trace --help
+awe-discovery build-migration-bundle --help
+```
+
+Run the complete checked-in example in
+[`examples/postgres-alembic-discovery`](examples/postgres-alembic-discovery).
+The fixture is synthetic; an independent real-world pilot remains a release
+criterion. For a real database-backed check, the repository also includes an
+isolated runner reference implementation. It is intentionally outside the
+trusted core and performs no agent execution:
+
+```bash
+python -m pip install -r examples/postgres-alembic-discovery/harness/requirements.txt
+python examples/postgres-alembic-discovery/harness/run.py \
+  --dsn postgresql://awe_runner:awe_runner@127.0.0.1:5432/awe_runner \
+  --repository https://github.com/your-org/your-repository \
+  --commit-sha "$(git rev-parse HEAD)" \
+  --out migration-results.json
+```
+
+The harness creates a disposable schema, runs the forward migration, checks
+row preservation, rolls back, and checks the rows again. The four required
+lanes must be `success`: `forward_migration`, `data_preservation`, `rollback`,
+and `tests`. CI runs the same command against PostgreSQL 16; local verification
+on the maintainer workstation produced four successful lanes in the checked-out
+worktree. The DSN is never written to the artifact and the temporary schema is
+dropped in a `finally` block. Sign the resulting package with an operator key
+before requiring `signature_verified` provenance in a gate.
+
+Discovery interventions are also consent-bound. Use
+`awe-discovery propose-intervention`, then require an independent human
+approval before `prepare-replay` emits a handoff for an external runner. AWE
+never starts that runner or treats the resulting output as evidence until the
+new trace and held evaluation inputs are independently validated.
 
 ## Start here
 
@@ -628,10 +734,10 @@ truth.
 
 Evidence packages can additionally bind repository URI, exact commit, producer
 and environment digests, capture time, maximum age, provenance level, and the
-external verification artifact supporting a signed or attested claim.
-Version 0.3 enforces only an `asserted` minimum provenance level. Signed and
-attested labels remain recorded metadata until a future trusted verifier can
-replay the external verification artifact; they cannot satisfy a gate floor.
+external verification artifact supporting a signed or attested claim. Version
+0.3 can enforce `signature_verified` when the separately checked Ed25519 receipt
+targets the exact package digest, repository, and commit. `attested` remains
+record-only until a trusted attestation verifier is integrated.
 
 ## Reproducibility evidence
 
@@ -764,6 +870,11 @@ Still required before a production-ready claim:
 - complete an independent external-adopter pilot;
 - add authenticated actors and an append-only decision ledger before exposing a
   shared network service.
+
+The current PR #14 checkpoint is commit `0149a50`. It is a validated branch
+commit, not an immutable release tag. A real pilot must use a non-sensitive
+migration task, record trace/evaluation consent, run all four migration lanes,
+and let a different person replay the artifacts from a clean checkout.
 
 Autonomous execution, browser control, deployment, model routing, memory, hidden
 telemetry, and automatic promotion are intentionally out of scope.

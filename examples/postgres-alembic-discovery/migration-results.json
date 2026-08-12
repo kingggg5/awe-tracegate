@@ -1,0 +1,36 @@
+{
+  "schema_version": "awe.postgres-alembic-experiment.v1",
+  "experiment_id": "postgres-alembic-example",
+  "repository_uri": "https://github.com/example/postgres-migrations",
+  "commit_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "subject_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "dataset_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "dataset_split_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "harness_name": "postgres-alembic-harness",
+  "harness_version": "1.0.0",
+  "harness_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+  "strategy_name": "candidate",
+  "strategy_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+  "model_provider": "openai",
+  "model_name": "external-coding-agent",
+  "model_config_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+  "environment_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+  "grader_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+  "trials": [
+    {
+      "trial_id": "migration-trial-01",
+      "case_id": "add-column-preserve-rows",
+      "seed": 7,
+      "checks": [
+        {"name": "data_preservation", "outcome": "success", "duration_ms": 18, "evidence_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999"},
+        {"name": "forward_migration", "outcome": "success", "duration_ms": 41, "evidence_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+        {"name": "rollback", "outcome": "failure", "duration_ms": 34, "evidence_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+        {"name": "tests", "outcome": "success", "duration_ms": 96, "evidence_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
+      ],
+      "cost_microusd": 50,
+      "input_tokens": 160,
+      "cached_input_tokens": 40,
+      "output_tokens": 55
+    }
+  ]
+}

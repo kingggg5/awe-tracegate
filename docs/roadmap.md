@@ -48,6 +48,18 @@ The pre-alpha source currently provides:
   receipts, a loopback API, generated TypeScript types, and a local review UI;
 - reproducible release-bundle tooling, checksums, an SPDX SBOM, clean-install
   smoke tests, and an unprivileged exact-tag CI prerequisite.
+- a consented external Discovery adapter for Codex, Claude Code, and generic
+  JSONL plus one PostgreSQL/Alembic reliability contract covering forward,
+  rollback, data-preservation, and test evidence without executing a runner or
+  database inside TraceGate.
+- a disposable PostgreSQL/Alembic runner reference implementation with a
+  PostgreSQL 16 CI job; it emits four typed lanes and destroys its schema after
+  each run.
+- consent-bound Discovery intervention, independent human approval, and
+  external replay handoff contracts; the trusted core never starts the runner.
+- an Ed25519 evidence-package verification bridge that can raise package
+  provenance from asserted to `signature_verified` only when the signed target
+  matches the exact package digest, repository, and commit.
 
 This foundation re-verifies supplied artifacts and produces deterministic,
 content-addressed decisions. Comparison v1 estimates evidence reliability only
@@ -66,6 +78,14 @@ improvement.
    source traces, policy, repository revision, and expected receipt are public.
 5. Exercise Gate v2 against released artifacts and one independent adopter,
    including its held-input comparison verifier and fail-closed quality sidecars.
+6. Run the PostgreSQL/Alembic adapter against one consented external coding-agent
+   pilot and publish redacted artifacts, harness/environment digests, negative
+   cases, and an adjudicated result.
+
+Current implementation checkpoint: PR #14 commit `0149a50` contains the
+disposable PostgreSQL/Alembic runner, signature-verified package bridge, and
+consent-bound intervention/replay contracts. It remains a branch commit until
+the immutable release tag and independent pilot exist.
 
 Exit criteria:
 
@@ -102,7 +122,8 @@ Exit criteria:
 
 ## P2 — Diagnose failures and interoperate
 
-- a stable failure taxonomy covering planning, tool selection, tool arguments,
+- extend the implemented migration/terminal taxonomy into a stable failure
+  taxonomy covering planning, tool selection, tool arguments,
   retrieval, environment, verification, recovery, policy, timeout,
   infrastructure, and evaluator disagreement;
 - deterministic failure grouping from declared features, with provenance for

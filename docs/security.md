@@ -90,9 +90,11 @@ policy, grant a capability, approve a step, or change an effect class.
   those fields proves no freshness, even when exact-input gate replay succeeds.
 - A `signature_verified` or `attested` provenance label plus a verification
   artifact digest does not establish trust by itself. The caller must verify the
-  external signature or attestation against an operator-owned policy before
-  constructing that envelope. TraceGate v0.3 therefore records those labels but
-  refuses to use them as an enforceable minimum; only `asserted` is supported.
+  external signature or attestation against an operator-owned policy. The v0.3
+  Ed25519 bridge can enforce `signature_verified` only from a separately
+  verified receipt whose target is the exact evidence-package digest,
+  repository, and commit. `attested` remains record-only until a trusted
+  attestation verifier is integrated.
 - Judge IDs, judge digests, judge votes, and human verdicts in quality sidecars
   are asserted evidence. Their agreement metric does not authenticate a reviewer,
   establish that a judge is independent, or prove label correctness.
@@ -162,11 +164,48 @@ It has no natural-language composer and does not evaluate prompt text, call a
 model, run shell commands, or load arbitrary plugins. The tools view is an
 inventory, not an OAuth or secret storage surface.
 
-Any external agent host or workspace owns its goal/command composer and remains
-a different process boundary. Connecting one to TraceGate does not give it
-permission to change gate policy, authenticate a reviewer, or turn its own
-output into approval. Treat its traces as untrusted evidence at the same typed
+The repository includes AWE Workspace under `apps/workspace`, but it remains a
+different package and process boundary. Connecting it or any external agent host
+to TraceGate does not give it permission to change gate policy, authenticate a
+reviewer, or turn its own output into approval. Treat its goals, handoffs,
+checkpoints, artifact references, and traces as untrusted data at the same typed
 ingestion boundary as every other producer.
+
+Workspace binds only to a loopback host, accepts only a loopback TraceGate URL,
+requires same-origin mutations, bounds request bodies and stored records, and
+uses restrictive local file permissions where the platform supports them. It
+is still a single-user local coordinator, not a hardened multi-tenant identity
+service. A local reviewer identifier is asserted rather than authenticated,
+and cancelling a handoff record does not stop work already running in an
+external host.
+
+The `awe.runtime-handoff.v2` permission names describe the data a user approved
+for export. They do not install a connector or grant an operating-system
+capability. In particular, the Workspace has no shell, browser, network,
+credential, deployment, or promotion permission. External hosts must enforce
+their own sandbox and approval model.
+
+Trace capture and migration evaluation use separate asserted consent scopes.
+Both are off by default, bind one run/runner/reviewer ID, and can be revoked in
+the local store. The Discovery adapter rejects a supplied consent record that
+is revoked, expired, mismatched, or missing. It cannot discover that a
+previously exported active handoff was later revoked; operators must replace
+stale handoffs and separately track/delete raw traces or exported bundles.
+Cancelling a local handoff revokes an active consent record but still cannot
+stop or erase external work.
+
+Repository and commit values on an agent trace receipt are caller-asserted. They
+fail closed on later bundle mismatch but do not prove what checkout the external
+host actually executed. Do not claim attested revision provenance until an
+operator verifies and binds a trusted runner or artifact attestation.
+
+Raw provider JSONL is untrusted and may contain prompts, commands, tool output,
+secrets, PII, customer data, or source code. The adapter bounds line/event
+counts and total input at 32 MB, rejects malformed/duplicate-key objects, and
+emits only allowlisted metadata plus
+canonical payload digests. Digests are not anonymization and may permit guessing
+low-entropy values; sensitive values must be redacted before capture. The
+trusted core never executes raw events or migration artifacts.
 
 ## Dependency and release hygiene
 

@@ -26,6 +26,7 @@ from .contracts import (
     ProvenanceLevel,
     QualityPolicy,
     RepositoryUri,
+    SignatureVerification,
     SkillBom,
     canonical_digest,
 )
@@ -69,18 +70,33 @@ class GateReplayExpectations:
             and not 0 <= self.maximum_evidence_age_seconds <= 31_556_952_000
         ):
             raise ValueError("expected maximum evidence age is outside policy bounds")
-        if self.minimum_provenance_level not in (None, "asserted"):
+        if self.minimum_provenance_level not in (
+            None,
+            "asserted",
+            "signature_verified",
+        ):
             raise ValueError(
-                "only asserted provenance can be expected until an external "
-                "signature or attestation verifier is configured"
+                "only asserted provenance or signature_verified provenance "
+                "with a trusted verifier can be enforced"
             )
 
 
-def _package_provenance(package: EvidencePackage) -> ProvenanceLevel:
-    return min(
+def _package_provenance(
+    package: EvidencePackage,
+    signature_verification: SignatureVerification | None = None,
+) -> ProvenanceLevel:
+    declared = min(
         (envelope.provenance_level for envelope in package.envelopes),
         key=_PROVENANCE_RANK.__getitem__,
     )
+    if (
+        signature_verification is not None
+        and signature_verification.status == "valid"
+        and signature_verification.artifact_kind == "evidence_package"
+        and signature_verification.artifact_digest == package.package_digest
+    ):
+        return "signature_verified"
+    return declared
 
 
 def gate_receipt_payload(receipt: GateReceipt) -> dict[str, object]:
@@ -102,6 +118,7 @@ def _package_reasons(
     maximum_age_seconds: int | None,
     minimum_provenance_level: ProvenanceLevel | None,
     skill_bom: SkillBom | None,
+    signature_verification: SignatureVerification | None,
 ) -> list[str]:
     reasons: list[str] = []
     if (
@@ -111,9 +128,17 @@ def _package_reasons(
         reasons.append("evidence_package_repository_mismatch")
     if expected_commit_sha is not None and package.commit_sha != expected_commit_sha:
         reasons.append("evidence_package_commit_mismatch")
+    if signature_verification is not None:
+        if signature_verification.status != "valid":
+            reasons.append("evidence_package_signature_invalid")
+        elif (
+            signature_verification.artifact_kind != "evidence_package"
+            or signature_verification.artifact_digest != package.package_digest
+        ):
+            reasons.append("evidence_package_signature_target_mismatch")
     if (
         minimum_provenance_level is not None
-        and _PROVENANCE_RANK[_package_provenance(package)]
+        and _PROVENANCE_RANK[_package_provenance(package, signature_verification)]
         < _PROVENANCE_RANK[minimum_provenance_level]
     ):
         reasons.append("evidence_package_provenance_below_minimum")
@@ -173,6 +198,7 @@ def gate_evidence(
     maximum_age_seconds: int | None = None,
     minimum_provenance_level: ProvenanceLevel | None = None,
     skill_bom: SkillBom | None = None,
+    signature_verification: SignatureVerification | None = None,
 ) -> GateReceipt:
     """Create one fail-closed receipt over the complete local evidence chain.
 
@@ -193,14 +219,23 @@ def gate_evidence(
         )
     ):
         raise ValueError("repository, commit, and age checks require evidence package")
+    if signature_verification is not None and evidence_package is None:
+        raise ValueError("signature verification requires an evidence package")
     if maximum_age_seconds is not None and maximum_age_seconds < 0:
         raise ValueError("maximum evidence age cannot be negative")
     if maximum_age_seconds is not None and maximum_age_seconds > 31_556_952_000:
         raise ValueError("maximum evidence age exceeds 1,000 years")
-    if minimum_provenance_level not in (None, "asserted"):
+    if minimum_provenance_level not in (None, "asserted", "signature_verified"):
         raise ValueError(
-            "only asserted provenance can be enforced until an external "
-            "signature or attestation verifier is configured"
+            "only asserted provenance or signature_verified provenance "
+            "with a trusted verifier can be enforced"
+        )
+    if (
+        minimum_provenance_level == "signature_verified"
+        and signature_verification is None
+    ):
+        raise ValueError(
+            "signature_verified provenance requires a verification receipt"
         )
 
     active_policy = policy or EvaluationPolicy()
@@ -247,6 +282,7 @@ def gate_evidence(
                 maximum_age_seconds=maximum_age_seconds,
                 minimum_provenance_level=minimum_provenance_level,
                 skill_bom=skill_bom,
+                signature_verification=signature_verification,
             )
         )
 
@@ -276,7 +312,7 @@ def gate_evidence(
             evidence_package.package_digest if evidence_package is not None else None
         ),
         evidence_provenance_level=(
-            _package_provenance(evidence_package)
+            _package_provenance(evidence_package, signature_verification)
             if evidence_package is not None
             else None
         ),
@@ -310,6 +346,7 @@ def validate_gate_receipt_inputs(
     *,
     evidence_package: EvidencePackage | None = None,
     skill_bom: SkillBom | None = None,
+    signature_verification: SignatureVerification | None = None,
     expectations: GateReplayExpectations | None = None,
 ) -> GateReceipt:
     """Replay a v1 receipt against every exact input it claims to bind.
@@ -365,6 +402,7 @@ def validate_gate_receipt_inputs(
             expectations.minimum_provenance_level if expectations is not None else None
         ),
         skill_bom=skill_bom,
+        signature_verification=signature_verification,
     )
     if replayed.receipt_hash != receipt.receipt_hash:
         raise ValueError("gate receipt does not match exact input replay")
@@ -391,6 +429,7 @@ def gate_evidence_v2(
     maximum_age_seconds: int | None = None,
     minimum_provenance_level: ProvenanceLevel | None = None,
     skill_bom: SkillBom | None = None,
+    signature_verification: SignatureVerification | None = None,
 ) -> GateReceiptV2:
     """Create Gate v2 without changing the existing v1 receipt contract.
 
@@ -415,6 +454,7 @@ def gate_evidence_v2(
         maximum_age_seconds=maximum_age_seconds,
         minimum_provenance_level=minimum_provenance_level,
         skill_bom=skill_bom,
+        signature_verification=signature_verification,
     )
     comparison_verification = verify_comparison_receipt_inputs(
         comparison,
@@ -541,6 +581,7 @@ def validate_gate_v2_receipt_inputs(
     quality_policy: QualityPolicy | None = None,
     evidence_package: EvidencePackage | None = None,
     skill_bom: SkillBom | None = None,
+    signature_verification: SignatureVerification | None = None,
     expectations: GateReplayExpectations | None = None,
 ) -> GateReceiptV2:
     """Replay Gate v2 against held inputs and independently owned controls."""
@@ -594,6 +635,7 @@ def validate_gate_v2_receipt_inputs(
             expectations.minimum_provenance_level if expectations is not None else None
         ),
         skill_bom=skill_bom,
+        signature_verification=signature_verification,
     )
     if replayed.receipt_hash != receipt.receipt_hash:
         raise ValueError("Gate v2 receipt does not match exact input replay")

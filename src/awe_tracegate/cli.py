@@ -46,6 +46,7 @@ from .contracts import (
     RepositoryUri,
     SensitivityPolicy,
     SensitivityReceipt,
+    SignatureVerification,
     SignedReceiptBundle,
     SkillBom,
 )
@@ -256,16 +257,18 @@ def _build_parser() -> argparse.ArgumentParser:
     gate_parser.add_argument("--policy", type=Path)
     gate_parser.add_argument("--skill-bom", type=Path)
     gate_parser.add_argument("--evidence-package", type=Path)
+    gate_parser.add_argument(
+        "--signature-verification",
+        type=Path,
+        help="verified SignatureVerification for the supplied evidence package",
+    )
     gate_parser.add_argument("--repository")
     gate_parser.add_argument("--commit-sha")
     gate_parser.add_argument("--max-age-seconds", type=int)
     gate_parser.add_argument(
         "--minimum-provenance",
-        choices=("asserted",),
-        help=(
-            "enforce declared provenance only; cryptographic and attestation "
-            "verification are not yet implemented"
-        ),
+        choices=("asserted", "signature_verified"),
+        help="enforce asserted or explicitly verified Ed25519 provenance",
     )
     gate_parser.add_argument(
         "--evaluated-at",
@@ -396,10 +399,13 @@ def _build_parser() -> argparse.ArgumentParser:
     gate_v2_parser.add_argument("--quality-policy", type=Path)
     gate_v2_parser.add_argument("--skill-bom", type=Path)
     gate_v2_parser.add_argument("--evidence-package", type=Path)
+    gate_v2_parser.add_argument("--signature-verification", type=Path)
     gate_v2_parser.add_argument("--repository")
     gate_v2_parser.add_argument("--commit-sha")
     gate_v2_parser.add_argument("--max-age-seconds", type=int)
-    gate_v2_parser.add_argument("--minimum-provenance", choices=("asserted",))
+    gate_v2_parser.add_argument(
+        "--minimum-provenance", choices=("asserted", "signature_verified")
+    )
     gate_v2_parser.add_argument("--evaluated-at")
     _add_output(gate_v2_parser)
 
@@ -616,6 +622,11 @@ def _gate(args: argparse.Namespace) -> int:
         else None
     )
     skill_bom = _load_model(args.skill_bom, SkillBom) if args.skill_bom else None
+    signature_verification = (
+        _load_model(args.signature_verification, SignatureVerification)
+        if args.signature_verification
+        else None
+    )
     evaluated_at = (
         datetime.fromisoformat(args.evaluated_at.replace("Z", "+00:00"))
         if args.evaluated_at
@@ -643,6 +654,7 @@ def _gate(args: argparse.Namespace) -> int:
         maximum_age_seconds=args.max_age_seconds,
         minimum_provenance_level=args.minimum_provenance,
         skill_bom=skill_bom,
+        signature_verification=signature_verification,
     )
     _emit(receipt, args.out)
     if receipt.status == "PASS":
@@ -800,6 +812,11 @@ def _gate_v2(args: argparse.Namespace) -> int:
         else None
     )
     skill_bom = _load_model(args.skill_bom, SkillBom) if args.skill_bom else None
+    signature_verification = (
+        _load_model(args.signature_verification, SignatureVerification)
+        if args.signature_verification
+        else None
+    )
     provenance_requested = any(
         value is not None
         for value in (
@@ -852,6 +869,7 @@ def _gate_v2(args: argparse.Namespace) -> int:
         maximum_age_seconds=args.max_age_seconds,
         minimum_provenance_level=args.minimum_provenance,
         skill_bom=skill_bom,
+        signature_verification=signature_verification,
     )
     _emit(receipt, args.out)
     if receipt.status == "PASS":

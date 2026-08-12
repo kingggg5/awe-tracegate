@@ -41,11 +41,19 @@ from .contracts import (
     SignedReceiptBundle,
     SkillBom,
 )
+from .discovery import (
+    AgentTraceReceipt,
+    FailureClusterReport,
+    MigrationDiscoveryBundle,
+    PostgresAlembicExperiment,
+    TraceCaptureConsent,
+)
 from .recipes import DecisionRecipeCatalog, RecipeScaffoldManifest
 from .workspace_status import WorkspaceStatusReport
 
 SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "adapter-conformance-v1.schema.json": AdapterConformanceReceipt,
+    "agent-trace-receipt-v1.schema.json": AgentTraceReceipt,
     "capabilities-v1.schema.json": CapabilitiesDocument,
     "candidate-v1.schema.json": CompilationCandidate,
     "compilation-receipt-v1.schema.json": CompilationReceipt,
@@ -66,8 +74,11 @@ SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "explanation-receipt-v1.schema.json": ExplanationReceipt,
     "gate-receipt-v1.schema.json": GateReceipt,
     "gate-receipt-v2.schema.json": GateReceiptV2,
+    "failure-cluster-report-v1.schema.json": FailureClusterReport,
     "governed-redaction-summary-v1.schema.json": GovernedRedactionSummary,
     "promotion-receipt-v2.schema.json": PromotionReceipt,
+    "migration-discovery-bundle-v1.schema.json": MigrationDiscoveryBundle,
+    "postgres-alembic-experiment-v1.schema.json": PostgresAlembicExperiment,
     "receipt-verification-v2.schema.json": ReceiptVerification,
     "redaction-summary-v1.schema.json": RedactionSummary,
     "redaction-policy-v1.schema.json": RedactionPolicy,
@@ -78,6 +89,7 @@ SCHEMA_MODELS: dict[str, type[BaseModel]] = {
     "sensitivity-receipt-v1.schema.json": SensitivityReceipt,
     "signed-receipt-bundle-v1.schema.json": SignedReceiptBundle,
     "skill-bom-v1.schema.json": SkillBom,
+    "trace-capture-consent-v1.schema.json": TraceCaptureConsent,
     "workspace-status-v1.schema.json": WorkspaceStatusReport,
     "quality-policy-v1.schema.json": QualityPolicy,
 }

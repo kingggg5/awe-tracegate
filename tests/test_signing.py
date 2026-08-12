@@ -8,7 +8,9 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from pydantic import ValidationError
 
 from awe_tracegate.contracts import SignedReceiptBundle
+from awe_tracegate.gate import gate_evidence
 from awe_tracegate.signing import create_signed_bundle, verify_signed_bundle
+from tests.test_gate import _package
 
 REPOSITORY = "https://github.com/example/agent"
 COMMIT = "a" * 40
@@ -116,3 +118,41 @@ def test_rejects_untrusted_key() -> None:
 
     assert result.status == "invalid"
     assert result.reasons == ("invalid_signature", "untrusted_public_key")
+
+
+def test_verified_evidence_package_can_satisfy_signature_floor() -> None:
+    private_pem, public_pem = keys()
+    traces, baseline, candidate, policy, package = _package("asserted")
+    signed = create_signed_bundle(
+        package.model_dump(mode="json", exclude={"package_digest"}),
+        artifact_kind="evidence_package",
+        repository_uri=package.repository_uri,
+        commit_sha=package.commit_sha,
+        signer_id=SIGNER,
+        issued_at=datetime(2026, 8, 9, tzinfo=UTC),
+        private_key_pem=private_pem,
+    )
+    verification = verify_signed_bundle(
+        signed,
+        trusted_public_key_pem=public_pem,
+        expected_signer_id=SIGNER,
+        expected_repository_uri=package.repository_uri,
+        expected_commit_sha=package.commit_sha,
+    )
+
+    receipt = gate_evidence(
+        traces,
+        baseline,
+        candidate,
+        policy,
+        evidence_package=package,
+        expected_repository=package.repository_uri,
+        expected_commit_sha=package.commit_sha,
+        minimum_provenance_level="signature_verified",
+        signature_verification=verification,
+    )
+
+    assert verification.status == "valid"
+    assert verification.artifact_digest == package.package_digest
+    assert receipt.status == "PASS"
+    assert receipt.evidence_provenance_level == "signature_verified"

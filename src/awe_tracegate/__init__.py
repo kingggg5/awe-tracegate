@@ -29,9 +29,19 @@ from .contracts import (
     ReviewBundleReport,
     SensitivityPolicy,
     SensitivityReceipt,
+    SignatureVerification,
     SkillBom,
 )
 from .demo import generate_demo, inspect_review_bundle
+from .discovery import (
+    AgentTraceReceipt,
+    FailureClusterReport,
+    MigrationDiscoveryBundle,
+    PostgresAlembicExperiment,
+    TraceCaptureConsent,
+    build_migration_discovery_bundle,
+    import_agent_trace,
+)
 from .evaluation import (
     compare_experiments,
     evaluate_candidate,
@@ -51,6 +61,14 @@ from .gate import (
     validate_gate_receipt_inputs,
     validate_gate_v2_receipt_inputs,
 )
+from .intervention import (
+    DiscoveryIntervention,
+    DiscoveryReplayRequest,
+    InterventionApproval,
+    approve_intervention,
+    prepare_replay_request,
+    propose_intervention,
+)
 from .quality import assess_experiment_quality
 from .recipes import (
     DecisionRecipe,
@@ -67,6 +85,7 @@ from .workspace_status import WorkspaceStatusReport, inspect_workspace_status
 
 __all__ = [
     "AdapterConformanceReceipt",
+    "AgentTraceReceipt",
     "CapabilitiesDocument",
     "ComparisonPolicy",
     "ComparisonReceipt",
@@ -76,6 +95,8 @@ __all__ = [
     "CompileRequest",
     "DecisionRecipe",
     "DecisionRecipeCatalog",
+    "DiscoveryIntervention",
+    "DiscoveryReplayRequest",
     "EvaluationReceipt",
     "EvidenceEnvelope",
     "EvidencePackage",
@@ -84,9 +105,13 @@ __all__ = [
     "ExperimentQualityEvidence",
     "ExperimentQualityReceipt",
     "ExplanationReceipt",
+    "FailureClusterReport",
     "GateReceipt",
     "GateReceiptV2",
     "GateReplayExpectations",
+    "InterventionApproval",
+    "MigrationDiscoveryBundle",
+    "PostgresAlembicExperiment",
     "PromotionReceipt",
     "QualityPolicy",
     "ReceiptVerification",
@@ -94,10 +119,14 @@ __all__ = [
     "ReviewBundleReport",
     "SensitivityPolicy",
     "SensitivityReceipt",
+    "SignatureVerification",
     "SkillBom",
+    "TraceCaptureConsent",
     "WorkspaceStatusReport",
+    "approve_intervention",
     "assess_experiment_quality",
     "assess_sensitivity",
+    "build_migration_discovery_bundle",
     "build_recipe_scaffold",
     "compare_experiments",
     "compile_traces",
@@ -109,12 +138,15 @@ __all__ = [
     "gate_evidence",
     "gate_evidence_v2",
     "generate_demo",
+    "import_agent_trace",
     "import_generic_evaluation",
     "import_otel_genai_evaluation",
     "initialize_evidence_workspace",
     "inspect_review_bundle",
     "inspect_skill",
     "inspect_workspace_status",
+    "prepare_replay_request",
+    "propose_intervention",
     "validate_comparison_receipt_inputs",
     "validate_evidence_envelope",
     "validate_gate_receipt_inputs",

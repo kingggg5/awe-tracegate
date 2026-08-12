@@ -2,8 +2,10 @@
 
 **AWE is reproducible evidence infrastructure for agent experiments.** Its
 product question is: *did an agent change improve, and can we trust the evidence
-behind that conclusion?* TraceGate is the trusted evidence-integrity and
-decision core, not an agent runtime, eval runner, or observability store.
+behind that conclusion?* TraceGate is the trusted Python evidence-integrity and
+decision core, not an agent executor, eval runner, or observability store. The
+repository also contains a separate TypeScript Workspace coordinator under
+`apps/workspace`.
 
 The current trusted contract is an offline, read-only evidence transformation:
 
@@ -24,6 +26,50 @@ The compiler, verifier, evaluator, redactor, and promotion recorder have no
 model, tool, browser, network, or workflow-execution loop. Given the same
 supported inputs and contract versions, they must return the same canonical
 decision.
+
+## Monorepo boundaries
+
+```text
+apps/workspace (TypeScript, local coordination, untrusted)
+    -> goal + explicit grants + human approval + optional consent
+    -> awe.runtime-handoff.v2
+    -> external Codex / Claude Code / other host
+    -> raw trace + isolated PostgreSQL/Alembic results (untrusted)
+    -> awe-discovery external adapter (redaction + deterministic projection)
+    -> src/awe_tracegate (Python, deterministic trusted core)
+    -> PASS / REVIEW / BLOCK receipt
+    -> separate human reuse or promotion decision
+```
+
+The dependency direction is one-way. Workspace may probe the loopback
+TraceGate API and may point a reviewer at evidence, but TraceGate never imports
+Workspace, accepts its local approval as evidence, or delegates a decision to
+it. The two surfaces also have separate package manifests, test suites, and
+processes.
+
+Workspace is a handoff coordinator rather than an embedded agent executor.
+It persists bounded local goals and discovery briefs, lets a user select an
+external runner, requires an exact permission approval, exports a typed handoff,
+and records optional checkpoints. Its only permission identifiers are
+`read_goal`, `read_evidence_references`, and `write_checkpoint`; none grants a
+shell, browser, network, secret, deployment, or promotion capability.
+
+The first external Discovery adapter is intentionally domain-specific. It
+normalizes frozen Codex JSONL, Claude Code stream JSON, or generic JSONL only
+after a handoff contains active `capture_trace` consent. It emits a redacted
+`awe.agent-trace-receipt.v1` bound to a caller-asserted repository and commit.
+This is exact identity metadata, not cryptographic proof of runner provenance.
+Building
+an `awe.migration-discovery-bundle.v1` additionally requires
+`evaluate_migration` consent and externally supplied checks for forward
+migration, rollback, data preservation, and tests. The adapter never starts an
+agent, imports repository migration code, opens a database connection, or runs
+a command.
+
+Failure grouping is a deterministic taxonomy over supplied event/check fields.
+It is evidence navigation, not clustering by an LLM and not causal diagnosis.
+The resulting `ExperimentManifest` and quality sidecar enter the existing
+comparison/Gate v2 path; Workspace approval itself never becomes gate evidence.
 
 ## Design goals
 
@@ -166,8 +212,9 @@ They bind payload digests and provenance without loading adapter code into the
 verifier. The `asserted`, `signature_verified`, and `attested` labels describe
 the supplied provenance level; non-asserted labels also require an external
 verification-artifact digest. An operator must still validate that external
-artifact against its own trust policy. Version 0.3 records non-asserted labels
-but does not let them satisfy a gate minimum without a trusted verifier.
+artifact against its own trust policy. Version 0.3 can enforce
+`signature_verified` only from a checked Ed25519 receipt targeting the exact
+package digest, repository, and commit; `attested` remains record-only.
 
 `SkillBom` inventories the exact regular files, roles, sizes, external URLs, and
 SHA-256 digests in an Agent Skill folder without importing or executing it. It

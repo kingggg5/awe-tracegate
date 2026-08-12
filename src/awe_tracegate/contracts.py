@@ -1111,7 +1111,11 @@ class GateReceipt(ContractModel):
             ):
                 raise ValueError("gate evaluation targets another candidate")
         if self.status == "PASS":
-            if self.minimum_provenance_level not in (None, "asserted"):
+            if self.minimum_provenance_level not in (
+                None,
+                "asserted",
+                "signature_verified",
+            ):
                 raise ValueError(
                     "passing gate cannot rely on unverified external provenance"
                 )
@@ -1460,6 +1464,8 @@ class SignatureVerification(ContractModel):
     )
     status: Literal["valid", "invalid"]
     bundle_digest: Sha256Digest
+    artifact_kind: DisplayName | None = None
+    artifact_digest: Sha256Digest | None = None
     signer_id: SignerIdentity
     public_key_fingerprint: Sha256Digest
     reasons: Annotated[tuple[Reason, ...], Field(strict=False)] = ()

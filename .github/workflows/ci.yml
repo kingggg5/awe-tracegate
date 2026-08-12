@@ -163,6 +163,65 @@ jobs:
           "${cli}" install --target "${target_root}"
           "${cli}" check --target "${target_root}"
 
+  workspace:
+    name: Agent runtime workspace
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/workspace/package-lock.json
+      - name: Install Workspace dependencies
+        run: npm ci --prefix apps/workspace
+      - name: Type-check and validate browser JavaScript
+        run: npm run workspace:check
+      - name: Test contracts, storage, and loopback API
+        run: npm run workspace:test
+
+  postgres-harness:
+    name: PostgreSQL/Alembic migration evidence
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+        ports:
+          - 5432:5432
+    steps:
+      - name: Check out source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install AWE and harness dependencies
+        run: |
+          python -m pip install -e .
+          python -m pip install -r examples/postgres-alembic-discovery/harness/requirements.txt
+      - name: Run forward, preservation, rollback, and test lanes
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="${RUNNER_TEMP}/postgres-alembic-experiment.json"
+          python examples/postgres-alembic-discovery/harness/run.py \
+            --dsn "postgresql://postgres:postgres@127.0.0.1:5432/postgres" \
+            --repository "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            --commit-sha "${GITHUB_SHA}" \
+            --out "${output}"
+          python -c 'import json, pathlib; payload=json.loads(pathlib.Path("'"${output}"'").read_text()); assert payload["schema_version"] == "awe.postgres-alembic-experiment.v1"; assert {check["outcome"] for check in payload["trials"][0]["checks"]} == {"success"}'
+
   typescript-sdk:
     name: TypeScript SDK contract parity
     runs-on: ubuntu-latest
