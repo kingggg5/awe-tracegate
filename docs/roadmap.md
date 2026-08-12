@@ -52,6 +52,14 @@ The pre-alpha source currently provides:
   JSONL plus one PostgreSQL/Alembic reliability contract covering forward,
   rollback, data-preservation, and test evidence without executing a runner or
   database inside TraceGate.
+- a disposable PostgreSQL/Alembic runner reference implementation with a
+  PostgreSQL 16 CI job; it emits four typed lanes and destroys its schema after
+  each run.
+- consent-bound Discovery intervention, independent human approval, and
+  external replay handoff contracts; the trusted core never starts the runner.
+- an Ed25519 evidence-package verification bridge that can raise package
+  provenance from asserted to `signature_verified` only when the signed target
+  matches the exact package digest, repository, and commit.
 
 This foundation re-verifies supplied artifacts and produces deterministic,
 content-addressed decisions. Comparison v1 estimates evidence reliability only

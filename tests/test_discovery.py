@@ -400,3 +400,14 @@ def test_checked_in_postgres_alembic_example_runs_end_to_end(tmp_path: Path) -> 
     bundle = json.loads((out_dir / "migration-discovery-bundle.json").read_text())
     assert bundle["quality_evidence"]["trials"][0]["terminal_outcome"] == "failure"
     assert bundle["failure_report"]["clusters"][0]["category"] == "rollback"
+
+
+def test_real_postgres_harness_contract_is_checked_in_and_non_executing() -> None:
+    harness = PROJECT_ROOT / "examples" / "postgres-alembic-discovery" / "harness"
+    assert (harness / "run.py").is_file()
+    requirements = (harness / "requirements.txt").read_text(encoding="utf-8")
+    assert "alembic" in requirements
+    source = (harness / "run.py").read_text(encoding="utf-8")
+    assert "awe.postgres-alembic-experiment.v1" in source
+    assert "DROP SCHEMA IF EXISTS" in source
+    assert "AWE_HARNESS_DATABASE_URL" in source

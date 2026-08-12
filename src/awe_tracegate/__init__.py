@@ -29,6 +29,7 @@ from .contracts import (
     ReviewBundleReport,
     SensitivityPolicy,
     SensitivityReceipt,
+    SignatureVerification,
     SkillBom,
 )
 from .demo import generate_demo, inspect_review_bundle
@@ -60,6 +61,14 @@ from .gate import (
     validate_gate_receipt_inputs,
     validate_gate_v2_receipt_inputs,
 )
+from .intervention import (
+    DiscoveryIntervention,
+    DiscoveryReplayRequest,
+    InterventionApproval,
+    approve_intervention,
+    prepare_replay_request,
+    propose_intervention,
+)
 from .quality import assess_experiment_quality
 from .recipes import (
     DecisionRecipe,
@@ -86,6 +95,8 @@ __all__ = [
     "CompileRequest",
     "DecisionRecipe",
     "DecisionRecipeCatalog",
+    "DiscoveryIntervention",
+    "DiscoveryReplayRequest",
     "EvaluationReceipt",
     "EvidenceEnvelope",
     "EvidencePackage",
@@ -98,6 +109,7 @@ __all__ = [
     "GateReceipt",
     "GateReceiptV2",
     "GateReplayExpectations",
+    "InterventionApproval",
     "MigrationDiscoveryBundle",
     "PostgresAlembicExperiment",
     "PromotionReceipt",
@@ -107,9 +119,11 @@ __all__ = [
     "ReviewBundleReport",
     "SensitivityPolicy",
     "SensitivityReceipt",
+    "SignatureVerification",
     "SkillBom",
     "TraceCaptureConsent",
     "WorkspaceStatusReport",
+    "approve_intervention",
     "assess_experiment_quality",
     "assess_sensitivity",
     "build_migration_discovery_bundle",
@@ -131,6 +145,8 @@ __all__ = [
     "inspect_review_bundle",
     "inspect_skill",
     "inspect_workspace_status",
+    "prepare_replay_request",
+    "propose_intervention",
     "validate_comparison_receipt_inputs",
     "validate_evidence_envelope",
     "validate_gate_receipt_inputs",

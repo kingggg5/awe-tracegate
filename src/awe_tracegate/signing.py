@@ -31,6 +31,7 @@ ArtifactKind = Literal[
     "evaluation",
     "experiment",
     "promotion",
+    "evidence_package",
 ]
 
 
@@ -156,6 +157,8 @@ def verify_signed_bundle(
     provisional = SignatureVerification.model_construct(
         status="invalid" if reasons else "valid",
         bundle_digest=canonical_digest(bundle),
+        artifact_kind=bundle.artifact_kind,
+        artifact_digest=bundle.artifact_digest,
         signer_id=bundle.signer_id,
         public_key_fingerprint=bundle.public_key_fingerprint,
         reasons=tuple(sorted(set(reasons))),

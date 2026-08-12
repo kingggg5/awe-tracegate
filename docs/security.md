@@ -90,9 +90,11 @@ policy, grant a capability, approve a step, or change an effect class.
   those fields proves no freshness, even when exact-input gate replay succeeds.
 - A `signature_verified` or `attested` provenance label plus a verification
   artifact digest does not establish trust by itself. The caller must verify the
-  external signature or attestation against an operator-owned policy before
-  constructing that envelope. TraceGate v0.3 therefore records those labels but
-  refuses to use them as an enforceable minimum; only `asserted` is supported.
+  external signature or attestation against an operator-owned policy. The v0.3
+  Ed25519 bridge can enforce `signature_verified` only from a separately
+  verified receipt whose target is the exact evidence-package digest,
+  repository, and commit. `attested` remains record-only until a trusted
+  attestation verifier is integrated.
 - Judge IDs, judge digests, judge votes, and human verdicts in quality sidecars
   are asserted evidence. Their agreement metric does not authenticate a reviewer,
   establish that a judge is independent, or prove label correctness.

@@ -35,6 +35,15 @@ stable contract release.
   receipts and PostgreSQL/Alembic Discovery bundles with forward, rollback,
   data-preservation, test, typed terminal-outcome, and deterministic failure
   evidence.
+- Added a disposable PostgreSQL/Alembic runner reference implementation and a
+  PostgreSQL 16 CI job. It runs forward, preservation, rollback, and test lanes
+  against a fresh schema, then removes the schema before returning evidence.
+- Added consent-bound Discovery intervention proposals, independent human
+  approval, and external replay handoffs; no runner or migration is executed by
+  the trusted core.
+- Added an Ed25519 evidence-package verification bridge. A gate may require
+  `signature_verified` only when the signature target matches the exact package
+  digest, repository, and commit.
 - AWE Workspace handoff v2 with separate opt-in `capture_trace` and
   `evaluate_migration` consent, asserted reviewer identity, local revocation,
   and explicit non-retroactive deletion warnings.

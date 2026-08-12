@@ -169,7 +169,33 @@ awe-discovery build-migration-bundle --help
 Run the complete checked-in example in
 [`examples/postgres-alembic-discovery`](examples/postgres-alembic-discovery).
 The fixture is synthetic; an independent real-world pilot remains a release
-criterion.
+criterion. For a real database-backed check, the repository also includes an
+isolated runner reference implementation. It is intentionally outside the
+trusted core and performs no agent execution:
+
+```bash
+python -m pip install -r examples/postgres-alembic-discovery/harness/requirements.txt
+python examples/postgres-alembic-discovery/harness/run.py \
+  --dsn postgresql://awe_runner:awe_runner@127.0.0.1:5432/awe_runner \
+  --repository https://github.com/your-org/your-repository \
+  --commit-sha "$(git rev-parse HEAD)" \
+  --out migration-results.json
+```
+
+The harness creates a disposable schema, runs the forward migration, checks
+row preservation, rolls back, and checks the rows again. The four required
+lanes must be `success`: `forward_migration`, `data_preservation`, `rollback`,
+and `tests`. CI runs the same command against PostgreSQL 16; local verification
+on the maintainer workstation produced four successful lanes in the checked-out
+worktree. The DSN is never written to the artifact and the temporary schema is
+dropped in a `finally` block. Sign the resulting package with an operator key
+before requiring `signature_verified` provenance in a gate.
+
+Discovery interventions are also consent-bound. Use
+`awe-discovery propose-intervention`, then require an independent human
+approval before `prepare-replay` emits a handoff for an external runner. AWE
+never starts that runner or treats the resulting output as evidence until the
+new trace and held evaluation inputs are independently validated.
 
 ## Start here
 
@@ -704,10 +730,10 @@ truth.
 
 Evidence packages can additionally bind repository URI, exact commit, producer
 and environment digests, capture time, maximum age, provenance level, and the
-external verification artifact supporting a signed or attested claim.
-Version 0.3 enforces only an `asserted` minimum provenance level. Signed and
-attested labels remain recorded metadata until a future trusted verifier can
-replay the external verification artifact; they cannot satisfy a gate floor.
+external verification artifact supporting a signed or attested claim. Version
+0.3 can enforce `signature_verified` when the separately checked Ed25519 receipt
+targets the exact package digest, repository, and commit. `attested` remains
+record-only until a trusted attestation verifier is integrated.
 
 ## Reproducibility evidence
 

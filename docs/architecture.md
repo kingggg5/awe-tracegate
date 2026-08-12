@@ -212,8 +212,9 @@ They bind payload digests and provenance without loading adapter code into the
 verifier. The `asserted`, `signature_verified`, and `attested` labels describe
 the supplied provenance level; non-asserted labels also require an external
 verification-artifact digest. An operator must still validate that external
-artifact against its own trust policy. Version 0.3 records non-asserted labels
-but does not let them satisfy a gate minimum without a trusted verifier.
+artifact against its own trust policy. Version 0.3 can enforce
+`signature_verified` only from a checked Ed25519 receipt targeting the exact
+package digest, repository, and commit; `attested` remains record-only.
 
 `SkillBom` inventories the exact regular files, roles, sizes, external URLs, and
 SHA-256 digests in an Agent Skill folder without importing or executing it. It
