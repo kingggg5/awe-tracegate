@@ -19,7 +19,7 @@ adopter result.
 - [x] Judge/human calibration, bounded seed/environment sensitivity, and
   deterministic `awe explain` evidence graphs.
 - [x] Consent-bound Discovery adapter for Codex, Claude Code, and generic JSONL.
-- [x] Discovery intervention → independent approval → expiring replay handoff.
+- [x] Discovery intervention -> independent approval -> expiring replay handoff.
 - [x] Ed25519 evidence-package bridge for exact `signature_verified` targets.
 - [x] PostgreSQL/Alembic runner reference implementation with disposable schema,
   forward/rollback/data-preservation/tests lanes, and PostgreSQL 16 CI.
@@ -36,12 +36,13 @@ adopter result.
 Use the [external pilot runbook](docs/EXTERNAL_PILOT_RUNBOOK.md) with a
 non-sensitive migration task. The pilot is complete only when:
 
-1. Codex/Claude or another external host runs 3–5 cases with explicit trace and
+1. Codex/Claude or another external host runs 3-5 cases with explicit trace and
    evaluation consent.
 2. Each case has forward migration, rollback, data-preservation, and tests
    evidence, including timeout/refusal/infrastructure/missing outcomes.
-3. The failure cluster → intervention → independent approval → replay request →
-   candidate run → comparison → Gate v2 → explain loop is completed once.
+3. The failure cluster -> intervention -> independent approval -> replay
+   request -> candidate run -> comparison -> Gate v2 -> explain loop is
+   completed once.
 4. A person other than the producer replays the held artifacts from a clean
    checkout and obtains identical receipt hashes.
 5. Only redacted, consented artifacts are published; raw prompts, commands,
