@@ -42,10 +42,19 @@ def test_readme_discovery_walkthrough_steps_stay_inside_the_panel() -> None:
         step = next((child for child in group if child.tag == f"{namespace}rect"), None)
         if step is None or step.get("width") != "302":
             continue
-        step_bounds.append((int(match.group(1)), int(match.group(2)), int(step.get("width", "0")), int(step.get("height", "0"))))
+        step_bounds.append(
+            (
+                int(match.group(1)),
+                int(match.group(2)),
+                int(step.get("width", "0")),
+                int(step.get("height", "0")),
+            )
+        )
 
     assert step_bounds == [(34, 96, 302, 228), (393, 96, 302, 228), (752, 96, 302, 228)]
-    assert all(offset_y + height <= panel_height - 20 for _, offset_y, _, height in step_bounds)
+    assert all(
+        offset_y + height <= panel_height - 20 for _, offset_y, _, height in step_bounds
+    )
     assert all(offset_x + width <= 1088 - 34 for offset_x, _, width, _ in step_bounds)
 
 
