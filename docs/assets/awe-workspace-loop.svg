@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="820" viewBox="0 0 1440 820" role="img" aria-labelledby="title desc">
+  <title id="title">AWE Workspace human-gated handoff flow</title>
+  <desc id="desc">Animated static illustration of AWE Workspace: save a goal, define a Discovery brief, review permissions and consent, export a typed handoff, then validate evidence in TraceGate. Workspace never runs the external agent.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#1f2328" flood-opacity=".14"/></filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto"><path d="M0 0 10 4 0 8z" fill="#57606a"/></marker>
+  </defs>
+  <rect width="1440" height="820" fill="#f6f8fa"/>
+  <g font-family="Atkinson Hyperlegible Next, Segoe UI, Noto Sans, Arial, sans-serif" fill="#1f2328">
+    <text x="72" y="70" font-size="36" font-weight="750">AWE Workspace: work with an agent, keep control</text>
+    <text x="72" y="110" font-size="20" fill="#424a53">Local-first coordination for goals, consent, permissions, and typed handoffs.</text>
+    <g transform="translate(72 150)" filter="url(#shadow)">
+      <rect width="1296" height="580" rx="16" fill="#ffffff" stroke="#d0d7de" stroke-width="2"/>
+      <path d="M0 70h1296" stroke="#d8dee4" stroke-width="2"/>
+      <circle cx="34" cy="35" r="8" fill="#cf222e"/><circle cx="62" cy="35" r="8" fill="#bf8700"/><circle cx="90" cy="35" r="8" fill="#1a7f37"/>
+      <text x="126" y="43" font-size="19" font-weight="650" fill="#424a53">AWE Workspace — human-gated coordination</text>
+      <g transform="translate(42 104)">
+        <rect width="1212" height="94" rx="12" fill="#f6f8fa" stroke="#afb8c1" stroke-width="2"/>
+        <circle cx="32" cy="47" r="14" fill="#0969da"><animate attributeName="opacity" values="1;.45;1" dur="4.8s" begin="0s" repeatCount="indefinite"/></circle>
+        <text x="27" y="54" font-size="18" font-weight="750" fill="#fff">1</text>
+        <text x="72" y="39" font-size="22" font-weight="700">Save a goal</text>
+        <text x="72" y="70" font-size="18" fill="#424a53">Capture what should change, without starting a runner.</text>
+        <rect x="1040" y="25" width="142" height="44" rx="22" fill="#ddf4ff" stroke="#0969da" stroke-width="2"/><text x="1066" y="54" font-size="18" font-weight="700" fill="#0969da">SAVED</text>
+      </g>
+      <path d="M648 206v28" stroke="#57606a" stroke-width="3" marker-end="url(#arrow)"/>
+      <g transform="translate(42 248)">
+        <rect width="1212" height="94" rx="12" fill="#f6f8fa" stroke="#afb8c1" stroke-width="2"/>
+        <circle cx="32" cy="47" r="14" fill="#8250df"><animate attributeName="opacity" values=".45;1;.45" dur="4.8s" begin="1.2s" repeatCount="indefinite"/></circle>
+        <text x="27" y="54" font-size="18" font-weight="750" fill="#fff">2</text>
+        <text x="72" y="39" font-size="22" font-weight="700">Define the Discovery brief</text>
+        <text x="72" y="70" font-size="18" fill="#424a53">Set a hypothesis, success metric, runner, and evidence intent.</text>
+        <rect x="1014" y="25" width="168" height="44" rx="22" fill="#fbefff" stroke="#8250df" stroke-width="2"/><text x="1034" y="54" font-size="18" font-weight="700" fill="#6639a6">REVIEWABLE</text>
+      </g>
+      <path d="M648 350v28" stroke="#57606a" stroke-width="3" marker-end="url(#arrow)"/>
+      <g transform="translate(42 392)">
+        <rect width="1212" height="128" rx="12" fill="#f6f8fa" stroke="#afb8c1" stroke-width="2"/>
+        <circle cx="32" cy="64" r="14" fill="#bf8700"><animate attributeName="opacity" values=".45;1;.45" dur="4.8s" begin="2.4s" repeatCount="indefinite"/></circle>
+        <text x="27" y="71" font-size="18" font-weight="750" fill="#fff">3</text>
+        <text x="72" y="42" font-size="22" font-weight="700">Review permissions + consent</text>
+        <text x="72" y="76" font-size="18" fill="#424a53">Approve only read-goal, evidence-reference, and checkpoint access.</text>
+        <text x="72" y="105" font-size="18" fill="#424a53">Trace capture is optional and off until explicitly selected.</text>
+        <rect x="1036" y="42" width="146" height="44" rx="22" fill="#fff8c5" stroke="#bf8700" stroke-width="2"/><text x="1061" y="71" font-size="18" font-weight="700" fill="#7a4e00">APPROVE</text>
+      </g>
+      <path d="M648 528v28" stroke="#57606a" stroke-width="3" marker-end="url(#arrow)"/>
+      <g transform="translate(42 570)">
+        <rect width="1212" height="94" rx="12" fill="#f6f8fa" stroke="#afb8c1" stroke-width="2"/>
+        <circle cx="32" cy="47" r="14" fill="#1a7f37"><animate attributeName="opacity" values=".45;1;.45" dur="4.8s" begin="3.6s" repeatCount="indefinite"/></circle>
+        <text x="27" y="54" font-size="18" font-weight="750" fill="#fff">4</text>
+        <text x="72" y="39" font-size="22" font-weight="700">Export typed handoff → external runner</text>
+        <text x="72" y="70" font-size="18" fill="#424a53">Workspace records the handoff; TraceGate later verifies held evidence.</text>
+        <rect x="1051" y="25" width="131" height="44" rx="22" fill="#dafbe1" stroke="#1a7f37" stroke-width="2"/><text x="1080" y="54" font-size="18" font-weight="700" fill="#1a7f37">READY</text>
+      </g>
+    </g>
+    <text x="72" y="785" font-size="18" fill="#424a53">Workspace coordinates work. It does not execute tools, hold credentials, or make TraceGate decisions.</text>
+  </g>
+</svg>
