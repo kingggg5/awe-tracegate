@@ -28,6 +28,8 @@ adopter result.
 - [x] Full local verification: `184 passed, 1 skipped`; Ruff and mypy clean.
 - [x] Hosted PR checks for commit `0149a50`: Windows, Ubuntu, Docker, SDK,
   npm/Git install, PostgreSQL harness, CodeQL, and dependency review passed.
+- [x] Cross-platform canonical fixture comparison for Ubuntu and Windows is
+  enforced in CI; macOS remains outside the current hosted proof.
 
 ## Remaining P0: external state, not missing core code
 
