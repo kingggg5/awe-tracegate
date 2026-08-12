@@ -15,6 +15,10 @@ the intended commit and all required checks pass.
 
 ## Release sequence
 
+Before tagging, confirm the cross-platform canonical-fixture job is green on
+Ubuntu, Windows, and macOS. That job proves receipt serialization parity only;
+it is not an agent-quality or external-adopter result.
+
 ```bash
 git checkout main
 git pull --ff-only origin main
