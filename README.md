@@ -867,6 +867,11 @@ Still required before a production-ready claim:
 - add authenticated actors and an append-only decision ledger before exposing a
   shared network service.
 
+The current PR #14 checkpoint is commit `0149a50`. It is a validated branch
+commit, not an immutable release tag. A real pilot must use a non-sensitive
+migration task, record trace/evaluation consent, run all four migration lanes,
+and let a different person replay the artifacts from a clean checkout.
+
 Autonomous execution, browser control, deployment, model routing, memory, hidden
 telemetry, and automatic promotion are intentionally out of scope.
 

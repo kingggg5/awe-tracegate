@@ -44,6 +44,9 @@ stable contract release.
 - Added an Ed25519 evidence-package verification bridge. A gate may require
   `signature_verified` only when the signature target matches the exact package
   digest, repository, and commit.
+- Recorded the PR #14 implementation checkpoint as `0149a50`; immutable
+  release-tag publication and an independent external pilot remain open
+  release criteria.
 - AWE Workspace handoff v2 with separate opt-in `capture_trace` and
   `evaluate_migration` consent, asserted reviewer identity, local revocation,
   and explicit non-retroactive deletion warnings.
