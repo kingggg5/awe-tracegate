@@ -12,6 +12,10 @@
 [GitHub Action](#github-action) · [Skills](#install-the-skills) ·
 [Architecture](docs/architecture.md) · [Roadmap](docs/roadmap.md)
 
+Implementation plan: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) ·
+[External pilot runbook](docs/EXTERNAL_PILOT_RUNBOOK.md) ·
+[Release runbook](docs/RELEASE_RUNBOOK.md)
+
 > Don't merely observe an agent. Determine whether the supplied evidence
 > supports the change.
 
