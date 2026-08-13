@@ -85,11 +85,11 @@ improvement.
    pilot and publish redacted artifacts, harness/environment digests, negative
    cases, and an adjudicated result.
 
-Current implementation checkpoint: commit `a50f8a3` contains the disposable
-PostgreSQL/Alembic runner, signature-verified package bridge, consent-bound
-intervention/replay contracts, and the current documentation/visual updates.
-It remains a branch checkpoint until the immutable release tag and independent
-pilot exist.
+Current source implementation baseline: commit `a50f8a3` contains the
+disposable PostgreSQL/Alembic runner, signature-verified package bridge, and
+consent-bound intervention/replay contracts. Later documentation commits do not
+change that source baseline. It remains unreleased until the immutable tag and
+independent pilot exist.
 
 Exit criteria:
 

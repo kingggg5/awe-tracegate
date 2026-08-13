@@ -902,8 +902,8 @@ Still required before a production-ready claim:
 - add authenticated actors and an append-only decision ledger before exposing a
   shared network service.
 
-The current branch checkpoint is commit `a50f8a3`. It is a validated branch
-commit, not an immutable release tag. A real pilot must use a non-sensitive
+The source implementation baseline is commit `a50f8a3`; documentation may have
+later alignment commits. It is not an immutable release tag. A real pilot must use a non-sensitive
 migration task, record trace/evaluation consent, run all four migration lanes,
 and let a different person replay the artifacts from a clean checkout.
 
