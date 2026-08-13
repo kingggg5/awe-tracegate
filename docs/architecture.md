@@ -384,8 +384,10 @@ The current source has two distinct decision paths:
   emits bounded v1 uncertainty and flakiness evidence over full manifests.
 
 Neither path runs trials or grades outputs. Judge agreement/calibration, typed
-timeout/refusal/infrastructure outcomes, multi-environment variance, automatic
-failure clustering, and counterfactual causal attribution remain planned work.
+timeout/refusal/infrastructure outcomes, multi-environment variance, broad or
+semantic automatic failure clustering, and counterfactual causal attribution
+remain planned work. The migration adapter has only deterministic grouping by
+declared evidence fields; it does not infer a root cause.
 Until those contracts exist, AWE must not infer them from prose, provider
 metadata, or a model's confidence.
 

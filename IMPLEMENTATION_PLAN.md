@@ -1,7 +1,7 @@
 # AWE TraceGate implementation plan
 
-**Snapshot:** PR #14 current branch (implementation checkpoint `0149a50`)
-**Updated:** 2026-08-12
+**Snapshot:** `codex/workspace-visual-main` (implementation checkpoint `a50f8a3`)
+**Updated:** 2026-08-13
 **Positioning:** reproducible evidence infrastructure for agent experiments;
 TraceGate is the offline decision core and external hosts remain responsible
 for execution.
@@ -25,9 +25,11 @@ adopter result.
   forward/rollback/data-preservation/tests lanes, and PostgreSQL 16 CI.
 - [x] Codex/Claude Skills, npm/Python installers, plugin metadata, reproducible
   artifact tooling, SBOM/checksums, and release workflow.
-- [x] Full local verification: `184 passed, 1 skipped`; Ruff and mypy clean.
-- [x] Hosted PR checks for commit `0149a50`: Windows, Ubuntu, Docker, SDK,
-  npm/Git install, PostgreSQL harness, CodeQL, and dependency review passed.
+- [x] Full local verification at `a50f8a3`: `186 passed, 1 skipped`; Ruff and
+  mypy clean.
+- [x] Hosted CI foundation for the migration/release path is present and has
+  passed on the earlier `0149a50` checkpoint; the current visual-documentation
+  commits still require their required checks before merge.
 - [x] Cross-platform canonical fixture comparison for Ubuntu, Windows, and
   macOS is enforced in CI.
 

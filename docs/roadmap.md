@@ -85,10 +85,11 @@ improvement.
    pilot and publish redacted artifacts, harness/environment digests, negative
    cases, and an adjudicated result.
 
-Current implementation checkpoint: PR #14 commit `0149a50` contains the
-disposable PostgreSQL/Alembic runner, signature-verified package bridge, and
-consent-bound intervention/replay contracts. It remains a branch commit until
-the immutable release tag and independent pilot exist.
+Current implementation checkpoint: commit `a50f8a3` contains the disposable
+PostgreSQL/Alembic runner, signature-verified package bridge, consent-bound
+intervention/replay contracts, and the current documentation/visual updates.
+It remains a branch checkpoint until the immutable release tag and independent
+pilot exist.
 
 Exit criteria:
 
